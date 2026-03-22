@@ -1,0 +1,66 @@
+---
+description: Authentication and authorization rules using Clerk
+alwaysApply: true
+---
+
+# Auth & Authorization
+
+All authentication is handled by Clerk. Every server-side data access must be scoped to the authenticated user — never expose or mutate another user's data.
+
+## Getting the Current User
+
+```typescript
+// ✅ GOOD — Server Component or Route Handler
+import { auth } from "@clerk/nextjs/server";
+
+const { userId } = await auth();
+if (!userId) throw new Error("Unauthorized");
+
+// ✅ GOOD — Server Action
+import { auth } from "@clerk/nextjs/server";
+
+export async function myAction() {
+  const { userId } = await auth();
+  if (!userId) return { error: "Unauthorized" };
+  // ...
+}
+```
+
+## Scoping Queries to the Authenticated User
+
+Always filter by `clerkUserId` when querying user-owned resources.
+
+```typescript
+// ✅ GOOD
+const userDecks = await db
+  .select()
+  .from(decks)
+  .where(eq(decks.clerkUserId, userId));
+
+// ❌ BAD — missing ownership check
+const allDecks = await db.select().from(decks);
+```
+
+## Verifying Ownership Before Mutations
+
+Before updating or deleting a resource, verify the record belongs to the current user.
+
+```typescript
+// ✅ GOOD
+const deck = await db.query.decks.findFirst({
+  where: and(eq(decks.id, deckId), eq(decks.clerkUserId, userId)),
+});
+if (!deck) throw new Error("Not found");
+
+await db.delete(decks).where(eq(decks.id, deckId));
+
+// ❌ BAD — deletes by id alone, no ownership check
+await db.delete(decks).where(eq(decks.id, deckId));
+```
+
+## Rules
+
+- Always call `auth()` at the top of every server action, route handler, and data-fetching function
+- Always return a 401/redirect or throw early if `userId` is null
+- Never trust client-supplied user IDs — always derive the userId from `auth()`
+- Never skip ownership checks when accessing nested resources (e.g. cards inherit ownership from their deck)

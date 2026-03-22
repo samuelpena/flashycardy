@@ -1,0 +1,73 @@
+---
+description: Enforces server component data fetching, server action mutations, and Zod validation patterns
+alwaysApply: true
+---
+
+# Data Access Patterns
+
+## Data Fetching — Server Components Only
+
+All data retrieval must happen in Server Components. Never fetch data on the client.
+
+```typescript
+// ✅ GOOD — fetch in a Server Component
+export default async function DecksPage() {
+  const { userId } = await auth();
+  const decks = await db.select().from(decks).where(eq(decks.clerkUserId, userId));
+  return <DeckList decks={decks} />;
+}
+
+// ❌ BAD — fetching in a Client Component
+"use client";
+useEffect(() => {
+  fetch("/api/decks").then(...);
+}, []);
+```
+
+## Mutations — Server Actions Only
+
+All inserts, updates, and deletes must go through Server Actions. Never mutate via API routes or client-side calls.
+
+```typescript
+// ✅ GOOD
+"use server";
+export async function createDeck(input: CreateDeckInput) { ... }
+
+// ❌ BAD — mutation in a route handler or client fetch
+export async function POST(req: Request) {
+  await db.insert(decks).values(...);
+}
+```
+
+## Validation — Zod Required
+
+All data passed into Server Actions must be validated with Zod before any database operation.
+
+```typescript
+// ✅ GOOD
+import { z } from "zod";
+
+const createDeckSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().optional(),
+});
+
+type CreateDeckInput = z.infer<typeof createDeckSchema>;
+
+export async function createDeck(input: CreateDeckInput) {
+  const parsed = createDeckSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.flatten() };
+  // proceed with db operation
+}
+
+// ❌ BAD — no validation, or using FormData as the type
+export async function createDeck(data: FormData) { ... }
+```
+
+## Rules
+
+- Data fetching belongs in Server Components — not `useEffect`, not `fetch()` calls in client code
+- Mutations belong in Server Actions — not route handlers or client-side code
+- Every Server Action must define a typed input schema using Zod (`z.infer<typeof schema>`)
+- Never use `FormData` as a Server Action parameter type
+- Always call `safeParse` or `parse` before touching the database

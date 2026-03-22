@@ -1,0 +1,51 @@
+---
+description: All database interactions must use Drizzle ORM with the project schema
+alwaysApply: true
+---
+
+# Database Interactions
+
+All database access must go through Drizzle ORM. Never use raw SQL strings or direct client queries.
+
+## Schema
+
+Tables and relations are defined in `src/db/schema.ts`:
+- `decks` — belongs to a `clerkUserId`, has many `cards`
+- `cards` — belongs to a `deckId` (cascades on delete)
+
+Always import tables and relations from `@/db/schema`, and the `db` client from `@/db`.
+
+## Querying
+
+```typescript
+// ✅ GOOD — Drizzle query with schema
+import { db } from "@/db";
+import { decks, cards } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+const userDecks = await db.select().from(decks).where(eq(decks.clerkUserId, userId));
+
+// ✅ GOOD — relational query
+const deckWithCards = await db.query.decks.findFirst({
+  where: eq(decks.id, deckId),
+  with: { cards: true },
+});
+
+// ❌ BAD — raw SQL
+const result = await sql`SELECT * FROM decks WHERE clerk_user_id = ${userId}`;
+```
+
+## Mutations
+
+```typescript
+// ✅ GOOD
+await db.insert(decks).values({ clerkUserId, name, description });
+await db.update(decks).set({ name }).where(eq(decks.id, id));
+await db.delete(cards).where(eq(cards.id, cardId));
+```
+
+## Schema Changes
+
+- All schema changes go in `src/db/schema.ts`
+- Run `pnpm db:generate` then `pnpm db:migrate` after schema changes
+- Never alter the database directly
