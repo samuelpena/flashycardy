@@ -1,0 +1,30 @@
+---
+alwaysApply: true
+---
+# shadcn/ui Usage
+
+This project uses [shadcn/ui](https://ui.shadcn.com/) for all UI components. Never write custom UI primitives from scratch when a shadcn/ui component is available.
+
+## Initialization
+
+If shadcn/ui is not yet set up in the project:
+
+```bash
+pnpm dlx shadcn@latest init -t next
+```
+
+## Adding Components
+
+Install components on demand. Example for the `button` component:
+
+```bash
+pnpm dlx shadcn@latest add button
+```
+
+Replace `button` with the desired component name (e.g. `card`, `dialog`, `input`, `table`, etc.).
+
+## Rules
+
+- Always check `components/ui/` before creating a new UI element — it may already be installed.
+- If a needed component is not in `components/ui/`, add it via the CLI above rather than building it manually.
+- Import components from `@/components/ui/<component>`, not from third-party libraries.
