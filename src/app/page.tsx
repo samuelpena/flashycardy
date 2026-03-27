@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { SignInButton, SignUpButton, Show } from "@clerk/nextjs";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -14,16 +14,14 @@ export default async function Home() {
           Your personal flashcard platform
         </p>
       </div>
-      <Show when="signed-out">
-        <div className="flex items-center gap-3">
-          <SignInButton mode="modal">
-            <Button variant="ghost">Sign in</Button>
-          </SignInButton>
-          <SignUpButton mode="modal">
-            <Button>Sign up</Button>
-          </SignUpButton>
-        </div>
-      </Show>
+      <div className="flex items-center gap-3">
+        <SignInButton mode="modal">
+          <Button variant="ghost">Sign in</Button>
+        </SignInButton>
+        <SignUpButton mode="modal">
+          <Button>Sign up</Button>
+        </SignUpButton>
+      </div>
     </main>
   );
 }
