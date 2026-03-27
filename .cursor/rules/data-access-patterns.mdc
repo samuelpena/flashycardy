@@ -1,21 +1,60 @@
 ---
-description: Enforces server component data fetching, server action mutations, and Zod validation patterns
 alwaysApply: true
 ---
-
 # Data Access Patterns
+
+## Query Helpers — `db/queries` Directory
+
+All database interactions must be encapsulated in typed helper functions inside `src/db/queries/`. Never write raw Drizzle queries inline in Server Components or Server Actions.
+
+Organize files by resource (e.g. `src/db/queries/decks.ts`, `src/db/queries/cards.ts`). Each file exports focused, reusable async functions that accept only the arguments they need.
+
+```typescript
+// ✅ GOOD — src/db/queries/decks.ts
+import { db } from "@/db";
+import { decks } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+
+export async function getDecksByUser(userId: string) {
+  return db.select().from(decks).where(eq(decks.clerkUserId, userId));
+}
+
+export async function getDeckByIdAndUser(deckId: number, userId: string) {
+  return db.query.decks.findFirst({
+    where: and(eq(decks.id, deckId), eq(decks.clerkUserId, userId)),
+    with: { cards: true },
+  });
+}
+
+export async function insertDeck(values: typeof decks.$inferInsert) {
+  return db.insert(decks).values(values).returning();
+}
+
+export async function deleteDeckById(deckId: number) {
+  return db.delete(decks).where(eq(decks.id, deckId));
+}
+
+// ❌ BAD — inline Drizzle query in a Server Component or Server Action
+const userDecks = await db.select().from(decks).where(eq(decks.clerkUserId, userId));
+```
 
 ## Data Fetching — Server Components Only
 
-All data retrieval must happen in Server Components. Never fetch data on the client.
+All data retrieval must happen in Server Components via query helpers. Never fetch data on the client.
 
 ```typescript
-// ✅ GOOD — fetch in a Server Component
+// ✅ GOOD — fetch via query helper in a Server Component
+import { getDecksByUser } from "@/db/queries/decks";
+
 export default async function DecksPage() {
   const { userId } = await auth();
-  const decks = await db.select().from(decks).where(eq(decks.clerkUserId, userId));
+  if (!userId) redirect("/");
+  const decks = await getDecksByUser(userId);
   return <DeckList decks={decks} />;
 }
+
+// ❌ BAD — inline Drizzle query in a Server Component
+const decks = await db.select().from(decks).where(eq(decks.clerkUserId, userId));
 
 // ❌ BAD — fetching in a Client Component
 "use client";
@@ -26,12 +65,23 @@ useEffect(() => {
 
 ## Mutations — Server Actions Only
 
-All inserts, updates, and deletes must go through Server Actions. Never mutate via API routes or client-side calls.
+All inserts, updates, and deletes must go through Server Actions that delegate to query helpers. Never mutate via API routes or client-side calls.
 
 ```typescript
-// ✅ GOOD
+// ✅ GOOD — Server Action calls a query helper
 "use server";
-export async function createDeck(input: CreateDeckInput) { ... }
+import { insertDeck } from "@/db/queries/decks";
+
+export async function createDeckAction(input: CreateDeckInput) {
+  const { userId } = await auth();
+  if (!userId) return { error: "Unauthorized" };
+  const parsed = createDeckSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.flatten() };
+  await insertDeck({ clerkUserId: userId, ...parsed.data });
+}
+
+// ❌ BAD — inline Drizzle mutation inside a Server Action
+await db.insert(decks).values({ clerkUserId: userId, name });
 
 // ❌ BAD — mutation in a route handler or client fetch
 export async function POST(req: Request) {
@@ -54,10 +104,11 @@ const createDeckSchema = z.object({
 
 type CreateDeckInput = z.infer<typeof createDeckSchema>;
 
-export async function createDeck(input: CreateDeckInput) {
+export async function createDeckAction(input: CreateDeckInput) {
   const parsed = createDeckSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
-  // proceed with db operation
+  // delegate to query helper
+  await insertDeck({ clerkUserId: userId, ...parsed.data });
 }
 
 // ❌ BAD — no validation, or using FormData as the type
@@ -66,8 +117,12 @@ export async function createDeck(data: FormData) { ... }
 
 ## Rules
 
+- All Drizzle queries must live in `src/db/queries/` — never inline them in components or actions
+- Organize query files by resource (e.g. `decks.ts`, `cards.ts`)
 - Data fetching belongs in Server Components — not `useEffect`, not `fetch()` calls in client code
+- Server Components must call query helpers from `@/db/queries/*`, not `db` directly
 - Mutations belong in Server Actions — not route handlers or client-side code
+- Server Actions must call query helpers from `@/db/queries/*`, not `db` directly
 - Every Server Action must define a typed input schema using Zod (`z.infer<typeof schema>`)
 - Never use `FormData` as a Server Action parameter type
 - Always call `safeParse` or `parse` before touching the database
