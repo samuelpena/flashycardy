@@ -12,7 +12,7 @@ export default function DashboardLayout({
           <span className="text-lg font-semibold tracking-tight">
             FlashyCardy
           </span>
-          <UserButton />
+          <UserButton afterSignOutUrl="/" />
         </div>
       </header>
       {children}

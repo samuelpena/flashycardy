@@ -6,7 +6,6 @@ import { eq, count } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
