@@ -28,7 +28,6 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider ui={ui} appearance={{ theme: dark }}>
-          <header className="flex items-center justify-end gap-4 px-6 py-3" />
           {children}
         </ClerkProvider>
       </body>
