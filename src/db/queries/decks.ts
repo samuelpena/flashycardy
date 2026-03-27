@@ -9,6 +9,7 @@ export async function getDecksByUser(userId: string) {
       name: decks.name,
       description: decks.description,
       createdAt: decks.createdAt,
+      updatedAt: decks.updatedAt,
       cardCount: count(cards.id),
     })
     .from(decks)

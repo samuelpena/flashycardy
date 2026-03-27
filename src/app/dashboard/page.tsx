@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PlusIcon, LayersIcon } from "lucide-react";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -52,8 +53,8 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {userDecks.map((deck) => (
+            <Link key={deck.id} href={`/decks/${deck.id}`}>
             <Card
-              key={deck.id}
               className="flex flex-col hover:border-primary/50 transition-colors cursor-pointer"
             >
               <CardHeader className="flex-1">
@@ -73,15 +74,16 @@ export default async function DashboardPage() {
               </CardHeader>
               <CardFooter className="pt-0">
                 <p className="text-xs text-muted-foreground">
-                  Created{" "}
+                  Updated{" "}
                   {new Intl.DateTimeFormat("en-US", {
                     month: "short",
                     day: "numeric",
                     year: "numeric",
-                  }).format(deck.createdAt)}
+                  }).format(deck.updatedAt)}
                 </p>
               </CardFooter>
             </Card>
+            </Link>
           ))}
         </div>
       )}
