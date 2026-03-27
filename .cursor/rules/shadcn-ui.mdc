@@ -1,9 +1,18 @@
 ---
 alwaysApply: true
 ---
-# shadcn/ui Usage
+# shadcn/ui Usage — MANDATORY
 
-This project uses [shadcn/ui](https://ui.shadcn.com/) for all UI components. Never write custom UI primitives from scratch when a shadcn/ui component is available.
+This project uses [shadcn/ui](https://ui.shadcn.com/) as the **one and only** UI component library. **No custom UI components, primitives, or hand-rolled styles are permitted under any circumstances.**
+
+## Absolute Rules
+
+- **NEVER** create custom UI components (buttons, inputs, modals, cards, badges, etc.) from scratch.
+- **NEVER** use any third-party UI library other than shadcn/ui (no MUI, Chakra, Radix directly, Headless UI, etc.).
+- **NEVER** build a UI element by hand if a shadcn/ui component exists for it — even for "simple" things like a button or a divider.
+- **ALWAYS** install the shadcn/ui component via CLI if it is not yet in `components/ui/`.
+- **ALL** Clerk sign-in and sign-up trigger buttons must use the shadcn/ui `<Button>` component — never Clerk's built-in `<SignInButton>` or `<SignUpButton>` default rendering.
+- **ALL** Clerk authentication flows (sign-in, sign-up) must open in a **modal** — never redirect to a separate page. Use `mode="modal"` on `<SignInButton>` and `<SignUpButton>`.
 
 ## Initialization
 
@@ -23,8 +32,36 @@ pnpm dlx shadcn@latest add button
 
 Replace `button` with the desired component name (e.g. `card`, `dialog`, `input`, `table`, etc.).
 
-## Rules
+## Clerk Auth Buttons — Required Pattern
 
-- Always check `components/ui/` before creating a new UI element — it may already be installed.
-- If a needed component is not in `components/ui/`, add it via the CLI above rather than building it manually.
+```tsx
+// ✅ CORRECT — shadcn Button wrapping Clerk, modal mode
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+
+<SignInButton mode="modal">
+  <Button>Sign In</Button>
+</SignInButton>
+
+<SignUpButton mode="modal">
+  <Button>Sign Up</Button>
+</SignUpButton>
+
+// ❌ WRONG — Clerk default button (not shadcn/ui)
+<SignInButton />
+
+// ❌ WRONG — redirects instead of modal
+<SignInButton mode="redirect">
+  <Button>Sign In</Button>
+</SignInButton>
+
+// ❌ WRONG — custom styled button
+<button className="bg-blue-500 text-white px-4 py-2">Sign In</button>
+```
+
+## Rules Summary
+
+- Check `components/ui/` before building any UI element — it may already be installed.
+- If a needed component is not in `components/ui/`, add it via the CLI above; never build it manually.
 - Import components from `@/components/ui/<component>`, not from third-party libraries.
+- Zero exceptions: every visible UI element must trace back to a shadcn/ui component.
