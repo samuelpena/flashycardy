@@ -1,8 +1,6 @@
 ---
-description: Authentication and authorization rules using Clerk
 alwaysApply: true
 ---
-
 # Auth & Authorization
 
 All authentication is handled by Clerk. Every server-side data access must be scoped to the authenticated user — never expose or mutate another user's data.
@@ -10,11 +8,12 @@ All authentication is handled by Clerk. Every server-side data access must be sc
 ## Getting the Current User
 
 ```typescript
-// ✅ GOOD — Server Component or Route Handler
+// ✅ GOOD — Server Component or Route Handler (protected page)
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 const { userId } = await auth();
-if (!userId) throw new Error("Unauthorized");
+if (!userId) redirect("/");
 
 // ✅ GOOD — Server Action
 import { auth } from "@clerk/nextjs/server";
@@ -24,6 +23,28 @@ export async function myAction() {
   if (!userId) return { error: "Unauthorized" };
   // ...
 }
+```
+
+## Redirecting Unauthenticated Users
+
+If a user is not logged in and navigates to a protected page, redirect them to the home page (`/`). This is where the Sign In / Sign Up buttons are located. Never throw an error or return a 401 from a Server Component — always use `redirect("/")`.
+
+```typescript
+// ✅ GOOD — redirect to home if unauthenticated
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+
+export default async function ProtectedPage() {
+  const { userId } = await auth();
+  if (!userId) redirect("/");
+  // ...
+}
+
+// ❌ BAD — throwing instead of redirecting
+if (!userId) throw new Error("Unauthorized");
+
+// ❌ BAD — redirecting to a login page that doesn't exist
+if (!userId) redirect("/login");
 ```
 
 ## Scoping Queries to the Authenticated User
@@ -61,6 +82,8 @@ await db.delete(decks).where(eq(decks.id, deckId));
 ## Rules
 
 - Always call `auth()` at the top of every server action, route handler, and data-fetching function
-- Always return a 401/redirect or throw early if `userId` is null
+- In Server Components (pages), always use `redirect("/")` when `userId` is null — never throw an error
+- In Server Actions, return `{ error: "Unauthorized" }` when `userId` is null
+- Never redirect to `/login` or any other auth page — the home page (`/`) is where sign-in/sign-up lives
 - Never trust client-supplied user IDs — always derive the userId from `auth()`
 - Never skip ownership checks when accessing nested resources (e.g. cards inherit ownership from their deck)
