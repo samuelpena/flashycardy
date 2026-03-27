@@ -1,8 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { db } from "@/db";
-import { decks, cards } from "@/db/schema";
-import { eq, count } from "drizzle-orm";
+import { getDecksByUser } from "@/db/queries/decks";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,18 +16,7 @@ export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect("/");
 
-  const userDecks = await db
-    .select({
-      id: decks.id,
-      name: decks.name,
-      description: decks.description,
-      createdAt: decks.createdAt,
-      cardCount: count(cards.id),
-    })
-    .from(decks)
-    .leftJoin(cards, eq(cards.deckId, decks.id))
-    .where(eq(decks.clerkUserId, userId))
-    .groupBy(decks.id);
+  const userDecks = await getDecksByUser(userId);
 
   return (
     <main className="flex flex-1 flex-col gap-8 px-6 py-8 max-w-5xl mx-auto w-full">
