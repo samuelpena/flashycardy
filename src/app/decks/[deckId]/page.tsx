@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeftIcon, PlusIcon, LayersIcon } from "lucide-react";
 import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
+import { AddCardDialog } from "./add-card-dialog";
 
 export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
   const { userId } = await auth();
@@ -46,10 +47,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button>
-            <PlusIcon className="size-4" />
-            Add Card
-          </Button>
+          <AddCardDialog deckId={deck.id} />
           <EditDeckDialog
             deckId={deck.id}
             initialName={deck.name}
@@ -69,10 +67,15 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
               Add your first card to start studying this deck.
             </p>
           </div>
-          <Button>
-            <PlusIcon className="size-4" />
-            Add your first card
-          </Button>
+          <AddCardDialog
+            deckId={deck.id}
+            trigger={
+              <Button>
+                <PlusIcon className="size-4" />
+                Add your first card
+              </Button>
+            }
+          />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
