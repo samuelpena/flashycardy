@@ -72,7 +72,7 @@ export default async function DashboardPage() {
                   </CardDescription>
                 )}
               </CardHeader>
-              <CardFooter className="pt-0">
+              <CardFooter className="pt-4 flex items-center">
                 <p className="text-xs text-muted-foreground">
                   Updated{" "}
                   {new Intl.DateTimeFormat("en-US", {
