@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeftIcon, PlusIcon, LayersIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, LayersIcon, BookOpenIcon } from "lucide-react";
 import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
 import { AddCardDialog } from "./add-card-dialog";
@@ -61,6 +61,14 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="secondary"
+            nativeButton={false}
+            render={<Link href={`/decks/${deck.id}/study`} />}
+          >
+            <BookOpenIcon className="size-4" />
+            Study
+          </Button>
           <AddCardDialog deckId={deck.id} />
           <EditDeckDialog
             deckId={deck.id}
