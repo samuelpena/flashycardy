@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getDeckByIdAndUser } from "@/db/queries/decks";
-import { insertCard, updateCard } from "@/db/queries/cards";
+import { insertCard, updateCard, deleteCard } from "@/db/queries/cards";
 
 const createCardSchema = z.object({
   deckId: z.number().int().positive(),
@@ -57,6 +57,34 @@ export async function updateCardAction(input: UpdateCardInput) {
   if (!card) return { error: "Card not found" };
 
   await updateCard(cardId, { front, back });
+
+  revalidatePath(`/decks/${deckId}`);
+  return { success: true };
+}
+
+const deleteCardSchema = z.object({
+  cardId: z.number().int().positive(),
+  deckId: z.number().int().positive(),
+});
+
+type DeleteCardInput = z.infer<typeof deleteCardSchema>;
+
+export async function deleteCardAction(input: DeleteCardInput) {
+  const { userId } = await auth();
+  if (!userId) return { error: "Unauthorized" };
+
+  const parsed = deleteCardSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.flatten() };
+
+  const { cardId, deckId } = parsed.data;
+
+  const deck = await getDeckByIdAndUser(deckId, userId);
+  if (!deck) return { error: "Deck not found" };
+
+  const card = deck.cards.find((c) => c.id === cardId);
+  if (!card) return { error: "Card not found" };
+
+  await deleteCard(cardId);
 
   revalidatePath(`/decks/${deckId}`);
   return { success: true };

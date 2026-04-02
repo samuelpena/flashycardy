@@ -15,6 +15,7 @@ import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
 import { AddCardDialog } from "./add-card-dialog";
 import { EditCardDialog } from "./edit-card-dialog";
+import { DeleteCardDialog } from "./delete-card-dialog";
 import { CardSortSelect, type CardSortOption } from "./card-sort-select";
 
 export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
@@ -110,7 +111,8 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
                   {card.back}
                 </p>
               </CardContent>
-              <CardFooter className="pt-1 justify-end">
+              <CardFooter className="pt-1 justify-end gap-1">
+                <DeleteCardDialog cardId={card.id} deckId={deck.id} />
                 <EditCardDialog
                   cardId={card.id}
                   deckId={deck.id}

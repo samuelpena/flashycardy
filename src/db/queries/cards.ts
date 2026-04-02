@@ -16,3 +16,7 @@ export async function updateCard(
     .where(eq(cards.id, cardId))
     .returning();
 }
+
+export async function deleteCard(cardId: number) {
+  return db.delete(cards).where(eq(cards.id, cardId));
+}
