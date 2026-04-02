@@ -10,5 +10,9 @@ export async function updateCard(
   cardId: number,
   values: Partial<Pick<typeof cards.$inferInsert, "front" | "back">>
 ) {
-  return db.update(cards).set(values).where(eq(cards.id, cardId)).returning();
+  return db
+    .update(cards)
+    .set({ ...values, updatedAt: new Date() })
+    .where(eq(cards.id, cardId))
+    .returning();
 }

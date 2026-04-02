@@ -15,6 +15,7 @@ import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
 import { AddCardDialog } from "./add-card-dialog";
 import { EditCardDialog } from "./edit-card-dialog";
+import { CardSortSelect, type CardSortOption } from "./card-sort-select";
 
 export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
   const { userId } = await auth();
@@ -26,6 +27,16 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
 
   const deck = await getDeckByIdAndUser(parsedId, userId);
   if (!deck) notFound();
+
+  const { sort: rawSort } = await props.searchParams;
+  const sort: CardSortOption =
+    rawSort === "az" || rawSort === "za" ? rawSort : "updated";
+
+  const sortedCards = [...deck.cards].sort((a, b) => {
+    if (sort === "az") return a.front.localeCompare(b.front);
+    if (sort === "za") return b.front.localeCompare(a.front);
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
 
   return (
     <main className="flex flex-1 flex-col gap-8 px-6 py-8 max-w-5xl mx-auto w-full">
@@ -55,6 +66,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
             initialName={deck.name}
             initialDescription={deck.description ?? null}
           />
+          <CardSortSelect currentSort={sort} />
         </div>
       </div>
 
@@ -81,7 +93,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {deck.cards.map((card) => (
+          {sortedCards.map((card) => (
             <Card key={card.id} className="flex flex-col">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -98,7 +110,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
                   {card.back}
                 </p>
               </CardContent>
-              <CardFooter className="pt-0 justify-end">
+              <CardFooter className="pt-1 justify-end">
                 <EditCardDialog
                   cardId={card.id}
                   deckId={deck.id}
