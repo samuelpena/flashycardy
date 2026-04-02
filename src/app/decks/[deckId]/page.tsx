@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { ArrowLeftIcon, PlusIcon, LayersIcon } from "lucide-react";
 import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
 import { AddCardDialog } from "./add-card-dialog";
+import { EditCardDialog } from "./edit-card-dialog";
 
 export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
   const { userId } = await auth();
@@ -96,6 +98,14 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
                   {card.back}
                 </p>
               </CardContent>
+              <CardFooter className="pt-0 justify-end">
+                <EditCardDialog
+                  cardId={card.id}
+                  deckId={deck.id}
+                  initialFront={card.front}
+                  initialBack={card.back}
+                />
+              </CardFooter>
             </Card>
           ))}
         </div>
