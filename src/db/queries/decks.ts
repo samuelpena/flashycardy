@@ -44,5 +44,6 @@ export async function updateDeck(
 export async function deleteDeckByIdAndUser(deckId: number, userId: string) {
   return db
     .delete(decks)
-    .where(and(eq(decks.id, deckId), eq(decks.clerkUserId, userId)));
+    .where(and(eq(decks.id, deckId), eq(decks.clerkUserId, userId)))
+    .returning();
 }

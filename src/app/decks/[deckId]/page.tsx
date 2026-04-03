@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeftIcon, PlusIcon, LayersIcon, BookOpenIcon } from "lucide-react";
 import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
+import { DeleteDeckDialog } from "./delete-deck-dialog";
 import { AddCardDialog } from "./add-card-dialog";
 import { EditCardDialog } from "./edit-card-dialog";
 import { DeleteCardDialog } from "./delete-card-dialog";
@@ -74,6 +75,11 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
             deckId={deck.id}
             initialName={deck.name}
             initialDescription={deck.description ?? null}
+          />
+          <DeleteDeckDialog
+            deckId={deck.id}
+            deckName={deck.name}
+            cardCount={deck.cards.length}
           />
           <CardSortSelect currentSort={sort} />
         </div>

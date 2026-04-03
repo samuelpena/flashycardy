@@ -1,7 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getDecksByUser } from "@/db/queries/decks";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
@@ -10,8 +9,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PlusIcon, LayersIcon } from "lucide-react";
+import { LayersIcon } from "lucide-react";
 import Link from "next/link";
+import { CreateDeckDialog } from "@/components/create-deck-dialog";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -28,10 +28,7 @@ export default async function DashboardPage() {
             Manage and study your flashcard decks.
           </p>
         </div>
-        <Button>
-          <PlusIcon className="size-4" />
-          New Deck
-        </Button>
+        <CreateDeckDialog />
       </div>
 
       {userDecks.length === 0 ? (
@@ -45,10 +42,7 @@ export default async function DashboardPage() {
               Create your first deck to start building and studying flashcards.
             </p>
           </div>
-          <Button>
-            <PlusIcon className="size-4" />
-            Create your first deck
-          </Button>
+          <CreateDeckDialog triggerLabel="Create your first deck" />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
