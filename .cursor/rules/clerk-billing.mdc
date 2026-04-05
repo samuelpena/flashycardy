@@ -1,0 +1,78 @@
+---
+description: Clerk Billing conventions for subscriptions, payments, and feature gating
+alwaysApply: true
+---
+
+# Clerk Billing
+
+This app uses **Clerk Billing** (B2C) for all subscription and payment logic. Never integrate Stripe directly or build custom payment flows.
+
+## Plans & Features
+
+| Plan | Features |
+|------|----------|
+| `free_user` | `3_deck_limit` |
+| `pro` | `unlimited_decks`, `ai_flashcard_generation` |
+
+## Gating Access — Server Side (`has()`)
+
+Use the `has()` helper from `auth()` to check plans or features in Server Components and Server Actions.
+
+```typescript
+// ✅ GOOD — check by plan
+import { auth } from "@clerk/nextjs/server";
+
+const { has } = await auth();
+const isPro = has({ plan: "pro" });
+
+// ✅ GOOD — check by feature
+const canUseAI = has({ feature: "ai_flashcard_generation" });
+const hasUnlimitedDecks = has({ feature: "unlimited_decks" });
+```
+
+## Gating Access — Client Side (`<Show>`)
+
+Use the `<Show>` component from `@clerk/nextjs` to conditionally render UI based on plan or feature.
+
+```tsx
+// ✅ GOOD — gate UI by feature
+import { Show } from "@clerk/nextjs";
+
+<Show
+  when={{ feature: "ai_flashcard_generation" }}
+  fallback={<p>Upgrade to Pro to unlock AI flashcard generation.</p>}
+>
+  <AIGenerateButton />
+</Show>
+
+// ✅ GOOD — gate UI by plan
+<Show
+  when={{ plan: "pro" }}
+  fallback={<UpgradeBanner />}
+>
+  <ProFeaturePanel />
+</Show>
+```
+
+## Pricing Page
+
+Use the `<PricingTable />` component on a dedicated pricing page. Never build a custom pricing table.
+
+```tsx
+// ✅ GOOD — app/pricing/page.tsx
+import { PricingTable } from "@clerk/nextjs";
+
+export default function PricingPage() {
+  return <PricingTable />;
+}
+```
+
+## Rules
+
+- All plan slugs: `free_user`, `pro`
+- All feature slugs: `3_deck_limit`, `unlimited_decks`, `ai_flashcard_generation`
+- Use `has()` from `auth()` for server-side gating — never query a custom subscriptions table
+- Use `<Show>` for client-side conditional rendering — never roll custom feature-flag logic
+- Use `<PricingTable />` for pricing UI — never build a custom pricing table
+- Clerk Billing manages Stripe under the hood — never call Stripe APIs directly
+- Plans and features are configured in the Clerk Dashboard, not in code
