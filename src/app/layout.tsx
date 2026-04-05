@@ -27,7 +27,7 @@ export default function RootLayout({
       className={`${poppins.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ClerkProvider ui={ui} appearance={{ theme: dark }}>
+        <ClerkProvider ui={ui} appearance={{ theme: dark }} afterSignOutUrl="/">
           {children}
         </ClerkProvider>
       </body>
