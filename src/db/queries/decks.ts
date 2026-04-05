@@ -41,6 +41,14 @@ export async function updateDeck(
     .returning();
 }
 
+export async function getDeckCountByUser(userId: string) {
+  const [result] = await db
+    .select({ count: count(decks.id) })
+    .from(decks)
+    .where(eq(decks.clerkUserId, userId));
+  return result?.count ?? 0;
+}
+
 export async function deleteDeckByIdAndUser(deckId: number, userId: string) {
   return db
     .delete(decks)

@@ -13,11 +13,15 @@ import { LayersIcon } from "lucide-react";
 import Link from "next/link";
 import { CreateDeckDialog } from "@/components/create-deck-dialog";
 
+const FREE_DECK_LIMIT = 3;
+
 export default async function DashboardPage() {
-  const { userId } = await auth();
+  const { userId, has } = await auth();
   if (!userId) redirect("/");
 
   const userDecks = await getDecksByUser(userId);
+  const hasUnlimitedDecks = has({ feature: "unlimited_decks" });
+  const limitReached = !hasUnlimitedDecks && userDecks.length >= FREE_DECK_LIMIT;
 
   return (
     <main className="flex flex-1 flex-col gap-8 px-6 py-8 max-w-5xl mx-auto w-full">
@@ -26,9 +30,14 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight">Your Decks</h1>
           <p className="text-muted-foreground mt-1">
             Manage and study your flashcard decks.
+            {!hasUnlimitedDecks && (
+              <span className="ml-2 text-xs">
+                {userDecks.length}/{FREE_DECK_LIMIT} decks used
+              </span>
+            )}
           </p>
         </div>
-        <CreateDeckDialog />
+        <CreateDeckDialog limitReached={limitReached} />
       </div>
 
       {userDecks.length === 0 ? (
@@ -42,7 +51,7 @@ export default async function DashboardPage() {
               Create your first deck to start building and studying flashcards.
             </p>
           </div>
-          <CreateDeckDialog triggerLabel="Create your first deck" />
+          <CreateDeckDialog triggerLabel="Create your first deck" limitReached={limitReached} />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
