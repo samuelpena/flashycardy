@@ -6,6 +6,10 @@ export async function insertCard(values: typeof cards.$inferInsert) {
   return db.insert(cards).values(values).returning();
 }
 
+export async function insertCards(values: (typeof cards.$inferInsert)[]) {
+  return db.insert(cards).values(values).returning();
+}
+
 export async function updateCard(
   cardId: number,
   values: Partial<Pick<typeof cards.$inferInsert, "front" | "back">>

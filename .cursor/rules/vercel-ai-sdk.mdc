@@ -1,0 +1,41 @@
+---
+description: Vercel AI SDK usage for AI-powered features (flashcard generation)
+alwaysApply: true
+---
+
+# Vercel AI SDK — OpenAI Integration
+
+This project uses the [Vercel AI SDK](https://sdk.vercel.ai/) (`ai` + `@ai-sdk/openai`) for all AI features. Never call OpenAI APIs directly.
+
+## Structured Output — Generating Flashcards
+
+Use `generateText` with `Output.object` and a Zod schema to produce structured data. The model is `gpt-4.1-nano` — the cheapest OpenAI model that supports structured outputs ($0.10/1M input, $0.40/1M output).
+
+```typescript
+import { generateText, Output } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
+
+const cardSchema = z.object({
+  cards: z.array(
+    z.object({
+      front: z.string(),
+      back: z.string(),
+    }),
+  ),
+});
+
+const { output } = await generateText({
+  model: openai("gpt-4.1-nano"),
+  output: Output.object({ schema: cardSchema }),
+  prompt: `Generate ${count} flashcards about ${topic}.`,
+});
+```
+
+## Rules
+
+- Always use `generateText` from `ai` and `openai` from `@ai-sdk/openai` — never call the OpenAI REST API directly
+- Always use `Output.object` with a Zod schema for structured responses — never parse raw text
+- Model: `gpt-4.1-nano` via `openai("gpt-4.1-nano")` — cheapest option with structured output support
+- AI calls must happen in Server Actions only — never on the client
+- Gate AI features behind Clerk Billing (`has({ feature: "ai_flashcard_generation" })`) before invoking

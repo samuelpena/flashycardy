@@ -18,10 +18,13 @@ import { AddCardDialog } from "./add-card-dialog";
 import { EditCardDialog } from "./edit-card-dialog";
 import { DeleteCardDialog } from "./delete-card-dialog";
 import { CardSortSelect, type CardSortOption } from "./card-sort-select";
+import { GenerateCardsButton } from "./generate-cards-button";
 
 export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
-  const { userId } = await auth();
+  const { userId, has } = await auth();
   if (!userId) redirect("/");
+
+  const hasAiFeature = has({ feature: "ai_flashcard_generation" });
 
   const { deckId } = await props.params;
   const parsedId = Number(deckId);
@@ -70,6 +73,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
             <BookOpenIcon className="size-4" />
             Study
           </Button>
+          <GenerateCardsButton deckId={deck.id} hasAiFeature={hasAiFeature} />
           <AddCardDialog deckId={deck.id} />
           <EditDeckDialog
             deckId={deck.id}
