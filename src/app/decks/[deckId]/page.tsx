@@ -45,25 +45,18 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
 
   return (
     <main className="flex flex-1 flex-col gap-8 px-6 py-8 max-w-5xl mx-auto w-full">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit mb-1"
-          >
-            <ArrowLeftIcon className="size-3.5" />
-            Back to decks
-          </Link>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-3xl font-bold tracking-tight">{deck.name}</h1>
-            <Badge variant="secondary">
-              {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
-            </Badge>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit mb-1"
+            >
+              <ArrowLeftIcon className="size-3.5" />
+              Back to decks
+            </Link>
+           
           </div>
-          {deck.description && (
-            <p className="text-muted-foreground mt-0.5">{deck.description}</p>
-          )}
-        </div>
         <div className="flex items-center gap-2 shrink-0">
           <Button
             variant="secondary"
@@ -87,6 +80,16 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
           />
           <CardSortSelect currentSort={sort} />
         </div>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap pt-8">
+              <h1 className="text-3xl font-bold tracking-tight">{deck.name}</h1>
+              <Badge variant="secondary">
+                {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
+              </Badge>
+            </div>
+        {deck.description && (
+          <p className="text-muted-foreground mt-0.5">{deck.description}</p>
+        )}
       </div>
 
       {deck.cards.length === 0 ? (
