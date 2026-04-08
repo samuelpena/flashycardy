@@ -66,7 +66,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
             <BookOpenIcon className="size-4" />
             Study
           </Button>
-          <GenerateCardsButton deckId={deck.id} hasAiFeature={hasAiFeature} />
+          <GenerateCardsButton deckId={deck.id} hasAiFeature={hasAiFeature} hasDescription={!!deck.description} />
           <AddCardDialog deckId={deck.id} />
           <EditDeckDialog
             deckId={deck.id}

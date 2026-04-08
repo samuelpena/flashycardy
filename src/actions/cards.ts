@@ -114,6 +114,10 @@ export async function generateCardsAction(input: GenerateCardsInput) {
   const deck = await getDeckByIdAndUser(deckId, userId);
   if (!deck) return { error: "Deck not found" };
 
+  if (!deck.description) {
+    return { error: "Add a description to your deck before generating cards." };
+  }
+
   const cardSchema = z.object({
     cards: z.array(
       z.object({

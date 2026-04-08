@@ -14,11 +14,13 @@ import { generateCardsAction } from "@/actions/cards";
 interface GenerateCardsButtonProps {
   deckId: number;
   hasAiFeature: boolean;
+  hasDescription: boolean;
 }
 
 export function GenerateCardsButton({
   deckId,
   hasAiFeature,
+  hasDescription,
 }: GenerateCardsButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -43,20 +45,28 @@ export function GenerateCardsButton({
     });
   }
 
-  if (!hasAiFeature) {
+  const tooltipMessage = !hasAiFeature
+    ? "This is a Pro feature. Click to view plans."
+    : !hasDescription
+      ? "Add a description to your deck first so AI can generate relevant cards."
+      : null;
+
+  if (tooltipMessage) {
+    const isDisabled = hasAiFeature && !hasDescription;
+
     return (
       <Tooltip>
-        <TooltipTrigger
-          render={
-            <Button variant="secondary" onClick={handleClick}>
-              <SparklesIcon className="size-4" />
-              Generate with AI
-            </Button>
-          }
-        />
-        <TooltipContent>
-          This is a Pro feature. Click to view plans.
-        </TooltipContent>
+        <TooltipTrigger render={<span className="inline-flex" />}>
+          <Button
+            variant="secondary"
+            onClick={!hasAiFeature ? handleClick : undefined}
+            disabled={isDisabled}
+          >
+            <SparklesIcon className="size-4" />
+            Generate with AI
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{tooltipMessage}</TooltipContent>
       </Tooltip>
     );
   }
