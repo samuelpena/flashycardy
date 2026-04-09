@@ -58,11 +58,11 @@ export default async function DashboardPage() {
           {userDecks.map((deck) => (
             <Link key={deck.id} href={`/decks/${deck.id}`}>
             <Card
-              className="flex flex-col hover:border-primary/50 transition-colors cursor-pointer"
+              className="flex h-44 flex-col hover:border-primary/50 transition-colors cursor-pointer"
             >
               <CardHeader className="flex-1">
                 <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-lg leading-tight">
+                  <CardTitle className="text-lg leading-tight line-clamp-2">
                     {deck.name}
                   </CardTitle>
                   <Badge variant="secondary" className="shrink-0">
