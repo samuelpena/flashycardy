@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { Show } from "@clerk/nextjs";
 import { redirect, notFound } from "next/navigation";
 import { getDeckByIdAndUser } from "@/db/queries/decks";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeftIcon, PlusIcon, LayersIcon, BookOpenIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, LayersIcon, BookOpenIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
 import { DeleteDeckDialog } from "./delete-deck-dialog";
@@ -21,10 +22,8 @@ import { CardSortSelect, type CardSortOption } from "./card-sort-select";
 import { GenerateCardsButton } from "./generate-cards-button";
 
 export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
-  const { userId, has } = await auth();
+  const { userId } = await auth();
   if (!userId) redirect("/");
-
-  const hasAiFeature = has({ feature: "ai_flashcard_generation" });
 
   const { deckId } = await props.params;
   const parsedId = Number(deckId);
@@ -66,7 +65,17 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
             <BookOpenIcon className="size-4" />
             Study
           </Button>
-          <GenerateCardsButton deckId={deck.id} hasAiFeature={hasAiFeature} hasDescription={!!deck.description} />
+          <Show
+            when={{ feature: "ai_flashcard_generation" }}
+            fallback={
+              <Button variant="secondary" nativeButton={false} render={<Link href="/pricing" />}>
+                <SparklesIcon className="size-4" />
+                Generate with AI
+              </Button>
+            }
+          >
+            <GenerateCardsButton deckId={deck.id} hasDescription={!!deck.description} />
+          </Show>
           <AddCardDialog deckId={deck.id} />
           <EditDeckDialog
             deckId={deck.id}
