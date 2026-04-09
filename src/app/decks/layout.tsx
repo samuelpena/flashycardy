@@ -16,7 +16,7 @@ export default function DecksLayout({
           >
             FlashyCardy
           </Link>
-          <UserButton afterSignOutUrl="/" />
+          <UserButton />
         </div>
       </header>
       {children}

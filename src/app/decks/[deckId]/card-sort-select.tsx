@@ -26,9 +26,9 @@ export function CardSortSelect({ currentSort }: CardSortSelectProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  function handleChange(value: string) {
+  function handleChange(value: CardSortOption | null) {
     const params = new URLSearchParams(searchParams.toString());
-    if (value === "updated") {
+    if (!value || value === "updated") {
       params.delete("sort");
     } else {
       params.set("sort", value);
