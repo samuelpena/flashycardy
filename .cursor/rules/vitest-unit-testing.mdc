@@ -1,0 +1,69 @@
+---
+description: Vitest unit testing setup and conventions for Next.js
+alwaysApply: true
+---
+
+# Unit Testing with Vitest
+
+This project uses [Vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for unit testing.
+
+## Setup
+
+Dependencies (already installed as dev dependencies):
+- `vitest`
+- `@vitejs/plugin-react`
+- `jsdom`
+- `@testing-library/react`
+- `@testing-library/dom`
+- `vite-tsconfig-paths`
+
+Config lives at `vitest.config.mts` in the project root:
+
+```ts
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import tsconfigPaths from 'vite-tsconfig-paths'
+
+export default defineConfig({
+  plugins: [tsconfigPaths(), react()],
+  test: {
+    environment: 'jsdom',
+  },
+})
+```
+
+Run tests with:
+```bash
+pnpm test
+```
+
+## Where to Put Tests
+
+- Colocate test files inside `app/` next to the component
+- Test files must end in `.test.tsx` or `.test.ts`
+
+## Writing Tests
+
+```tsx
+// ✅ GOOD — synchronous Client or Server Component
+import { expect, test } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import MyComponent from '../app/some/path/MyComponent'
+
+test('renders heading', () => {
+  render(<MyComponent />)
+  expect(screen.getByRole('heading', { level: 1, name: 'Title' })).toBeDefined()
+})
+```
+
+## Limitations
+
+> `async` Server Components are **not supported** by Vitest. Write unit tests only for synchronous Server Components and Client Components. Use E2E tests (e.g. Playwright) for `async` Server Components.
+
+## Rules
+
+- Use `vitest` and `@testing-library/react` — never Jest or Enzyme
+- Test files must use `.test.tsx` / `.test.ts` extensions
+- Do not test `async` Server Components with Vitest — use E2E tests instead
+- Keep tests focused: one component or function per test file
+- Use `screen` queries from React Testing Library — never query the DOM directly
