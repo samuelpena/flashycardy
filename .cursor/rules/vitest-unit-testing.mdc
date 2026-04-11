@@ -15,7 +15,6 @@ Dependencies (already installed as dev dependencies):
 - `jsdom`
 - `@testing-library/react`
 - `@testing-library/dom`
-- `vite-tsconfig-paths`
 
 Config lives at `vitest.config.mts` in the project root:
 
