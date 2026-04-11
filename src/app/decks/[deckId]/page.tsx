@@ -176,14 +176,14 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
                   <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     Front
                   </CardTitle>
-                  <p className="text-sm font-medium leading-snug">{card.front}</p>
+                  <p className="text-sm font-medium leading-snug line-clamp-2 h-[2.625rem]">{card.front}</p>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-2 pt-0">
                   <div className="h-px w-full bg-border" />
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     Back
                   </p>
-                  <p className="text-sm text-muted-foreground leading-snug">
+                  <p className="text-sm text-muted-foreground leading-snug line-clamp-3 h-[3.8rem]">
                     {card.back}
                   </p>
                 </CardContent>
