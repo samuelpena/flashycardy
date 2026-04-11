@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "pnpm run test:unit && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "pnpm test:unit && pnpm test:e2e",
-    "test:unit": "vitest",
+    "test:unit:watch": "vitest",
+    "test:unit": "vitest run",
     "test:e2e": "playwright test"
   },
   "dependencies": {
