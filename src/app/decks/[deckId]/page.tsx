@@ -11,6 +11,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { ArrowLeftIcon, PlusIcon, LayersIcon, BookOpenIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
@@ -20,6 +29,25 @@ import { EditCardDialog } from "./edit-card-dialog";
 import { DeleteCardDialog } from "./delete-card-dialog";
 import { CardSortSelect, type CardSortOption } from "./card-sort-select";
 import { GenerateCardsButton } from "./generate-cards-button";
+
+const PAGE_SIZE = 9;
+
+function getPageNumbers(current: number, total: number): (number | "ellipsis")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+  const pages: (number | "ellipsis")[] = [1];
+
+  if (current > 3) pages.push("ellipsis");
+
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  for (let i = start; i <= end; i++) pages.push(i);
+
+  if (current < total - 2) pages.push("ellipsis");
+
+  pages.push(total);
+  return pages;
+}
 
 export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
   const { userId } = await auth();
@@ -32,15 +60,32 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
   const deck = await getDeckByIdAndUser(parsedId, userId);
   if (!deck) notFound();
 
-  const { sort: rawSort } = await props.searchParams;
+  const { sort: rawSort, page: pageParam } = await props.searchParams;
   const sort: CardSortOption =
     rawSort === "az" || rawSort === "za" ? rawSort : "updated";
+
+  const currentPage = Math.max(1, parseInt(String(pageParam ?? "1"), 10) || 1);
 
   const sortedCards = [...deck.cards].sort((a, b) => {
     if (sort === "az") return a.front.localeCompare(b.front);
     if (sort === "za") return b.front.localeCompare(a.front);
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
   });
+
+  const totalPages = Math.max(1, Math.ceil(sortedCards.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedCards = sortedCards.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
+  );
+  const showPagination = sortedCards.length > PAGE_SIZE;
+
+  function buildPageHref(p: number) {
+    const params = new URLSearchParams();
+    if (sort !== "updated") params.set("sort", sort);
+    params.set("page", String(p));
+    return `/decks/${parsedId}?${params.toString()}`;
+  }
 
   return (
     <main className="flex flex-1 flex-col gap-8 px-6 py-8 max-w-5xl mx-auto w-full">
@@ -123,36 +168,77 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
           />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sortedCards.map((card) => (
-            <Card key={card.id} className="flex flex-col">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Front
-                </CardTitle>
-                <p className="text-sm font-medium leading-snug">{card.front}</p>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-2 pt-0">
-                <div className="h-px w-full bg-border" />
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Back
-                </p>
-                <p className="text-sm text-muted-foreground leading-snug">
-                  {card.back}
-                </p>
-              </CardContent>
-              <CardFooter className="pt-1 justify-end gap-1">
-                <DeleteCardDialog cardId={card.id} deckId={deck.id} />
-                <EditCardDialog
-                  cardId={card.id}
-                  deckId={deck.id}
-                  initialFront={card.front}
-                  initialBack={card.back}
-                />
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedCards.map((card) => (
+              <Card key={card.id} className="flex flex-col">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Front
+                  </CardTitle>
+                  <p className="text-sm font-medium leading-snug">{card.front}</p>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-2 pt-0">
+                  <div className="h-px w-full bg-border" />
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Back
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-snug">
+                    {card.back}
+                  </p>
+                </CardContent>
+                <CardFooter className="pt-1 justify-end gap-1">
+                  <DeleteCardDialog cardId={card.id} deckId={deck.id} />
+                  <EditCardDialog
+                    cardId={card.id}
+                    deckId={deck.id}
+                    initialFront={card.front}
+                    initialBack={card.back}
+                  />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+
+          {showPagination && (
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href={buildPageHref(safePage - 1)}
+                    aria-disabled={safePage === 1}
+                    className={safePage === 1 ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+
+                {getPageNumbers(safePage, totalPages).map((item, idx) =>
+                  item === "ellipsis" ? (
+                    <PaginationItem key={`ellipsis-${idx}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={item}>
+                      <PaginationLink
+                        href={buildPageHref(item)}
+                        isActive={item === safePage}
+                      >
+                        {item}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ),
+                )}
+
+                <PaginationItem>
+                  <PaginationNext
+                    href={buildPageHref(safePage + 1)}
+                    aria-disabled={safePage === totalPages}
+                    className={safePage === totalPages ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </>
       )}
     </main>
   );
