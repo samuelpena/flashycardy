@@ -21,6 +21,7 @@ import {
 import { LayersIcon } from "lucide-react";
 import Link from "next/link";
 import { CreateDeckDialog } from "@/components/create-deck-dialog";
+import { DeckSortSelect, type DeckSortOption } from "./deck-sort-select";
 
 const FREE_DECK_LIMIT = 3;
 const PAGE_SIZE = 9;
@@ -28,28 +29,39 @@ const PAGE_SIZE = 9;
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 }) {
   const { userId, has } = await auth();
   if (!userId) redirect("/");
 
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, sort: rawSort } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const sort: DeckSortOption =
+    rawSort === "az" || rawSort === "za" ? rawSort : "updated";
 
   const userDecks = await getDecksByUser(userId);
   const hasUnlimitedDecks = has({ feature: "unlimited_decks" });
   const limitReached = !hasUnlimitedDecks && userDecks.length >= FREE_DECK_LIMIT;
 
-  const totalPages = Math.max(1, Math.ceil(userDecks.length / PAGE_SIZE));
+  const sortedDecks = [...userDecks].sort((a, b) => {
+    if (sort === "az") return a.name.localeCompare(b.name);
+    if (sort === "za") return b.name.localeCompare(a.name);
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sortedDecks.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
-  const paginatedDecks = userDecks.slice(
+  const paginatedDecks = sortedDecks.slice(
     (safePage - 1) * PAGE_SIZE,
     safePage * PAGE_SIZE,
   );
-  const showPagination = userDecks.length > PAGE_SIZE;
+  const showPagination = sortedDecks.length > PAGE_SIZE;
 
   function buildPageHref(p: number) {
-    return `/dashboard?page=${p}`;
+    const params = new URLSearchParams();
+    params.set("page", String(p));
+    if (sort !== "updated") params.set("sort", sort);
+    return `/dashboard?${params.toString()}`;
   }
 
   function getPageNumbers(current: number, total: number): (number | "ellipsis")[] {
@@ -83,7 +95,10 @@ export default async function DashboardPage({
             )}
           </p>
         </div>
-        <CreateDeckDialog limitReached={limitReached} />
+        <div className="flex items-center gap-2">
+          {userDecks.length > 0 && <DeckSortSelect currentSort={sort} />}
+          <CreateDeckDialog limitReached={limitReached} />
+        </div>
       </div>
 
       {userDecks.length === 0 ? (
