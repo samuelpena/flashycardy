@@ -61,7 +61,8 @@ const mockDeck = {
   description: "Basic biology concepts",
   clerkUserId: USER_ID,
   createdAt: new Date(),
-  cards: [{ id: CARD_ID, front: "Q", back: "A", deckId: DECK_ID, createdAt: new Date() }],
+  updatedAt: new Date(),
+  cards: [{ id: CARD_ID, front: "Q", back: "A", deckId: DECK_ID, createdAt: new Date(), updatedAt: new Date() }],
 };
 
 beforeEach(() => {
