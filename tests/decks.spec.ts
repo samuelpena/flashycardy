@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./axe-test";
 
 /**
  * E2E tests for the Deck detail page (src/app/decks/[deckId]/page.tsx)
@@ -15,5 +15,16 @@ test.describe("Deck detail page — unauthenticated", () => {
   test("home page is shown after redirect with Sign In button visible", async ({ page }) => {
     await page.goto("/decks/1");
     await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible();
+  });
+});
+
+test.describe("Deck detail page — accessibility", () => {
+  test("redirected home page should not have any WCAG A/AA violations", async ({ page, makeAxeBuilder }) => {
+    await page.goto("/decks/1");
+    await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible();
+
+    const accessibilityScanResults = await makeAxeBuilder().analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
   });
 });

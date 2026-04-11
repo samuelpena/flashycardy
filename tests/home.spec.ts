@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./axe-test";
 
 /**
  * E2E tests for the Home page (src/app/page.tsx)
@@ -21,5 +21,16 @@ test.describe("Home page — unauthenticated", () => {
     await page.goto("/");
     await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign Up" })).toBeVisible();
+  });
+});
+
+test.describe("Home page — accessibility", () => {
+  test("should not have any WCAG A/AA violations", async ({ page, makeAxeBuilder }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1, name: "Flashycardy" })).toBeVisible();
+
+    const accessibilityScanResults = await makeAxeBuilder().analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
   });
 });
