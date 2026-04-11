@@ -21,11 +21,13 @@ import { createDeckAction } from "@/actions/decks";
 interface CreateDeckDialogProps {
   triggerLabel?: string;
   limitReached?: boolean;
+  triggerId?: string;
 }
 
 export function CreateDeckDialog({
   triggerLabel = "New Deck",
   limitReached = false,
+  triggerId,
 }: CreateDeckDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -71,7 +73,7 @@ export function CreateDeckDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button />}>
+      <DialogTrigger render={<Button id={triggerId} />}>
         <PlusIcon className="size-4" />
         {triggerLabel}
       </DialogTrigger>

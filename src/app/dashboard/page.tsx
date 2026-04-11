@@ -21,6 +21,7 @@ import {
 import { LayersIcon } from "lucide-react";
 import Link from "next/link";
 import { CreateDeckDialog } from "@/components/create-deck-dialog";
+import { DashboardTour } from "@/components/dashboard-tour";
 import { DeckSortSelect, type DeckSortOption } from "./deck-sort-select";
 import { EditDeckDialog } from "./edit-deck-dialog";
 import { DeleteDeckDialog } from "./delete-deck-dialog";
@@ -85,6 +86,7 @@ export default async function DashboardPage({
 
   return (
     <main className="flex flex-1 flex-col gap-8 px-6 py-8 max-w-5xl mx-auto w-full">
+      <DashboardTour />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Your Decks</h1>
@@ -99,7 +101,7 @@ export default async function DashboardPage({
         </div>
         <div className="flex items-center gap-2">
           {userDecks.length > 0 && <DeckSortSelect currentSort={sort} />}
-          <CreateDeckDialog limitReached={limitReached} />
+          <CreateDeckDialog limitReached={limitReached} triggerId="new-deck-btn" />
         </div>
       </div>
 
