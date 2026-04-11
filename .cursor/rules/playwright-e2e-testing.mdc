@@ -1,0 +1,71 @@
+---
+description: E2E testing standards using Playwright with Next.js
+alwaysApply: true
+---
+
+# E2E Testing with Playwright
+
+This project uses [Playwright](https://playwright.dev/) for End-to-End tests. Never use Vitest or React Testing Library for E2E — use Playwright only. Vitest is reserved for unit tests on synchronous components.
+
+## When to Write E2E Tests
+
+- `async` Server Components (cannot be unit tested with Vitest)
+- Full user flows (auth, navigation, CRUD operations)
+- Features that span multiple pages or server/client boundaries
+
+## File Location
+
+Place all E2E tests in the `tests/` directory at the project root:
+
+```
+tests/
+  example.spec.ts
+  decks.spec.ts
+```
+
+Test files must end in `.spec.ts`.
+
+## Running Tests
+
+Tests must run against the production build:
+
+```bash
+pnpm build && pnpm start
+# in another terminal:
+npx playwright test
+```
+
+## Writing Tests
+
+```ts
+// ✅ GOOD — use baseURL from playwright.config.ts
+import { test, expect } from '@playwright/test'
+
+test('should navigate to the about page', async ({ page }) => {
+  await page.goto('/')
+  await page.click('text=About')
+  await expect(page).toHaveURL('/about')
+  await expect(page.locator('h1')).toContainText('About')
+})
+
+// ❌ BAD — hardcoded full URLs
+await page.goto('http://localhost:3000/about')
+```
+
+## Config Requirements
+
+`playwright.config.ts` must set `baseURL`:
+
+```ts
+use: {
+  baseURL: 'http://localhost:3000',
+},
+```
+
+## Rules
+
+- All E2E tests live in `tests/` and use `.spec.ts` extension
+- Always use `baseURL`-relative paths (`'/'` not `'http://localhost:3000/'`)
+- Run against the production build (`pnpm build && pnpm start`), not the dev server
+- Use `async` Server Component flows as the primary motivation for E2E tests
+- Never duplicate E2E tests for logic already covered by Vitest unit tests
