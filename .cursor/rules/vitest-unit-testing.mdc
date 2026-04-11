@@ -59,6 +59,11 @@ test('renders heading', () => {
 
 > `async` Server Components are **not supported** by Vitest. Write unit tests only for synchronous Server Components and Client Components. Use E2E tests (e.g. Playwright) for `async` Server Components.
 
+## Skipped (not applicable for unit tests)
+
+- `src/db/queries/*` — database interaction code (requires a real DB)
+- `src/components/ui/*` — shadcn/ui library components (third-party, not our code)
+
 ## Rules
 
 - Use `vitest` and `@testing-library/react` — never Jest or Enzyme
