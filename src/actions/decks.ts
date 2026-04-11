@@ -62,6 +62,7 @@ export async function updateDeckAction(input: UpdateDeckInput) {
 
   if (!updated.length) return { error: "Deck not found" };
 
+  revalidatePath("/dashboard");
   revalidatePath(`/decks/${deckId}`);
   return { success: true };
 }

@@ -22,6 +22,8 @@ import { LayersIcon } from "lucide-react";
 import Link from "next/link";
 import { CreateDeckDialog } from "@/components/create-deck-dialog";
 import { DeckSortSelect, type DeckSortOption } from "./deck-sort-select";
+import { EditDeckDialog } from "./edit-deck-dialog";
+import { DeleteDeckDialog } from "./delete-deck-dialog";
 
 const FREE_DECK_LIMIT = 3;
 const PAGE_SIZE = 9;
@@ -118,35 +120,50 @@ export default async function DashboardPage({
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {paginatedDecks.map((deck) => (
-              <Link key={deck.id} href={`/decks/${deck.id}`}>
-                <Card className="flex h-44 flex-col hover:border-primary/50 transition-colors cursor-pointer">
-                  <CardHeader className="flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-lg leading-tight line-clamp-2">
-                        {deck.name}
-                      </CardTitle>
-                      <Badge variant="secondary" className="shrink-0">
-                        {deck.cardCount} {deck.cardCount === 1 ? "card" : "cards"}
-                      </Badge>
-                    </div>
-                    {deck.description && (
-                      <CardDescription className="line-clamp-2">
-                        {deck.description}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardFooter className="pt-4 flex items-center">
-                    <p className="text-xs text-muted-foreground">
-                      Updated{" "}
-                      {new Intl.DateTimeFormat("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      }).format(deck.updatedAt)}
-                    </p>
-                  </CardFooter>
-                </Card>
-              </Link>
+              <Card key={deck.id} className="relative flex h-44 flex-col hover:border-primary/50 transition-colors cursor-pointer">
+                <Link
+                  href={`/decks/${deck.id}`}
+                  className="absolute inset-0 rounded-xl"
+                  aria-label={`Open ${deck.name}`}
+                />
+                <CardHeader className="flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-lg leading-tight line-clamp-2">
+                      {deck.name}
+                    </CardTitle>
+                    <Badge variant="secondary" className="relative z-10 shrink-0">
+                      {deck.cardCount} {deck.cardCount === 1 ? "card" : "cards"}
+                    </Badge>
+                  </div>
+                  {deck.description && (
+                    <CardDescription className="line-clamp-2">
+                      {deck.description}
+                    </CardDescription>
+                  )}
+                </CardHeader>
+                <CardFooter className="relative z-10 pt-4 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    Updated{" "}
+                    {new Intl.DateTimeFormat("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    }).format(deck.updatedAt)}
+                  </p>
+                  <div className="flex items-center gap-0.5">
+                    <EditDeckDialog
+                      deckId={deck.id}
+                      initialName={deck.name}
+                      initialDescription={deck.description}
+                    />
+                    <DeleteDeckDialog
+                      deckId={deck.id}
+                      deckName={deck.name}
+                      cardCount={deck.cardCount}
+                    />
+                  </div>
+                </CardFooter>
+              </Card>
             ))}
           </div>
 
