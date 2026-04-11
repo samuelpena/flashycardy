@@ -10,7 +10,8 @@
     "test": "pnpm test:unit && pnpm test:e2e",
     "test:unit:watch": "vitest",
     "test:unit": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright test && pnpm exec playwright show-report"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.52",
