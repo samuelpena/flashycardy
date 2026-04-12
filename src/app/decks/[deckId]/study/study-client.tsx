@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,7 +11,9 @@ import {
   ThumbsUpIcon,
   ThumbsDownIcon,
   LayersIcon,
+  Loader2Icon,
 } from "lucide-react";
+import { saveStudySessionAction } from "@/actions/study-sessions";
 
 type Card = {
   id: number;
@@ -22,6 +24,7 @@ type Card = {
 type Rating = "correct" | "incorrect";
 
 interface StudyClientProps {
+  deckId: number;
   cards: Card[];
 }
 
@@ -34,15 +37,45 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-export function StudyClient({ cards }: StudyClientProps) {
+export function StudyClient({ deckId, cards }: StudyClientProps) {
   const [deck, setDeck] = useState(cards);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [results, setResults] = useState<Record<number, Rating>>({});
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const savedRef = useRef(false);
 
   const total = deck.length;
   const current = deck[index];
+
+  useEffect(() => {
+    if (!completed || savedRef.current) return;
+    savedRef.current = true;
+
+    const cardResults = deck
+      .filter((card) => results[card.id] !== undefined)
+      .map((card) => ({
+        cardId: card.id,
+        isCorrect: results[card.id] === "correct",
+      }));
+
+    if (cardResults.length === 0) return;
+
+    setSaving(true);
+    setSaveError(null);
+    saveStudySessionAction({ deckId, cardResults })
+      .then((res) => {
+        if ("error" in res) {
+          setSaveError(
+            typeof res.error === "string" ? res.error : "Failed to save results."
+          );
+        }
+      })
+      .catch(() => setSaveError("Failed to save results."))
+      .finally(() => setSaving(false));
+  }, [completed, deck, results, deckId]);
 
   const flip = useCallback(() => setFlipped((f) => !f), []);
 
@@ -71,19 +104,23 @@ export function StudyClient({ cards }: StudyClientProps) {
   );
 
   const restart = useCallback(() => {
+    savedRef.current = false;
     setDeck(cards);
     setIndex(0);
     setFlipped(false);
     setCompleted(false);
     setResults({});
+    setSaveError(null);
   }, [cards]);
 
   const shuffle = useCallback(() => {
+    savedRef.current = false;
     setDeck(shuffleArray(cards));
     setIndex(0);
     setFlipped(false);
     setCompleted(false);
     setResults({});
+    setSaveError(null);
   }, [cards]);
 
   useEffect(() => {
@@ -95,7 +132,7 @@ export function StudyClient({ cards }: StudyClientProps) {
         e.preventDefault();
         flip();
       }
-      if (e.key === "ArrowRight" && !flipped) goNext();
+      if (e.key === "ArrowRight" && !flipped) flip();
       if (e.key === "ArrowLeft") goPrev();
     };
     window.addEventListener("keydown", handleKey);
@@ -181,6 +218,16 @@ export function StudyClient({ cards }: StudyClientProps) {
               </p>
             )}
           </div>
+        )}
+
+        {saving && (
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Loader2Icon className="size-3 animate-spin" />
+            Saving results…
+          </p>
+        )}
+        {saveError && (
+          <p className="text-xs text-red-400">{saveError}</p>
         )}
 
         <div className="flex gap-3">
@@ -339,8 +386,8 @@ export function StudyClient({ cards }: StudyClientProps) {
             <ChevronLeftIcon className="size-5" />
             Previous
           </Button>
-          <Button size="lg" onClick={goNext}>
-            {index === total - 1 ? "Finish" : "Next"}
+          <Button size="lg" onClick={flip}>
+            {index === total - 1 ? "Reveal & Finish" : "Next"}
             <ChevronRightIcon className="size-5" />
           </Button>
         </div>

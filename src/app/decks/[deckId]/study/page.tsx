@@ -38,7 +38,7 @@ export default async function StudyPage(
         )}
       </div>
 
-      <StudyClient cards={deck.cards} />
+      <StudyClient deckId={deck.id} cards={deck.cards} />
     </main>
   );
 }
