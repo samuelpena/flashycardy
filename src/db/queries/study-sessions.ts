@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { studySessions, studySessionCards } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, isNotNull, sql } from "drizzle-orm";
 
 export async function insertStudySession(
   values: typeof studySessions.$inferInsert
@@ -24,6 +24,27 @@ export async function getStudySessionsByDeck(deckId: number) {
     with: { sessionCards: true },
     orderBy: [desc(studySessions.completedAt)],
   });
+}
+
+export async function getCardRatingsByDeck(deckId: number, userId: string) {
+  return db
+    .select({
+      cardId: studySessionCards.cardId,
+      correctCount: sql<number>`count(*) filter (where ${studySessionCards.isCorrect} = true)`
+        .mapWith(Number),
+      incorrectCount: sql<number>`count(*) filter (where ${studySessionCards.isCorrect} = false)`
+        .mapWith(Number),
+    })
+    .from(studySessionCards)
+    .innerJoin(studySessions, eq(studySessionCards.sessionId, studySessions.id))
+    .where(
+      and(
+        eq(studySessions.clerkUserId, userId),
+        eq(studySessions.deckId, deckId),
+        isNotNull(studySessionCards.cardId),
+      )
+    )
+    .groupBy(studySessionCards.cardId);
 }
 
 export async function getRecentStudySessionsByUser(

@@ -20,7 +20,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ArrowLeftIcon, PlusIcon, LayersIcon, BookOpenIcon, SparklesIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, LayersIcon, BookOpenIcon, SparklesIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
 import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
 import { DeleteDeckDialog } from "./delete-deck-dialog";
@@ -29,6 +29,7 @@ import { EditCardDialog } from "./edit-card-dialog";
 import { DeleteCardDialog } from "./delete-card-dialog";
 import { CardSortSelect, type CardSortOption } from "./card-sort-select";
 import { GenerateCardsButton } from "./generate-cards-button";
+import { getCardRatingsByDeck } from "@/db/queries/study-sessions";
 
 const PAGE_SIZE = 9;
 
@@ -57,8 +58,15 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
   const parsedId = Number(deckId);
   if (isNaN(parsedId)) notFound();
 
-  const deck = await getDeckByIdAndUser(parsedId, userId);
+  const [deck, cardRatingsRows] = await Promise.all([
+    getDeckByIdAndUser(parsedId, userId),
+    getCardRatingsByDeck(parsedId, userId),
+  ]);
   if (!deck) notFound();
+
+  const cardRatings = new Map(
+    cardRatingsRows.map((r) => [r.cardId, r])
+  );
 
   const { sort: rawSort, page: pageParam } = await props.searchParams;
   const sort: CardSortOption =
@@ -187,14 +195,33 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
                     {card.back}
                   </p>
                 </CardContent>
-                <CardFooter className="pt-1 justify-end gap-1">
-                  <DeleteCardDialog cardId={card.id} deckId={deck.id} />
-                  <EditCardDialog
-                    cardId={card.id}
-                    deckId={deck.id}
-                    initialFront={card.front}
-                    initialBack={card.back}
-                  />
+                <CardFooter className="pt-1 justify-between gap-1">
+                  {(() => {
+                    const r = cardRatings.get(card.id);
+                    return r ? (
+                      <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <ThumbsUpIcon className="size-3 text-green-500" />
+                          {r.correctCount}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <ThumbsDownIcon className="size-3 text-red-400" />
+                          {r.incorrectCount}
+                        </span>
+                      </div>
+                    ) : (
+                      <span />
+                    );
+                  })()}
+                  <div className="flex gap-1">
+                    <DeleteCardDialog cardId={card.id} deckId={deck.id} />
+                    <EditCardDialog
+                      cardId={card.id}
+                      deckId={deck.id}
+                      initialFront={card.front}
+                      initialBack={card.back}
+                    />
+                  </div>
                 </CardFooter>
               </Card>
             ))}
