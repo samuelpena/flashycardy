@@ -195,7 +195,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
                     {card.back}
                   </p>
                 </CardContent>
-                <CardFooter className="pt-1 justify-between gap-1">
+                <CardFooter className="pt-4 justify-between gap-1">
                   {(() => {
                     const r = cardRatings.get(card.id);
                     return r ? (

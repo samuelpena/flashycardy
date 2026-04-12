@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getDecksByUser } from "@/db/queries/decks";
 import {
   Card,
-  CardDescription,
+  CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -18,13 +18,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { LayersIcon } from "lucide-react";
+import { LayersIcon, BookOpenIcon } from "lucide-react";
 import Link from "next/link";
 import { CreateDeckDialog } from "@/components/create-deck-dialog";
 import { DashboardTour } from "@/components/dashboard-tour";
 import { DeckSortSelect, type DeckSortOption } from "./deck-sort-select";
 import { EditDeckDialog } from "./edit-deck-dialog";
 import { DeleteDeckDialog } from "./delete-deck-dialog";
+import { getStudySessionCountsByUser } from "@/db/queries/study-sessions";
 
 const FREE_DECK_LIMIT = 3;
 const PAGE_SIZE = 9;
@@ -42,7 +43,15 @@ export default async function DashboardPage({
   const sort: DeckSortOption =
     rawSort === "az" || rawSort === "za" ? rawSort : "updated";
 
-  const userDecks = await getDecksByUser(userId);
+  const [userDecks, sessionCountRows] = await Promise.all([
+    getDecksByUser(userId),
+    getStudySessionCountsByUser(userId),
+  ]);
+
+  const sessionCounts = new Map(
+    sessionCountRows.map((r) => [r.deckId, r.sessionCount])
+  );
+
   const hasUnlimitedDecks = has({ feature: "unlimited_decks" });
   const limitReached = !hasUnlimitedDecks && userDecks.length >= FREE_DECK_LIMIT;
 
@@ -122,36 +131,53 @@ export default async function DashboardPage({
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {paginatedDecks.map((deck) => (
-              <Card key={deck.id} className="relative flex h-44 flex-col hover:border-primary/50 transition-colors cursor-pointer">
+              <Card key={deck.id} className="relative flex flex-col hover:border-primary/50 transition-colors cursor-pointer">
                 <Link
                   href={`/decks/${deck.id}`}
                   className="absolute inset-0 rounded-xl"
                   aria-label={`Open ${deck.name}`}
                 />
-                <CardHeader className="flex-1">
+                <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-lg leading-tight line-clamp-2">
-                      {deck.name}
-                    </CardTitle>
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                      <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        Name
+                      </CardTitle>
+                      <p className="text-sm font-medium leading-snug line-clamp-2 h-[2.625rem]">
+                        {deck.name}
+                      </p>
+                    </div>
                     <Badge variant="secondary" className="relative z-10 shrink-0">
                       {deck.cardCount} {deck.cardCount === 1 ? "card" : "cards"}
                     </Badge>
                   </div>
-                  {deck.description && (
-                    <CardDescription className="line-clamp-2">
-                      {deck.description}
-                    </CardDescription>
-                  )}
                 </CardHeader>
-                <CardFooter className="relative z-10 pt-4 flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    Updated{" "}
-                    {new Intl.DateTimeFormat("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    }).format(deck.updatedAt)}
+                <CardContent className="flex flex-col gap-2 pt-0">
+                  <div className="h-px w-full bg-border" />
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Description
                   </p>
+                  <p className="text-sm text-muted-foreground leading-snug line-clamp-3 h-[3.8rem]">
+                    {deck.description ?? ""}
+                  </p>
+                </CardContent>
+                <CardFooter className="relative z-10 pt-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <p className="text-xs text-muted-foreground">
+                      Updated{" "}
+                      {new Intl.DateTimeFormat("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }).format(deck.updatedAt)}
+                    </p>
+                    {(sessionCounts.get(deck.id) ?? 0) > 0 && (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <BookOpenIcon className="size-3" />
+                        {sessionCounts.get(deck.id)}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-0.5">
                     <EditDeckDialog
                       deckId={deck.id}

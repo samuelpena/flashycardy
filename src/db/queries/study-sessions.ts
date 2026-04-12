@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { studySessions, studySessionCards } from "@/db/schema";
-import { eq, desc, and, isNotNull, sql } from "drizzle-orm";
+import { eq, desc, and, isNotNull, sql, count } from "drizzle-orm";
 
 export async function insertStudySession(
   values: typeof studySessions.$inferInsert
@@ -45,6 +45,17 @@ export async function getCardRatingsByDeck(deckId: number, userId: string) {
       )
     )
     .groupBy(studySessionCards.cardId);
+}
+
+export async function getStudySessionCountsByUser(userId: string) {
+  return db
+    .select({
+      deckId: studySessions.deckId,
+      sessionCount: count(studySessions.id),
+    })
+    .from(studySessions)
+    .where(eq(studySessions.clerkUserId, userId))
+    .groupBy(studySessions.deckId);
 }
 
 export async function getRecentStudySessionsByUser(
