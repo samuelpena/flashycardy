@@ -60,7 +60,46 @@ describe("StudyClient — with cards", () => {
     expect(screen.getByRole("button", { name: /finish/i })).toBeDefined();
   });
 
-  test("shows completion screen after clicking Finish", () => {
+  test("navigates backward with the Previous button", () => {
+    fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    fireEvent.click(screen.getByRole("button", { name: /previous/i }));
+    expect(screen.getByText("1 / 3")).toBeDefined();
+  });
+
+  test("shows thumbs rating buttons when card is flipped", () => {
+    const card = screen.getByRole("button", {
+      name: /card showing front/i,
+    });
+    fireEvent.click(card);
+    expect(screen.getByRole("button", { name: /mark as correct/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /mark as incorrect/i })).toBeDefined();
+  });
+
+  test("hides Next/Finish and shows rating buttons when flipped", () => {
+    const card = screen.getByRole("button", { name: /card showing front/i });
+    fireEvent.click(card);
+    expect(screen.queryByRole("button", { name: /^next$/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /mark as correct/i })).toBeDefined();
+  });
+
+  test("advances to next card after marking correct", () => {
+    const card = screen.getByRole("button", { name: /card showing front/i });
+    fireEvent.click(card);
+    fireEvent.click(screen.getByRole("button", { name: /mark as correct/i }));
+    expect(screen.getByText("2 / 3")).toBeDefined();
+  });
+
+  test("advances to next card after marking incorrect", () => {
+    const card = screen.getByRole("button", { name: /card showing front/i });
+    fireEvent.click(card);
+    fireEvent.click(screen.getByRole("button", { name: /mark as incorrect/i }));
+    expect(screen.getByText("2 / 3")).toBeDefined();
+  });
+});
+
+describe("StudyClient — completion screen", () => {
+  test("shows completion screen after skipping through all cards via Next", () => {
+    render(<StudyClient cards={CARDS} />);
     fireEvent.click(screen.getByRole("button", { name: /next/i }));
     fireEvent.click(screen.getByRole("button", { name: /next/i }));
     fireEvent.click(screen.getByRole("button", { name: /finish/i }));
@@ -68,17 +107,38 @@ describe("StudyClient — with cards", () => {
     expect(screen.getByText(/you studied all 3 cards/i)).toBeDefined();
   });
 
-  test("Restart resets back to the first card", () => {
+  test("shows correct/incorrect counts on completion screen", () => {
+    render(<StudyClient cards={CARDS} />);
+
+    // Card 1 — flip and mark correct
+    const card1 = screen.getByRole("button", { name: /card showing front/i });
+    fireEvent.click(card1);
+    fireEvent.click(screen.getByRole("button", { name: /mark as correct/i }));
+
+    // Card 2 — flip and mark incorrect
+    const card2 = screen.getByRole("button", { name: /card showing front/i });
+    fireEvent.click(card2);
+    fireEvent.click(screen.getByRole("button", { name: /mark as incorrect/i }));
+
+    // Card 3 — flip and mark correct
+    const card3 = screen.getByRole("button", { name: /card showing front/i });
+    fireEvent.click(card3);
+    fireEvent.click(screen.getByRole("button", { name: /mark as correct/i }));
+
+    expect(screen.getByText("Session complete!")).toBeDefined();
+    // Correct count (2) and Incorrect count (1) shown in stat boxes
+    const correctHeading = screen.getByText("Correct");
+    const incorrectHeading = screen.getByText("Incorrect");
+    expect(correctHeading).toBeDefined();
+    expect(incorrectHeading).toBeDefined();
+  });
+
+  test("Restart resets back to the first card and clears results", () => {
+    render(<StudyClient cards={CARDS} />);
     fireEvent.click(screen.getByRole("button", { name: /next/i }));
     fireEvent.click(screen.getByRole("button", { name: /next/i }));
     fireEvent.click(screen.getByRole("button", { name: /finish/i }));
     fireEvent.click(screen.getByRole("button", { name: /^restart$/i }));
-    expect(screen.getByText("1 / 3")).toBeDefined();
-  });
-
-  test("navigates backward with the Previous button", () => {
-    fireEvent.click(screen.getByRole("button", { name: /next/i }));
-    fireEvent.click(screen.getByRole("button", { name: /previous/i }));
     expect(screen.getByText("1 / 3")).toBeDefined();
   });
 });
@@ -93,5 +153,13 @@ describe("StudyClient — single card", () => {
     render(<StudyClient cards={[{ id: 1, front: "Q", back: "A" }]} />);
     fireEvent.click(screen.getByRole("button", { name: /finish/i }));
     expect(screen.getByText(/you studied all 1 card\./i)).toBeDefined();
+  });
+
+  test("shows Got it and Nope when single card is flipped then completes", () => {
+    render(<StudyClient cards={[{ id: 1, front: "Q", back: "A" }]} />);
+    const card = screen.getByRole("button", { name: /card showing front/i });
+    fireEvent.click(card);
+    fireEvent.click(screen.getByRole("button", { name: /mark as correct/i }));
+    expect(screen.getByText("Session complete!")).toBeDefined();
   });
 });

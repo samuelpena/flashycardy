@@ -8,7 +8,8 @@ import {
   ShuffleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CheckCircle2Icon,
+  ThumbsUpIcon,
+  ThumbsDownIcon,
   LayersIcon,
 } from "lucide-react";
 
@@ -17,6 +18,8 @@ type Card = {
   front: string;
   back: string;
 };
+
+type Rating = "correct" | "incorrect";
 
 interface StudyClientProps {
   cards: Card[];
@@ -36,6 +39,7 @@ export function StudyClient({ cards }: StudyClientProps) {
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [results, setResults] = useState<Record<number, Rating>>({});
 
   const total = deck.length;
   const current = deck[index];
@@ -58,11 +62,20 @@ export function StudyClient({ cards }: StudyClientProps) {
     }
   }, [index]);
 
+  const markResult = useCallback(
+    (rating: Rating) => {
+      setResults((prev) => ({ ...prev, [current.id]: rating }));
+      goNext();
+    },
+    [current, goNext]
+  );
+
   const restart = useCallback(() => {
     setDeck(cards);
     setIndex(0);
     setFlipped(false);
     setCompleted(false);
+    setResults({});
   }, [cards]);
 
   const shuffle = useCallback(() => {
@@ -70,6 +83,7 @@ export function StudyClient({ cards }: StudyClientProps) {
     setIndex(0);
     setFlipped(false);
     setCompleted(false);
+    setResults({});
   }, [cards]);
 
   useEffect(() => {
@@ -81,12 +95,12 @@ export function StudyClient({ cards }: StudyClientProps) {
         e.preventDefault();
         flip();
       }
-      if (e.key === "ArrowRight") goNext();
+      if (e.key === "ArrowRight" && !flipped) goNext();
       if (e.key === "ArrowLeft") goPrev();
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [flip, goNext, goPrev]);
+  }, [flip, goNext, goPrev, flipped]);
 
   if (total === 0) {
     return (
@@ -105,17 +119,70 @@ export function StudyClient({ cards }: StudyClientProps) {
   }
 
   if (completed) {
+    const correct = Object.values(results).filter((r) => r === "correct").length;
+    const incorrect = Object.values(results).filter(
+      (r) => r === "incorrect"
+    ).length;
+    const rated = correct + incorrect;
+    const pct = rated > 0 ? Math.round((correct / rated) * 100) : null;
+
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 py-24 text-center">
-        <div className="flex size-20 items-center justify-center rounded-full bg-green-500/10">
-          <CheckCircle2Icon className="size-10 text-green-500" />
-        </div>
+      <div className="flex flex-1 flex-col items-center justify-center gap-8 py-20 text-center">
         <div>
           <p className="text-2xl font-bold">Session complete!</p>
           <p className="text-muted-foreground mt-1">
             You studied all {total} {total === 1 ? "card" : "cards"}.
           </p>
         </div>
+
+        {rated > 0 && (
+          <div className="w-full max-w-sm flex flex-col gap-4">
+            <div className="flex gap-3">
+              <div className="flex-1 flex flex-col items-center gap-1.5 rounded-xl border bg-card py-5">
+                <div className="flex size-10 items-center justify-center rounded-full bg-green-500/10">
+                  <ThumbsUpIcon className="size-5 text-green-500" />
+                </div>
+                <p className="text-2xl font-bold">{correct}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Correct
+                </p>
+              </div>
+              <div className="flex-1 flex flex-col items-center gap-1.5 rounded-xl border bg-card py-5">
+                <div className="flex size-10 items-center justify-center rounded-full bg-red-500/10">
+                  <ThumbsDownIcon className="size-5 text-red-500" />
+                </div>
+                <p className="text-2xl font-bold">{incorrect}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Incorrect
+                </p>
+              </div>
+            </div>
+
+            {pct !== null && (
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Score</span>
+                  <span>{pct}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-green-500 transition-all duration-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {rated < total && (
+              <p className="text-xs text-muted-foreground">
+                {total - rated}{" "}
+                {total - rated === 1 ? "card was" : "cards were"} skipped
+                without a rating.
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="flex gap-3">
           <Button variant="outline" onClick={shuffle}>
             <ShuffleIcon className="size-4" />
@@ -172,7 +239,11 @@ export function StudyClient({ cards }: StudyClientProps) {
             flip();
           }
         }}
-        aria-label={flipped ? "Card showing back — click to show front" : "Card showing front — click to show back"}
+        aria-label={
+          flipped
+            ? "Card showing back — click to show front"
+            : "Card showing front — click to show back"
+        }
       >
         <div
           className="relative w-full transition-transform duration-500"
@@ -212,26 +283,68 @@ export function StudyClient({ cards }: StudyClientProps) {
               Back
             </p>
             <p className="text-2xl font-semibold leading-snug">{current.back}</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Did you get it right?
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex items-center gap-3 mt-1">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={goPrev}
-          disabled={index === 0}
-        >
-          <ChevronLeftIcon className="size-5" />
-          Previous
-        </Button>
-        <Button size="lg" onClick={goNext}>
-          {index === total - 1 ? "Finish" : "Next"}
-          <ChevronRightIcon className="size-5" />
-        </Button>
-      </div>
+      {/* Navigation / rating */}
+      {flipped ? (
+        <div className="flex items-center gap-3 mt-1">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={goPrev}
+            disabled={index === 0}
+          >
+            <ChevronLeftIcon className="size-5" />
+            Previous
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/60"
+            onClick={(e) => {
+              e.stopPropagation();
+              markResult("incorrect");
+            }}
+            aria-label="Mark as incorrect"
+          >
+            <ThumbsDownIcon className="size-5" />
+            Nope
+          </Button>
+          <Button
+            size="lg"
+            className="bg-green-600 hover:bg-green-700 text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              markResult("correct");
+            }}
+            aria-label="Mark as correct"
+          >
+            <ThumbsUpIcon className="size-5" />
+            Got it
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 mt-1">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={goPrev}
+            disabled={index === 0}
+          >
+            <ChevronLeftIcon className="size-5" />
+            Previous
+          </Button>
+          <Button size="lg" onClick={goNext}>
+            {index === total - 1 ? "Finish" : "Next"}
+            <ChevronRightIcon className="size-5" />
+          </Button>
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground">
         Use{" "}
