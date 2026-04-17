@@ -105,7 +105,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
           <ArrowLeftIcon className="size-3.5" />
           Back to decks
         </Link>
-        <div className="flex flex-col gap-4 pt-8 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-4 pt-8">
           <div className="min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">
@@ -121,7 +121,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap lg:shrink-0">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button
               variant="secondary"
               nativeButton={false}
