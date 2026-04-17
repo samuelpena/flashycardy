@@ -98,60 +98,63 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
   return (
     <main className="flex flex-1 flex-col gap-8 px-6 py-8 max-w-5xl mx-auto w-full">
       <div className="flex flex-col gap-1">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit mb-1"
-            >
-              <ArrowLeftIcon className="size-3.5" />
-              Back to decks
-            </Link>
-           
-          </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button
-            variant="secondary"
-            nativeButton={false}
-            render={<Link href={`/decks/${deck.id}/study`} />}
-          >
-            <BookOpenIcon className="size-4" />
-            Study
-          </Button>
-          <Show
-            when={{ feature: "ai_flashcard_generation" }}
-            fallback={
-              <Button variant="secondary" nativeButton={false} render={<Link href="/pricing" />}>
-                <SparklesIcon className="size-4" />
-                Generate with AI
-              </Button>
-            }
-          >
-            <GenerateCardsButton deckId={deck.id} hasDescription={!!deck.description} />
-          </Show>
-          <AddCardDialog deckId={deck.id} />
-          <EditDeckDialog
-            deckId={deck.id}
-            initialName={deck.name}
-            initialDescription={deck.description ?? null}
-          />
-          <DeleteDeckDialog
-            deckId={deck.id}
-            deckName={deck.name}
-            cardCount={deck.cards.length}
-          />
-          <CardSortSelect currentSort={sort} />
-        </div>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap pt-8">
-              <h1 className="text-3xl font-bold tracking-tight">{deck.name}</h1>
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit mb-1"
+        >
+          <ArrowLeftIcon className="size-3.5" />
+          Back to decks
+        </Link>
+        <div className="flex flex-col gap-4 pt-8 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">
+                {deck.name}
+              </h1>
               <Badge variant="secondary">
                 {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
               </Badge>
             </div>
-        {deck.description && (
-          <p className="text-muted-foreground mt-0.5">{deck.description}</p>
-        )}
+            {deck.description && (
+              <p className="text-muted-foreground mt-0.5 text-sm sm:text-base">
+                {deck.description}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap lg:shrink-0">
+            <Button
+              variant="secondary"
+              nativeButton={false}
+              render={<Link href={`/decks/${deck.id}/study`} />}
+            >
+              <BookOpenIcon className="size-4" />
+              Study
+            </Button>
+            <Show
+              when={{ feature: "ai_flashcard_generation" }}
+              fallback={
+                <Button variant="secondary" nativeButton={false} render={<Link href="/pricing" />}>
+                  <SparklesIcon className="size-4" />
+                  Generate with AI
+                </Button>
+              }
+            >
+              <GenerateCardsButton deckId={deck.id} hasDescription={!!deck.description} />
+            </Show>
+            <AddCardDialog deckId={deck.id} />
+            <EditDeckDialog
+              deckId={deck.id}
+              initialName={deck.name}
+              initialDescription={deck.description ?? null}
+            />
+            <DeleteDeckDialog
+              deckId={deck.id}
+              deckName={deck.name}
+              cardCount={deck.cards.length}
+            />
+            <CardSortSelect currentSort={sort} />
+          </div>
+        </div>
       </div>
 
       {deck.cards.length === 0 ? (

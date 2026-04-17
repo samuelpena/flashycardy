@@ -96,10 +96,10 @@ export default async function DashboardPage({
   return (
     <main className="flex flex-1 flex-col gap-8 px-6 py-8 max-w-5xl mx-auto w-full">
       <DashboardTour />
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Your Decks</h1>
-          <p className="text-muted-foreground mt-1">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Decks</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Manage and study your flashcard decks.
             {!hasUnlimitedDecks && (
               <span className="ml-2 text-xs">
@@ -108,7 +108,7 @@ export default async function DashboardPage({
             )}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:shrink-0">
           {userDecks.length > 0 && <DeckSortSelect currentSort={sort} />}
           <CreateDeckDialog limitReached={limitReached} triggerId="new-deck-btn" />
         </div>
