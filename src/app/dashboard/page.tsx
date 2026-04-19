@@ -18,8 +18,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { LayersIcon, BookOpenIcon } from "lucide-react";
+import { LayersIcon, BookOpenIcon, BarChart2Icon } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { CreateDeckDialog } from "@/components/create-deck-dialog";
 import { DashboardTour } from "@/components/dashboard-tour";
 import { DeckSortSelect, type DeckSortOption } from "./deck-sort-select";
@@ -110,6 +111,10 @@ export default async function DashboardPage({
         </div>
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:shrink-0">
           {userDecks.length > 0 && <DeckSortSelect currentSort={sort} />}
+          <Button variant="outline" nativeButton={false} render={<Link href="/analytics" />}>
+            <BarChart2Icon className="size-4" />
+            Analytics
+          </Button>
           <CreateDeckDialog limitReached={limitReached} triggerId="new-deck-btn" />
         </div>
       </div>

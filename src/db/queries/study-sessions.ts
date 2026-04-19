@@ -69,3 +69,11 @@ export async function getRecentStudySessionsByUser(
     limit,
   });
 }
+
+export async function getAllStudySessionsByUser(userId: string) {
+  return db.query.studySessions.findMany({
+    where: eq(studySessions.clerkUserId, userId),
+    with: { deck: true },
+    orderBy: [desc(studySessions.completedAt)],
+  });
+}
