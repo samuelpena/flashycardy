@@ -54,6 +54,7 @@ export default async function DashboardPage({
   );
 
   const hasUnlimitedDecks = has({ feature: "unlimited_decks" });
+  const canGenerateDeckFromDocument = has({ feature: "document_deck_generation" });
   const limitReached = !hasUnlimitedDecks && userDecks.length >= FREE_DECK_LIMIT;
 
   const sortedDecks = [...userDecks].sort((a, b) => {
@@ -115,7 +116,11 @@ export default async function DashboardPage({
             <BarChart2Icon className="size-4" />
             Analytics
           </Button>
-          <CreateDeckDialog limitReached={limitReached} triggerId="new-deck-btn" />
+          <CreateDeckDialog
+            limitReached={limitReached}
+            triggerId="new-deck-btn"
+            canGenerateDeckFromDocument={canGenerateDeckFromDocument}
+          />
         </div>
       </div>
 
@@ -130,7 +135,11 @@ export default async function DashboardPage({
               Create your first deck to start building and studying flashcards.
             </p>
           </div>
-          <CreateDeckDialog triggerLabel="Create your first deck" limitReached={limitReached} />
+          <CreateDeckDialog
+            triggerLabel="Create your first deck"
+            limitReached={limitReached}
+            canGenerateDeckFromDocument={canGenerateDeckFromDocument}
+          />
         </div>
       ) : (
         <>

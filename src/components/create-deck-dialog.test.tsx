@@ -4,6 +4,7 @@ import { CreateDeckDialog } from "./create-deck-dialog";
 
 vi.mock("@/actions/decks", () => ({
   createDeckAction: vi.fn(),
+  createDeckFromDocumentAction: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({

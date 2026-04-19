@@ -1,6 +1,7 @@
 import { db } from "@/db";
-import { decks, cards } from "@/db/schema";
-import { eq, count, and } from "drizzle-orm";
+import { insertCards } from "@/db/queries/cards";
+import { cards, decks } from "@/db/schema";
+import { and, count, eq } from "drizzle-orm";
 
 export async function getDecksByUser(userId: string) {
   return db
@@ -27,6 +28,32 @@ export async function getDeckByIdAndUser(deckId: number, userId: string) {
 
 export async function insertDeck(values: typeof decks.$inferInsert) {
   return db.insert(decks).values(values).returning();
+}
+
+/** Neon HTTP driver has no `db.transaction()` — insert deck then cards, rollback deck on failure. */
+export async function insertDeckWithCards(
+  deckValues: typeof decks.$inferInsert,
+  cardRows: { front: string; back: string }[],
+) {
+  const inserted = await insertDeck(deckValues);
+  const [deck] = inserted;
+  if (!deck) return null;
+
+  try {
+    if (cardRows.length > 0) {
+      await insertCards(
+        cardRows.map((c) => ({
+          deckId: deck.id,
+          front: c.front,
+          back: c.back,
+        })),
+      );
+    }
+    return deck;
+  } catch {
+    await deleteDeckByIdAndUser(deck.id, deckValues.clerkUserId);
+    return null;
+  }
 }
 
 export async function updateDeck(

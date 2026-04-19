@@ -11,20 +11,52 @@ vi.mock("next/cache", () => ({
 vi.mock("@/db/queries/decks", () => ({
   getDeckCountByUser: vi.fn(),
   insertDeck: vi.fn(),
+  insertDeckWithCards: vi.fn(),
   updateDeck: vi.fn(),
   deleteDeckByIdAndUser: vi.fn(),
 }));
 
+vi.mock("ai", () => ({
+  generateText: vi.fn(),
+  Output: {
+    object: vi.fn((opts: unknown) => opts),
+  },
+}));
+
+vi.mock("@ai-sdk/openai", () => ({
+  openai: vi.fn((model: string) => model),
+}));
+
+vi.mock("@/lib/extract-document-text", () => ({
+  extractPlainTextFromDocumentBuffer: vi.fn(),
+}));
+
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { getDeckCountByUser, insertDeck, updateDeck, deleteDeckByIdAndUser } from "@/db/queries/decks";
-import { createDeckAction, updateDeckAction, deleteDeckAction } from "./decks";
+import { generateText } from "ai";
+import {
+  getDeckCountByUser,
+  insertDeck,
+  insertDeckWithCards,
+  updateDeck,
+  deleteDeckByIdAndUser,
+} from "@/db/queries/decks";
+import { extractPlainTextFromDocumentBuffer } from "@/lib/extract-document-text";
+import {
+  createDeckAction,
+  createDeckFromDocumentAction,
+  updateDeckAction,
+  deleteDeckAction,
+} from "./decks";
 
 const mockAuth = vi.mocked(auth);
 const mockGetDeckCountByUser = vi.mocked(getDeckCountByUser);
 const mockInsertDeck = vi.mocked(insertDeck);
+const mockInsertDeckWithCards = vi.mocked(insertDeckWithCards);
 const mockUpdateDeck = vi.mocked(updateDeck);
 const mockDeleteDeckByIdAndUser = vi.mocked(deleteDeckByIdAndUser);
+const mockGenerateText = vi.mocked(generateText);
+const mockExtractPlainText = vi.mocked(extractPlainTextFromDocumentBuffer);
 const mockRevalidatePath = vi.mocked(revalidatePath);
 
 const USER_ID = "user_123";
@@ -104,6 +136,110 @@ describe("createDeckAction", () => {
       description: "A pro deck",
     });
     expect(mockRevalidatePath).toHaveBeenCalledWith("/dashboard");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createDeckFromDocumentAction
+// ---------------------------------------------------------------------------
+
+describe("createDeckFromDocumentAction", () => {
+  const mockHas = vi.fn();
+
+  const validInput = {
+    fileBase64: Buffer.from("%PDF-1.4 fake").toString("base64"),
+    fileName: "notes.pdf",
+  };
+
+  const aiCards = Array.from({ length: 20 }, (_, i) => ({
+    front: `Q${i + 1}`,
+    back: `A${i + 1}`,
+  }));
+
+  test("returns Unauthorized when no userId", async () => {
+    mockAuth.mockResolvedValue({ userId: null, has: mockHas } as never);
+
+    const result = await createDeckFromDocumentAction(validInput);
+
+    expect(result).toEqual({ error: "Unauthorized" });
+    expect(mockExtractPlainText).not.toHaveBeenCalled();
+  });
+
+  test("returns error when document_deck_generation feature is missing", async () => {
+    mockHas.mockReturnValue(false);
+    mockAuth.mockResolvedValue({ userId: USER_ID, has: mockHas } as never);
+
+    const result = await createDeckFromDocumentAction(validInput);
+
+    expect(result).toEqual({
+      error: "Document-based deck generation requires a Pro plan with this feature enabled.",
+    });
+    expect(mockExtractPlainText).not.toHaveBeenCalled();
+  });
+
+  test("returns error for unsupported file extension", async () => {
+    mockHas.mockReturnValue(true);
+    mockAuth.mockResolvedValue({ userId: USER_ID, has: mockHas } as never);
+
+    const result = await createDeckFromDocumentAction({
+      ...validInput,
+      fileName: "notes.exe",
+    });
+
+    expect(result).toEqual({
+      error: "Unsupported file type. Upload a .pdf, .docx, or .pptx file.",
+    });
+    expect(mockExtractPlainText).not.toHaveBeenCalled();
+  });
+
+  test("returns deck limit error when user lacks unlimited_decks and is at limit", async () => {
+    mockHas.mockImplementation((q: { feature?: string }) => {
+      if (q.feature === "document_deck_generation") return true;
+      if (q.feature === "unlimited_decks") return false;
+      return false;
+    });
+    mockAuth.mockResolvedValue({ userId: USER_ID, has: mockHas } as never);
+    mockGetDeckCountByUser.mockResolvedValue(3);
+
+    const result = await createDeckFromDocumentAction(validInput);
+
+    expect(result).toEqual({
+      error: "You've reached the 3-deck limit on the free plan. Upgrade to Pro for unlimited decks.",
+    });
+    expect(mockExtractPlainText).not.toHaveBeenCalled();
+  });
+
+  test("creates deck with cards and returns deckId on success", async () => {
+    mockHas.mockImplementation((q: { feature?: string }) => {
+      if (q.feature === "document_deck_generation") return true;
+      if (q.feature === "unlimited_decks") return true;
+      return false;
+    });
+    mockAuth.mockResolvedValue({ userId: USER_ID, has: mockHas } as never);
+    mockExtractPlainText.mockResolvedValue("Chapter one about photosynthesis.");
+    mockGenerateText.mockResolvedValue({
+      output: {
+        title: "Bio deck",
+        description: "From uploaded doc",
+        cards: aiCards,
+      },
+    } as never);
+    mockInsertDeckWithCards.mockResolvedValue({ id: 42, name: "Bio deck" } as never);
+
+    const result = await createDeckFromDocumentAction(validInput);
+
+    expect(result).toEqual({ success: true, deckId: 42 });
+    expect(mockExtractPlainText).toHaveBeenCalled();
+    expect(mockInsertDeckWithCards).toHaveBeenCalledWith(
+      {
+        clerkUserId: USER_ID,
+        name: "Bio deck",
+        description: "From uploaded doc",
+      },
+      aiCards,
+    );
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/dashboard");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/decks/42");
   });
 });
 
