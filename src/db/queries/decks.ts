@@ -1,12 +1,11 @@
 import { db } from "@/db";
-import { insertCards } from "@/db/queries/cards";
-import { cards, decks } from "@/db/schema";
-import { and, count, eq } from "drizzle-orm";
+import { decks, cards } from "@/db/schema";
+import { eq, count, and } from "drizzle-orm";
 
 export async function getDecksByUser(userId: string) {
   return db
     .select({
-      id: decks.id,
+      uuid: decks.uuid,
       name: decks.name,
       description: decks.description,
       createdAt: decks.createdAt,
@@ -19,9 +18,9 @@ export async function getDecksByUser(userId: string) {
     .groupBy(decks.id);
 }
 
-export async function getDeckByIdAndUser(deckId: number, userId: string) {
+export async function getDeckByUuidAndUser(deckUuid: string, userId: string) {
   return db.query.decks.findFirst({
-    where: and(eq(decks.id, deckId), eq(decks.clerkUserId, userId)),
+    where: and(eq(decks.uuid, deckUuid), eq(decks.clerkUserId, userId)),
     with: { cards: true },
   });
 }
@@ -30,41 +29,29 @@ export async function insertDeck(values: typeof decks.$inferInsert) {
   return db.insert(decks).values(values).returning();
 }
 
-/** Neon HTTP driver has no `db.transaction()` — insert deck then cards, rollback deck on failure. */
 export async function insertDeckWithCards(
   deckValues: typeof decks.$inferInsert,
-  cardRows: { front: string; back: string }[],
+  cardRows: { front: string; back: string }[]
 ) {
-  const inserted = await insertDeck(deckValues);
-  const [deck] = inserted;
+  const [deck] = await db.insert(decks).values(deckValues).returning();
   if (!deck) return null;
-
-  try {
-    if (cardRows.length > 0) {
-      await insertCards(
-        cardRows.map((c) => ({
-          deckId: deck.id,
-          front: c.front,
-          back: c.back,
-        })),
-      );
-    }
-    return deck;
-  } catch {
-    await deleteDeckByIdAndUser(deck.id, deckValues.clerkUserId);
-    return null;
+  if (cardRows.length > 0) {
+    await db.insert(cards).values(
+      cardRows.map((r) => ({ deckId: deck.id, front: r.front, back: r.back }))
+    );
   }
+  return deck;
 }
 
-export async function updateDeck(
-  deckId: number,
+export async function updateDeckByUuid(
+  deckUuid: string,
   userId: string,
   values: Partial<typeof decks.$inferInsert>
 ) {
   return db
     .update(decks)
     .set(values)
-    .where(and(eq(decks.id, deckId), eq(decks.clerkUserId, userId)))
+    .where(and(eq(decks.uuid, deckUuid), eq(decks.clerkUserId, userId)))
     .returning();
 }
 
@@ -76,9 +63,9 @@ export async function getDeckCountByUser(userId: string) {
   return result?.count ?? 0;
 }
 
-export async function deleteDeckByIdAndUser(deckId: number, userId: string) {
+export async function deleteDeckByUuidAndUser(deckUuid: string, userId: string) {
   return db
     .delete(decks)
-    .where(and(eq(decks.id, deckId), eq(decks.clerkUserId, userId)))
+    .where(and(eq(decks.uuid, deckUuid), eq(decks.clerkUserId, userId)))
     .returning();
 }

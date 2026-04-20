@@ -16,7 +16,7 @@ import {
 import { saveStudySessionAction } from "@/actions/study-sessions";
 
 type Card = {
-  id: number;
+  uuid: string;
   front: string;
   back: string;
 };
@@ -24,7 +24,7 @@ type Card = {
 type Rating = "correct" | "incorrect";
 
 interface StudyClientProps {
-  deckId: number;
+  deckUuid: string;
   cards: Card[];
 }
 
@@ -37,12 +37,12 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-export function StudyClient({ deckId, cards }: StudyClientProps) {
+export function StudyClient({ deckUuid, cards }: StudyClientProps) {
   const [deck, setDeck] = useState(cards);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const [results, setResults] = useState<Record<number, Rating>>({});
+  const [results, setResults] = useState<Record<string, Rating>>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const savedRef = useRef(false);
@@ -55,17 +55,17 @@ export function StudyClient({ deckId, cards }: StudyClientProps) {
     savedRef.current = true;
 
     const cardResults = deck
-      .filter((card) => results[card.id] !== undefined)
+      .filter((card) => results[card.uuid] !== undefined)
       .map((card) => ({
-        cardId: card.id,
-        isCorrect: results[card.id] === "correct",
+        cardUuid: card.uuid,
+        isCorrect: results[card.uuid] === "correct",
       }));
 
     if (cardResults.length === 0) return;
 
     setSaving(true);
     setSaveError(null);
-    saveStudySessionAction({ deckId, cardResults })
+    saveStudySessionAction({ deckUuid, cardResults })
       .then((res) => {
         if ("error" in res) {
           setSaveError(
@@ -75,7 +75,7 @@ export function StudyClient({ deckId, cards }: StudyClientProps) {
       })
       .catch(() => setSaveError("Failed to save results."))
       .finally(() => setSaving(false));
-  }, [completed, deck, results, deckId]);
+  }, [completed, deck, results, deckUuid]);
 
   const flip = useCallback(() => setFlipped((f) => !f), []);
 
@@ -97,7 +97,7 @@ export function StudyClient({ deckId, cards }: StudyClientProps) {
 
   const markResult = useCallback(
     (rating: Rating) => {
-      setResults((prev) => ({ ...prev, [current.id]: rating }));
+      setResults((prev) => ({ ...prev, [current.uuid]: rating }));
       goNext();
     },
     [current, goNext]

@@ -82,7 +82,7 @@ export default async function AnalyticsPage() {
                     </TableCell>
                     <TableCell className="font-medium">
                       <Link
-                        href={`/decks/${session.deckId}`}
+                        href={`/decks/${session.deck.uuid}`}
                         className="hover:underline"
                       >
                         {session.deck.name}

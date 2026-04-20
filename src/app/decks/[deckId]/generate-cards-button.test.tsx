@@ -11,19 +11,21 @@ function renderWithTooltip(ui: React.ReactElement) {
   return render(<TooltipProvider>{ui}</TooltipProvider>);
 }
 
+const DECK_UUID = "01960000-0000-7000-8000-000000000001";
+
 test("renders Generate with AI button when deck has a description", () => {
-  renderWithTooltip(<GenerateCardsButton deckId={1} hasDescription={true} />);
+  renderWithTooltip(<GenerateCardsButton deckUuid={DECK_UUID} hasDescription={true} />);
   expect(screen.getByRole("button", { name: /generate with ai/i })).toBeDefined();
 });
 
 test("button is enabled when deck has a description", () => {
-  renderWithTooltip(<GenerateCardsButton deckId={1} hasDescription={true} />);
+  renderWithTooltip(<GenerateCardsButton deckUuid={DECK_UUID} hasDescription={true} />);
   const button = screen.getByRole("button", { name: /generate with ai/i });
   expect(button.hasAttribute("disabled")).toBe(false);
 });
 
 test("renders disabled Generate with AI button when deck has no description", () => {
-  renderWithTooltip(<GenerateCardsButton deckId={1} hasDescription={false} />);
+  renderWithTooltip(<GenerateCardsButton deckUuid={DECK_UUID} hasDescription={false} />);
   const button = screen.getByRole("button", { name: /generate with ai/i });
   expect(button.hasAttribute("disabled")).toBe(true);
 });

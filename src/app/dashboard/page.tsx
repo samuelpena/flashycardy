@@ -50,7 +50,7 @@ export default async function DashboardPage({
   ]);
 
   const sessionCounts = new Map(
-    sessionCountRows.map((r) => [r.deckId, r.sessionCount])
+    sessionCountRows.map((r) => [r.deckUuid, r.sessionCount])
   );
 
   const hasUnlimitedDecks = has({ feature: "unlimited_decks" });
@@ -145,9 +145,9 @@ export default async function DashboardPage({
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {paginatedDecks.map((deck) => (
-              <Card key={deck.id} className="relative flex flex-col hover:border-primary/50 transition-colors cursor-pointer">
+              <Card key={deck.uuid} className="relative flex flex-col hover:border-primary/50 transition-colors cursor-pointer">
                 <Link
-                  href={`/decks/${deck.id}`}
+                  href={`/decks/${deck.uuid}`}
                   className="absolute inset-0 rounded-xl"
                   aria-label={`Open ${deck.name}`}
                 />
@@ -185,21 +185,21 @@ export default async function DashboardPage({
                         year: "numeric",
                       }).format(deck.updatedAt)}
                     </p>
-                    {(sessionCounts.get(deck.id) ?? 0) > 0 && (
+                    {(sessionCounts.get(deck.uuid) ?? 0) > 0 && (
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <BookOpenIcon className="size-3" />
-                        {sessionCounts.get(deck.id)}
+                        {sessionCounts.get(deck.uuid)}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-0.5">
                     <EditDeckDialog
-                      deckId={deck.id}
+                      deckUuid={deck.uuid}
                       initialName={deck.name}
                       initialDescription={deck.description}
                     />
                     <DeleteDeckDialog
-                      deckId={deck.id}
+                      deckUuid={deck.uuid}
                       deckName={deck.name}
                       cardCount={deck.cardCount}
                     />

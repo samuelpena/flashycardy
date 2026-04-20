@@ -6,11 +6,11 @@ import { generateText, Output } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import {
-  deleteDeckByIdAndUser,
+  deleteDeckByUuidAndUser,
   getDeckCountByUser,
   insertDeck,
   insertDeckWithCards,
-  updateDeck,
+  updateDeckByUuid,
 } from "@/db/queries/decks";
 import { extractPlainTextFromDocumentBuffer } from "@/lib/extract-document-text";
 
@@ -154,12 +154,12 @@ ${documentText}
   }
 
   revalidatePath("/dashboard");
-  revalidatePath(`/decks/${deck.id}`);
-  return { success: true, deckId: deck.id };
+  revalidatePath(`/decks/${deck.uuid}`);
+  return { success: true, deckUuid: deck.uuid };
 }
 
 const updateDeckSchema = z.object({
-  deckId: z.number().int().positive(),
+  deckUuid: z.string().uuid(),
   name: z.string().min(1, "Name is required").max(255),
   description: z.string().max(1000).optional(),
 });
@@ -173,9 +173,9 @@ export async function updateDeckAction(input: UpdateDeckInput) {
   const parsed = updateDeckSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
 
-  const { deckId, name, description } = parsed.data;
+  const { deckUuid, name, description } = parsed.data;
 
-  const updated = await updateDeck(deckId, userId, {
+  const updated = await updateDeckByUuid(deckUuid, userId, {
     name,
     description: description ?? null,
   });
@@ -183,12 +183,12 @@ export async function updateDeckAction(input: UpdateDeckInput) {
   if (!updated.length) return { error: "Deck not found" };
 
   revalidatePath("/dashboard");
-  revalidatePath(`/decks/${deckId}`);
+  revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }
 
 const deleteDeckSchema = z.object({
-  deckId: z.number().int().positive(),
+  deckUuid: z.string().uuid(),
 });
 
 type DeleteDeckInput = z.infer<typeof deleteDeckSchema>;
@@ -200,12 +200,12 @@ export async function deleteDeckAction(input: DeleteDeckInput) {
   const parsed = deleteDeckSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
 
-  const { deckId } = parsed.data;
+  const { deckUuid } = parsed.data;
 
-  const deleted = await deleteDeckByIdAndUser(deckId, userId);
+  const deleted = await deleteDeckByUuidAndUser(deckUuid, userId);
   if (!deleted.length) return { error: "Deck not found" };
 
   revalidatePath("/dashboard");
-  revalidatePath(`/decks/${deckId}`);
+  revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }

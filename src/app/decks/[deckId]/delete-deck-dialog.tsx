@@ -17,13 +17,13 @@ import {
 import { deleteDeckAction } from "@/actions/decks";
 
 interface DeleteDeckDialogProps {
-  deckId: number;
+  deckUuid: string;
   deckName: string;
   cardCount: number;
 }
 
 export function DeleteDeckDialog({
-  deckId,
+  deckUuid,
   deckName,
   cardCount,
 }: DeleteDeckDialogProps) {
@@ -40,7 +40,7 @@ export function DeleteDeckDialog({
   function handleConfirm() {
     setError(null);
     startTransition(async () => {
-      const result = await deleteDeckAction({ deckId });
+      const result = await deleteDeckAction({ deckUuid });
       if (result?.error) {
         setError(
           typeof result.error === "string"

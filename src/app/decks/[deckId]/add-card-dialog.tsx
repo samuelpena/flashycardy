@@ -16,11 +16,11 @@ import { Label } from "@/components/ui/label";
 import { createCardAction } from "@/actions/cards";
 
 interface AddCardDialogProps {
-  deckId: number;
+  deckUuid: string;
   trigger?: React.ReactNode;
 }
 
-export function AddCardDialog({ deckId, trigger }: AddCardDialogProps) {
+export function AddCardDialog({ deckUuid, trigger }: AddCardDialogProps) {
   const [open, setOpen] = useState(false);
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
@@ -41,7 +41,7 @@ export function AddCardDialog({ deckId, trigger }: AddCardDialogProps) {
     setError(null);
 
     startTransition(async () => {
-      const result = await createCardAction({ deckId, front, back });
+      const result = await createCardAction({ deckUuid, front, back });
 
       if (result?.error) {
         setError(

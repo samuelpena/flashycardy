@@ -210,7 +210,7 @@ export function CreateDeckDialog({
       setName("");
       setDescription("");
       if (fileInputRef.current) fileInputRef.current.value = "";
-      router.push(`/decks/${result.deckId}`);
+      router.push(`/decks/${result.deckUuid}`);
     });
   }
 

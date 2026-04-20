@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { Show } from "@clerk/nextjs";
 import { redirect, notFound } from "next/navigation";
-import { getDeckByIdAndUser } from "@/db/queries/decks";
+import { z } from "zod";
+import { getDeckByUuidAndUser } from "@/db/queries/decks";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -55,17 +56,18 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
   if (!userId) redirect("/");
 
   const { deckId } = await props.params;
-  const parsedId = Number(deckId);
-  if (isNaN(parsedId)) notFound();
+  const parsed = z.string().uuid().safeParse(deckId);
+  if (!parsed.success) notFound();
+  const deckUuid = parsed.data;
 
   const [deck, cardRatingsRows] = await Promise.all([
-    getDeckByIdAndUser(parsedId, userId),
-    getCardRatingsByDeck(parsedId, userId),
+    getDeckByUuidAndUser(deckUuid, userId),
+    getCardRatingsByDeck(deckUuid, userId),
   ]);
   if (!deck) notFound();
 
   const cardRatings = new Map(
-    cardRatingsRows.map((r) => [r.cardId, r])
+    cardRatingsRows.map((r) => [r.cardUuid, r])
   );
 
   const { sort: rawSort, page: pageParam } = await props.searchParams;
@@ -92,7 +94,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
     const params = new URLSearchParams();
     if (sort !== "updated") params.set("sort", sort);
     params.set("page", String(p));
-    return `/decks/${parsedId}?${params.toString()}`;
+    return `/decks/${deckUuid}?${params.toString()}`;
   }
 
   return (
@@ -105,7 +107,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
           <ArrowLeftIcon className="size-3.5" />
           Back to decks
         </Link>
-        <div className="flex flex-col gap-4 pt-8">
+        <div className="flex flex-col gap-4 pt-8 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">
@@ -121,11 +123,11 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap lg:shrink-0">
             <Button
               variant="secondary"
               nativeButton={false}
-              render={<Link href={`/decks/${deck.id}/study`} />}
+              render={<Link href={`/decks/${deckUuid}/study`} />}
             >
               <BookOpenIcon className="size-4" />
               Study
@@ -139,16 +141,16 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
                 </Button>
               }
             >
-              <GenerateCardsButton deckId={deck.id} hasDescription={!!deck.description} />
+              <GenerateCardsButton deckUuid={deck.uuid} hasDescription={!!deck.description} />
             </Show>
-            <AddCardDialog deckId={deck.id} />
+            <AddCardDialog deckUuid={deck.uuid} />
             <EditDeckDialog
-              deckId={deck.id}
+              deckUuid={deck.uuid}
               initialName={deck.name}
               initialDescription={deck.description ?? null}
             />
             <DeleteDeckDialog
-              deckId={deck.id}
+              deckUuid={deck.uuid}
               deckName={deck.name}
               cardCount={deck.cards.length}
             />
@@ -169,7 +171,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
             </p>
           </div>
           <AddCardDialog
-            deckId={deck.id}
+            deckUuid={deck.uuid}
             trigger={
               <Button>
                 <PlusIcon className="size-4" />
@@ -182,7 +184,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {paginatedCards.map((card) => (
-              <Card key={card.id} className="flex flex-col">
+              <Card key={card.uuid} className="flex flex-col">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     Front
@@ -200,7 +202,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
                 </CardContent>
                 <CardFooter className="pt-4 justify-between gap-1">
                   {(() => {
-                    const r = cardRatings.get(card.id);
+                    const r = cardRatings.get(card.uuid);
                     return r ? (
                       <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
@@ -217,10 +219,10 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
                     );
                   })()}
                   <div className="flex gap-1">
-                    <DeleteCardDialog cardId={card.id} deckId={deck.id} />
+                    <DeleteCardDialog cardUuid={card.uuid} deckUuid={deck.uuid} />
                     <EditCardDialog
-                      cardId={card.id}
-                      deckId={deck.id}
+                      cardUuid={card.uuid}
+                      deckUuid={deck.uuid}
                       initialFront={card.front}
                       initialBack={card.back}
                     />

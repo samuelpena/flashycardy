@@ -16,17 +16,17 @@ import {
 import { deleteCardAction } from "@/actions/cards";
 
 interface DeleteCardDialogProps {
-  cardId: number;
-  deckId: number;
+  cardUuid: string;
+  deckUuid: string;
 }
 
-export function DeleteCardDialog({ cardId, deckId }: DeleteCardDialogProps) {
+export function DeleteCardDialog({ cardUuid, deckUuid }: DeleteCardDialogProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   function handleConfirm() {
     startTransition(async () => {
-      await deleteCardAction({ cardId, deckId });
+      await deleteCardAction({ cardUuid, deckUuid });
       setOpen(false);
     });
   }

@@ -1,13 +1,29 @@
 import { db } from "@/db";
-import { studySessions, studySessionCards } from "@/db/schema";
+import { studySessions, studySessionCards, decks, cards } from "@/db/schema";
 import { eq, desc, and, isNotNull, sql, count } from "drizzle-orm";
 
-export async function insertStudySession(
-  values: typeof studySessions.$inferInsert
-) {
+export async function insertStudySession(values: {
+  clerkUserId: string;
+  deckUuid: string;
+  totalCards: number;
+  correctCount: number;
+  incorrectCount: number;
+}) {
+  const deck = await db.query.decks.findFirst({
+    where: eq(decks.uuid, values.deckUuid),
+    columns: { id: true },
+  });
+  if (!deck) throw new Error("Deck not found");
+
   const [session] = await db
     .insert(studySessions)
-    .values(values)
+    .values({
+      clerkUserId: values.clerkUserId,
+      deckId: deck.id,
+      totalCards: values.totalCards,
+      correctCount: values.correctCount,
+      incorrectCount: values.incorrectCount,
+    })
     .returning();
   return session;
 }
@@ -18,18 +34,10 @@ export async function insertStudySessionCards(
   return db.insert(studySessionCards).values(values).returning();
 }
 
-export async function getStudySessionsByDeck(deckId: number) {
-  return db.query.studySessions.findMany({
-    where: eq(studySessions.deckId, deckId),
-    with: { sessionCards: true },
-    orderBy: [desc(studySessions.completedAt)],
-  });
-}
-
-export async function getCardRatingsByDeck(deckId: number, userId: string) {
+export async function getCardRatingsByDeck(deckUuid: string, userId: string) {
   return db
     .select({
-      cardId: studySessionCards.cardId,
+      cardUuid: cards.uuid,
       correctCount: sql<number>`count(*) filter (where ${studySessionCards.isCorrect} = true)`
         .mapWith(Number),
       incorrectCount: sql<number>`count(*) filter (where ${studySessionCards.isCorrect} = false)`
@@ -37,25 +45,28 @@ export async function getCardRatingsByDeck(deckId: number, userId: string) {
     })
     .from(studySessionCards)
     .innerJoin(studySessions, eq(studySessionCards.sessionId, studySessions.id))
+    .innerJoin(cards, eq(studySessionCards.cardId, cards.id))
+    .innerJoin(decks, eq(studySessions.deckId, decks.id))
     .where(
       and(
         eq(studySessions.clerkUserId, userId),
-        eq(studySessions.deckId, deckId),
+        eq(decks.uuid, deckUuid),
         isNotNull(studySessionCards.cardId),
       )
     )
-    .groupBy(studySessionCards.cardId);
+    .groupBy(cards.uuid);
 }
 
 export async function getStudySessionCountsByUser(userId: string) {
   return db
     .select({
-      deckId: studySessions.deckId,
+      deckUuid: decks.uuid,
       sessionCount: count(studySessions.id),
     })
     .from(studySessions)
+    .innerJoin(decks, eq(studySessions.deckId, decks.id))
     .where(eq(studySessions.clerkUserId, userId))
-    .groupBy(studySessions.deckId);
+    .groupBy(decks.uuid);
 }
 
 export async function getRecentStudySessionsByUser(

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
-import { getDeckByIdAndUser } from "@/db/queries/decks";
+import { z } from "zod";
+import { getDeckByUuidAndUser } from "@/db/queries/decks";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { StudyClient } from "./study-client";
@@ -12,17 +13,18 @@ export default async function StudyPage(
   if (!userId) redirect("/");
 
   const { deckId } = await props.params;
-  const parsedId = Number(deckId);
-  if (isNaN(parsedId)) notFound();
+  const parsed = z.string().uuid().safeParse(deckId);
+  if (!parsed.success) notFound();
+  const deckUuid = parsed.data;
 
-  const deck = await getDeckByIdAndUser(parsedId, userId);
+  const deck = await getDeckByUuidAndUser(deckUuid, userId);
   if (!deck) notFound();
 
   return (
     <main className="flex flex-1 flex-col gap-6 px-6 py-8 max-w-3xl mx-auto w-full">
       <div>
         <Link
-          href={`/decks/${deck.id}`}
+          href={`/decks/${deckUuid}`}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit mb-2"
         >
           <ArrowLeftIcon className="size-3.5" />
@@ -38,7 +40,7 @@ export default async function StudyPage(
         )}
       </div>
 
-      <StudyClient deckId={deck.id} cards={deck.cards} />
+      <StudyClient deckUuid={deck.uuid} cards={deck.cards} />
     </main>
   );
 }

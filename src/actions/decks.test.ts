@@ -12,8 +12,8 @@ vi.mock("@/db/queries/decks", () => ({
   getDeckCountByUser: vi.fn(),
   insertDeck: vi.fn(),
   insertDeckWithCards: vi.fn(),
-  updateDeck: vi.fn(),
-  deleteDeckByIdAndUser: vi.fn(),
+  updateDeckByUuid: vi.fn(),
+  deleteDeckByUuidAndUser: vi.fn(),
 }));
 
 vi.mock("ai", () => ({
@@ -38,8 +38,8 @@ import {
   getDeckCountByUser,
   insertDeck,
   insertDeckWithCards,
-  updateDeck,
-  deleteDeckByIdAndUser,
+  updateDeckByUuid,
+  deleteDeckByUuidAndUser,
 } from "@/db/queries/decks";
 import { extractPlainTextFromDocumentBuffer } from "@/lib/extract-document-text";
 import {
@@ -53,14 +53,14 @@ const mockAuth = vi.mocked(auth);
 const mockGetDeckCountByUser = vi.mocked(getDeckCountByUser);
 const mockInsertDeck = vi.mocked(insertDeck);
 const mockInsertDeckWithCards = vi.mocked(insertDeckWithCards);
-const mockUpdateDeck = vi.mocked(updateDeck);
-const mockDeleteDeckByIdAndUser = vi.mocked(deleteDeckByIdAndUser);
+const mockUpdateDeckByUuid = vi.mocked(updateDeckByUuid);
+const mockDeleteDeckByUuidAndUser = vi.mocked(deleteDeckByUuidAndUser);
 const mockGenerateText = vi.mocked(generateText);
 const mockExtractPlainText = vi.mocked(extractPlainTextFromDocumentBuffer);
 const mockRevalidatePath = vi.mocked(revalidatePath);
 
 const USER_ID = "user_123";
-const DECK_ID = 1;
+const DECK_UUID = "01960000-0000-7000-8000-000000000001";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -209,7 +209,7 @@ describe("createDeckFromDocumentAction", () => {
     expect(mockExtractPlainText).not.toHaveBeenCalled();
   });
 
-  test("creates deck with cards and returns deckId on success", async () => {
+  test("creates deck with cards and returns deckUuid on success", async () => {
     mockHas.mockImplementation((q: { feature?: string }) => {
       if (q.feature === "document_deck_generation") return true;
       if (q.feature === "unlimited_decks") return true;
@@ -224,11 +224,11 @@ describe("createDeckFromDocumentAction", () => {
         cards: aiCards,
       },
     } as never);
-    mockInsertDeckWithCards.mockResolvedValue({ id: 42, name: "Bio deck" } as never);
+    mockInsertDeckWithCards.mockResolvedValue({ uuid: DECK_UUID, name: "Bio deck" } as never);
 
     const result = await createDeckFromDocumentAction(validInput);
 
-    expect(result).toEqual({ success: true, deckId: 42 });
+    expect(result).toEqual({ success: true, deckUuid: DECK_UUID });
     expect(mockExtractPlainText).toHaveBeenCalled();
     expect(mockInsertDeckWithCards).toHaveBeenCalledWith(
       {
@@ -239,7 +239,7 @@ describe("createDeckFromDocumentAction", () => {
       aiCards,
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/dashboard");
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/decks/42");
+    expect(mockRevalidatePath).toHaveBeenCalledWith(`/decks/${DECK_UUID}`);
   });
 });
 
@@ -251,35 +251,35 @@ describe("updateDeckAction", () => {
   test("returns Unauthorized when no userId", async () => {
     mockAuth.mockResolvedValue({ userId: null } as never);
 
-    const result = await updateDeckAction({ deckId: DECK_ID, name: "Updated" });
+    const result = await updateDeckAction({ deckUuid: DECK_UUID, name: "Updated" });
 
     expect(result).toEqual({ error: "Unauthorized" });
-    expect(mockUpdateDeck).not.toHaveBeenCalled();
+    expect(mockUpdateDeckByUuid).not.toHaveBeenCalled();
   });
 
   test("returns validation error for invalid input", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
 
-    const result = await updateDeckAction({ deckId: DECK_ID, name: "" });
+    const result = await updateDeckAction({ deckUuid: DECK_UUID, name: "" });
 
     expect(result).toMatchObject({ error: expect.objectContaining({ fieldErrors: expect.any(Object) }) });
-    expect(mockUpdateDeck).not.toHaveBeenCalled();
+    expect(mockUpdateDeckByUuid).not.toHaveBeenCalled();
   });
 
-  test("returns validation error when deckId is not a positive integer", async () => {
+  test("returns validation error when deckUuid is not a valid uuid", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
 
-    const result = await updateDeckAction({ deckId: -1, name: "Updated" });
+    const result = await updateDeckAction({ deckUuid: "not-a-uuid", name: "Updated" });
 
     expect(result).toMatchObject({ error: expect.objectContaining({ fieldErrors: expect.any(Object) }) });
-    expect(mockUpdateDeck).not.toHaveBeenCalled();
+    expect(mockUpdateDeckByUuid).not.toHaveBeenCalled();
   });
 
   test("returns Deck not found when update affects no rows", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockUpdateDeck.mockResolvedValue([]);
+    mockUpdateDeckByUuid.mockResolvedValue([]);
 
-    const result = await updateDeckAction({ deckId: DECK_ID, name: "Updated" });
+    const result = await updateDeckAction({ deckUuid: DECK_UUID, name: "Updated" });
 
     expect(result).toEqual({ error: "Deck not found" });
     expect(mockRevalidatePath).not.toHaveBeenCalled();
@@ -287,25 +287,25 @@ describe("updateDeckAction", () => {
 
   test("updates deck and revalidates on success", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockUpdateDeck.mockResolvedValue([{ id: DECK_ID }] as never);
+    mockUpdateDeckByUuid.mockResolvedValue([{ uuid: DECK_UUID }] as never);
 
-    const result = await updateDeckAction({ deckId: DECK_ID, name: "Updated", description: "New desc" });
+    const result = await updateDeckAction({ deckUuid: DECK_UUID, name: "Updated", description: "New desc" });
 
     expect(result).toEqual({ success: true });
-    expect(mockUpdateDeck).toHaveBeenCalledWith(DECK_ID, USER_ID, {
+    expect(mockUpdateDeckByUuid).toHaveBeenCalledWith(DECK_UUID, USER_ID, {
       name: "Updated",
       description: "New desc",
     });
-    expect(mockRevalidatePath).toHaveBeenCalledWith(`/decks/${DECK_ID}`);
+    expect(mockRevalidatePath).toHaveBeenCalledWith(`/decks/${DECK_UUID}`);
   });
 
   test("passes null description when description is omitted", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockUpdateDeck.mockResolvedValue([{ id: DECK_ID }] as never);
+    mockUpdateDeckByUuid.mockResolvedValue([{ uuid: DECK_UUID }] as never);
 
-    await updateDeckAction({ deckId: DECK_ID, name: "Updated" });
+    await updateDeckAction({ deckUuid: DECK_UUID, name: "Updated" });
 
-    expect(mockUpdateDeck).toHaveBeenCalledWith(DECK_ID, USER_ID, {
+    expect(mockUpdateDeckByUuid).toHaveBeenCalledWith(DECK_UUID, USER_ID, {
       name: "Updated",
       description: null,
     });
@@ -320,26 +320,26 @@ describe("deleteDeckAction", () => {
   test("returns Unauthorized when no userId", async () => {
     mockAuth.mockResolvedValue({ userId: null } as never);
 
-    const result = await deleteDeckAction({ deckId: DECK_ID });
+    const result = await deleteDeckAction({ deckUuid: DECK_UUID });
 
     expect(result).toEqual({ error: "Unauthorized" });
-    expect(mockDeleteDeckByIdAndUser).not.toHaveBeenCalled();
+    expect(mockDeleteDeckByUuidAndUser).not.toHaveBeenCalled();
   });
 
   test("returns validation error for invalid input", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
 
-    const result = await deleteDeckAction({ deckId: -5 });
+    const result = await deleteDeckAction({ deckUuid: "not-a-uuid" });
 
     expect(result).toMatchObject({ error: expect.objectContaining({ fieldErrors: expect.any(Object) }) });
-    expect(mockDeleteDeckByIdAndUser).not.toHaveBeenCalled();
+    expect(mockDeleteDeckByUuidAndUser).not.toHaveBeenCalled();
   });
 
   test("returns Deck not found when delete affects no rows", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockDeleteDeckByIdAndUser.mockResolvedValue([]);
+    mockDeleteDeckByUuidAndUser.mockResolvedValue([]);
 
-    const result = await deleteDeckAction({ deckId: DECK_ID });
+    const result = await deleteDeckAction({ deckUuid: DECK_UUID });
 
     expect(result).toEqual({ error: "Deck not found" });
     expect(mockRevalidatePath).not.toHaveBeenCalled();
@@ -347,13 +347,13 @@ describe("deleteDeckAction", () => {
 
   test("deletes deck and revalidates both paths on success", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockDeleteDeckByIdAndUser.mockResolvedValue([{ id: DECK_ID }] as never);
+    mockDeleteDeckByUuidAndUser.mockResolvedValue([{ uuid: DECK_UUID }] as never);
 
-    const result = await deleteDeckAction({ deckId: DECK_ID });
+    const result = await deleteDeckAction({ deckUuid: DECK_UUID });
 
     expect(result).toEqual({ success: true });
-    expect(mockDeleteDeckByIdAndUser).toHaveBeenCalledWith(DECK_ID, USER_ID);
+    expect(mockDeleteDeckByUuidAndUser).toHaveBeenCalledWith(DECK_UUID, USER_ID);
     expect(mockRevalidatePath).toHaveBeenCalledWith("/dashboard");
-    expect(mockRevalidatePath).toHaveBeenCalledWith(`/decks/${DECK_ID}`);
+    expect(mockRevalidatePath).toHaveBeenCalledWith(`/decks/${DECK_UUID}`);
   });
 });

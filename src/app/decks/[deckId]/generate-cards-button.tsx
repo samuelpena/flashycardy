@@ -11,12 +11,12 @@ import {
 import { generateCardsAction } from "@/actions/cards";
 
 interface GenerateCardsButtonProps {
-  deckId: number;
+  deckUuid: string;
   hasDescription: boolean;
 }
 
 export function GenerateCardsButton({
-  deckId,
+  deckUuid,
   hasDescription,
 }: GenerateCardsButtonProps) {
   const [isPending, startTransition] = useTransition();
@@ -25,7 +25,7 @@ export function GenerateCardsButton({
   function handleClick() {
     setError(null);
     startTransition(async () => {
-      const result = await generateCardsAction({ deckId });
+      const result = await generateCardsAction({ deckUuid });
       if (result?.error) {
         setError(
           typeof result.error === "string"

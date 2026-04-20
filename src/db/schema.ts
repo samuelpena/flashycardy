@@ -4,12 +4,15 @@ import {
   pgTable,
   text,
   timestamp,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { v7 as uuidv7 } from "uuid";
 
 export const decks = pgTable("decks", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  uuid: uuid().notNull().unique().$defaultFn(() => uuidv7()),
   clerkUserId: varchar({ length: 255 }).notNull(),
   name: varchar({ length: 255 }).notNull(),
   description: text(),
@@ -19,6 +22,7 @@ export const decks = pgTable("decks", {
 
 export const cards = pgTable("cards", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  uuid: uuid().notNull().unique().$defaultFn(() => uuidv7()),
   deckId: integer()
     .notNull()
     .references(() => decks.id, { onDelete: "cascade" }),
@@ -30,6 +34,7 @@ export const cards = pgTable("cards", {
 
 export const studySessions = pgTable("study_sessions", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  uuid: uuid().notNull().unique().$defaultFn(() => uuidv7()),
   clerkUserId: varchar({ length: 255 }).notNull(),
   deckId: integer()
     .notNull()
@@ -42,6 +47,7 @@ export const studySessions = pgTable("study_sessions", {
 
 export const studySessionCards = pgTable("study_session_cards", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  uuid: uuid().notNull().unique().$defaultFn(() => uuidv7()),
   sessionId: integer()
     .notNull()
     .references(() => studySessions.id, { onDelete: "cascade" }),

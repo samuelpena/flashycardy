@@ -2,18 +2,21 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
-import { getDeckByIdAndUser } from "@/db/queries/decks";
+import { db } from "@/db";
+import { cards } from "@/db/schema";
+import { inArray } from "drizzle-orm";
+import { getDeckByUuidAndUser } from "@/db/queries/decks";
 import {
   insertStudySession,
   insertStudySessionCards,
 } from "@/db/queries/study-sessions";
 
 const saveStudySessionSchema = z.object({
-  deckId: z.number().int().positive(),
+  deckUuid: z.string().uuid(),
   cardResults: z
     .array(
       z.object({
-        cardId: z.number().int().positive(),
+        cardUuid: z.string().uuid(),
         isCorrect: z.boolean(),
       })
     )
@@ -29,17 +32,25 @@ export async function saveStudySessionAction(input: SaveStudySessionInput) {
   const parsed = saveStudySessionSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
 
-  const { deckId, cardResults } = parsed.data;
+  const { deckUuid, cardResults } = parsed.data;
 
-  const deck = await getDeckByIdAndUser(deckId, userId);
+  const deck = await getDeckByUuidAndUser(deckUuid, userId);
   if (!deck) return { error: "Deck not found" };
+
+  const cardUuids = cardResults.map((r) => r.cardUuid);
+  const cardRows = await db
+    .select({ id: cards.id, uuid: cards.uuid })
+    .from(cards)
+    .where(inArray(cards.uuid, cardUuids));
+
+  const uuidToId = new Map(cardRows.map((c) => [c.uuid, c.id]));
 
   const correctCount = cardResults.filter((r) => r.isCorrect).length;
   const incorrectCount = cardResults.filter((r) => !r.isCorrect).length;
 
   const session = await insertStudySession({
     clerkUserId: userId,
-    deckId,
+    deckUuid,
     totalCards: cardResults.length,
     correctCount,
     incorrectCount,
@@ -48,10 +59,10 @@ export async function saveStudySessionAction(input: SaveStudySessionInput) {
   await insertStudySessionCards(
     cardResults.map((r) => ({
       sessionId: session.id,
-      cardId: r.cardId,
+      cardId: uuidToId.get(r.cardUuid) ?? null,
       isCorrect: r.isCorrect,
     }))
   );
 
-  return { success: true, sessionId: session.id };
+  return { success: true, sessionUuid: session.uuid };
 }

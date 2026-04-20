@@ -16,15 +16,15 @@ import { Label } from "@/components/ui/label";
 import { updateCardAction } from "@/actions/cards";
 
 interface EditCardDialogProps {
-  cardId: number;
-  deckId: number;
+  cardUuid: string;
+  deckUuid: string;
   initialFront: string;
   initialBack: string;
 }
 
 export function EditCardDialog({
-  cardId,
-  deckId,
+  cardUuid,
+  deckUuid,
   initialFront,
   initialBack,
 }: EditCardDialogProps) {
@@ -48,7 +48,7 @@ export function EditCardDialog({
     setError(null);
 
     startTransition(async () => {
-      const result = await updateCardAction({ cardId, deckId, front, back });
+      const result = await updateCardAction({ cardUuid, deckUuid, front, back });
 
       if (result?.error) {
         setError(

@@ -5,11 +5,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { generateText, Output } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { getDeckByIdAndUser } from "@/db/queries/decks";
-import { insertCard, insertCards, updateCard, deleteCard } from "@/db/queries/cards";
+import { getDeckByUuidAndUser } from "@/db/queries/decks";
+import { insertCard, insertCards, updateCardByUuid, deleteCardByUuid } from "@/db/queries/cards";
 
 const createCardSchema = z.object({
-  deckId: z.number().int().positive(),
+  deckUuid: z.string().uuid(),
   front: z.string().min(1, "Front is required"),
   back: z.string().min(1, "Back is required"),
 });
@@ -23,20 +23,20 @@ export async function createCardAction(input: CreateCardInput) {
   const parsed = createCardSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
 
-  const { deckId, front, back } = parsed.data;
+  const { deckUuid, front, back } = parsed.data;
 
-  const deck = await getDeckByIdAndUser(deckId, userId);
+  const deck = await getDeckByUuidAndUser(deckUuid, userId);
   if (!deck) return { error: "Deck not found" };
 
-  await insertCard({ deckId, front, back });
+  await insertCard({ deckUuid, front, back });
 
-  revalidatePath(`/decks/${deckId}`);
+  revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }
 
 const updateCardSchema = z.object({
-  cardId: z.number().int().positive(),
-  deckId: z.number().int().positive(),
+  cardUuid: z.string().uuid(),
+  deckUuid: z.string().uuid(),
   front: z.string().min(1, "Front is required"),
   back: z.string().min(1, "Back is required"),
 });
@@ -50,23 +50,23 @@ export async function updateCardAction(input: UpdateCardInput) {
   const parsed = updateCardSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
 
-  const { cardId, deckId, front, back } = parsed.data;
+  const { cardUuid, deckUuid, front, back } = parsed.data;
 
-  const deck = await getDeckByIdAndUser(deckId, userId);
+  const deck = await getDeckByUuidAndUser(deckUuid, userId);
   if (!deck) return { error: "Deck not found" };
 
-  const card = deck.cards.find((c) => c.id === cardId);
+  const card = deck.cards.find((c) => c.uuid === cardUuid);
   if (!card) return { error: "Card not found" };
 
-  await updateCard(cardId, deckId, { front, back });
+  await updateCardByUuid(cardUuid, deckUuid, { front, back });
 
-  revalidatePath(`/decks/${deckId}`);
+  revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }
 
 const deleteCardSchema = z.object({
-  cardId: z.number().int().positive(),
-  deckId: z.number().int().positive(),
+  cardUuid: z.string().uuid(),
+  deckUuid: z.string().uuid(),
 });
 
 type DeleteCardInput = z.infer<typeof deleteCardSchema>;
@@ -78,22 +78,22 @@ export async function deleteCardAction(input: DeleteCardInput) {
   const parsed = deleteCardSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
 
-  const { cardId, deckId } = parsed.data;
+  const { cardUuid, deckUuid } = parsed.data;
 
-  const deck = await getDeckByIdAndUser(deckId, userId);
+  const deck = await getDeckByUuidAndUser(deckUuid, userId);
   if (!deck) return { error: "Deck not found" };
 
-  const card = deck.cards.find((c) => c.id === cardId);
+  const card = deck.cards.find((c) => c.uuid === cardUuid);
   if (!card) return { error: "Card not found" };
 
-  await deleteCard(cardId, deckId);
+  await deleteCardByUuid(cardUuid, deckUuid);
 
-  revalidatePath(`/decks/${deckId}`);
+  revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }
 
 const generateCardsSchema = z.object({
-  deckId: z.number().int().positive(),
+  deckUuid: z.string().uuid(),
 });
 
 type GenerateCardsInput = z.infer<typeof generateCardsSchema>;
@@ -109,9 +109,9 @@ export async function generateCardsAction(input: GenerateCardsInput) {
   const parsed = generateCardsSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
 
-  const { deckId } = parsed.data;
+  const { deckUuid } = parsed.data;
 
-  const deck = await getDeckByIdAndUser(deckId, userId);
+  const deck = await getDeckByUuidAndUser(deckUuid, userId);
   if (!deck) return { error: "Deck not found" };
 
   if (!deck.description) {
@@ -142,13 +142,10 @@ Each card should have a concise question or term on the front and a clear, accur
   if (!output) return { error: "Failed to generate cards. Please try again." };
 
   await insertCards(
-    output.cards.map((card) => ({
-      deckId,
-      front: card.front,
-      back: card.back,
-    })),
+    deckUuid,
+    output.cards.map((card) => ({ front: card.front, back: card.back })),
   );
 
-  revalidatePath(`/decks/${deckId}`);
+  revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }

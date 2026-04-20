@@ -16,13 +16,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { updateDeckAction } from "@/actions/decks";
 
 interface EditDeckDialogProps {
-  deckId: number;
+  deckUuid: string;
   initialName: string;
   initialDescription: string | null;
 }
 
 export function EditDeckDialog({
-  deckId,
+  deckUuid,
   initialName,
   initialDescription,
 }: EditDeckDialogProps) {
@@ -47,7 +47,7 @@ export function EditDeckDialog({
 
     startTransition(async () => {
       const result = await updateDeckAction({
-        deckId,
+        deckUuid,
         name,
         description: description || undefined,
       });
