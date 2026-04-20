@@ -107,23 +107,21 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
           <ArrowLeftIcon className="size-3.5" />
           Back to decks
         </Link>
-        <div className="flex flex-col gap-4 pt-8 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">
-                {deck.name}
-              </h1>
-              <Badge variant="secondary">
-                {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
-              </Badge>
-            </div>
-            {deck.description && (
-              <p className="text-muted-foreground mt-0.5 text-sm sm:text-base">
-                {deck.description}
-              </p>
-            )}
+        <div className="flex flex-col gap-3 pt-8">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">
+              {deck.name}
+            </h1>
+            <Badge variant="secondary">
+              {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
+            </Badge>
           </div>
-          <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap lg:shrink-0">
+          {deck.description && (
+            <p className="text-muted-foreground text-sm sm:text-base">
+              {deck.description}
+            </p>
+          )}
+          <div className="flex items-center gap-2 flex-wrap">
             <Button
               variant="secondary"
               nativeButton={false}
