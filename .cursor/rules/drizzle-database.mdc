@@ -44,8 +44,40 @@ await db.update(decks).set({ name }).where(eq(decks.id, id));
 await db.delete(cards).where(eq(cards.id, cardId));
 ```
 
-## Schema Changes
+## Schema Changes — Codebase First
 
-- All schema changes go in `src/db/schema.ts`
-- Run `pnpm db:generate` then `pnpm db:migrate` after schema changes
-- Never alter the database directly
+This project follows the **codebase first** approach: `src/db/schema.ts` is the source of truth, kept under version control. Never alter the database directly.
+
+### Workflow
+
+1. **Edit the schema** in `src/db/schema.ts`
+2. **Generate a migration** — compares current schema against the previous snapshot and writes a new SQL migration file:
+   ```bash
+   pnpm db:generate
+   # → drizzle/migrations/<timestamp>_<name>/migration.sql
+   ```
+3. **Apply the migration** — reads unapplied migration files, checks the database's migration history, then runs only new migrations:
+   ```bash
+   pnpm db:migrate
+   ```
+
+### How `drizzle-kit generate` works
+
+- Reads the previous migration snapshots from `drizzle/`
+- Diffs current schema against the last snapshot
+- Prompts for renames when needed
+- Writes a new `migration.sql` + `snapshot.json` into a timestamped folder
+
+### How `drizzle-kit migrate` works
+
+- Reads all `migration.sql` files in the migrations folder
+- Fetches applied migration history from the database
+- Applies only previously unapplied migrations in order
+
+### Rules
+
+- All schema changes go in `src/db/schema.ts` — never write raw `ALTER TABLE` or `CREATE TABLE` statements by hand
+- Always run `pnpm db:generate` after every schema change to produce a versioned migration file
+- Always run `pnpm db:migrate` to apply pending migrations — never skip straight to pushing changes
+- Commit both the updated `schema.ts` and the generated migration files together
+- Never use `drizzle-kit push` in production — it bypasses the migration history and is for prototyping only
