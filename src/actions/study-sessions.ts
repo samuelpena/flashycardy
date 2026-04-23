@@ -25,6 +25,17 @@ const saveStudySessionSchema = z.object({
 
 type SaveStudySessionInput = z.infer<typeof saveStudySessionSchema>;
 
+/**
+ * Persists the results of a completed study session for a deck.
+ *
+ * Resolves each card UUID to its numeric primary key, then writes the session
+ * summary (total, correct, incorrect counts) and per-card correctness rows in
+ * two sequential inserts.
+ *
+ * @param input - Session payload (deckUuid, cardResults array of `{ cardUuid, isCorrect }`)
+ * @returns `{ success: true, sessionUuid }` on success, or `{ error }` if
+ *   unauthorized, deck not found, or validation fails
+ */
 export async function saveStudySessionAction(input: SaveStudySessionInput) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };

@@ -23,6 +23,16 @@ type CreateDeckInput = z.infer<typeof createDeckSchema>;
 
 const FREE_DECK_LIMIT = 3;
 
+/**
+ * Creates a new deck owned by the current user.
+ *
+ * Free-plan users are limited to `FREE_DECK_LIMIT` (3) decks. Users with the
+ * `unlimited_decks` Clerk feature flag bypass this restriction.
+ *
+ * @param input - Deck creation payload (name, optional description)
+ * @returns `{ success: true }` on success, or `{ error }` if unauthorized,
+ *   limit reached, or validation fails
+ */
 export async function createDeckAction(input: CreateDeckInput) {
   const { userId, has } = await auth();
   if (!userId) return { error: "Unauthorized" };
@@ -71,6 +81,17 @@ const deckFromDocumentOutputSchema = z.object({
     .length(20),
 });
 
+/**
+ * Creates a deck and 20 AI-generated flashcards from an uploaded document (Pro feature).
+ *
+ * Accepts `.pdf`, `.docx`, and `.pptx` files up to 10 MB encoded as base64.
+ * Requires the `document_deck_generation` Clerk feature flag. Respects the
+ * free-plan deck limit via the `unlimited_decks` flag.
+ *
+ * @param input - Upload payload (fileBase64, fileName)
+ * @returns `{ success: true, deckUuid }` on success, or `{ error }` if
+ *   unauthorized, feature-gated, file is invalid, or AI generation fails
+ */
 export async function createDeckFromDocumentAction(input: CreateDeckFromDocumentInput) {
   const { userId, has } = await auth();
   if (!userId) return { error: "Unauthorized" };
@@ -166,6 +187,15 @@ const updateDeckSchema = z.object({
 
 type UpdateDeckInput = z.infer<typeof updateDeckSchema>;
 
+/**
+ * Updates the name and description of an existing deck.
+ *
+ * Scoped to the current user — only decks they own can be updated.
+ *
+ * @param input - Update payload (deckUuid, name, optional description)
+ * @returns `{ success: true }` on success, or `{ error }` if unauthorized,
+ *   deck not found, or validation fails
+ */
 export async function updateDeckAction(input: UpdateDeckInput) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
@@ -193,6 +223,15 @@ const deleteDeckSchema = z.object({
 
 type DeleteDeckInput = z.infer<typeof deleteDeckSchema>;
 
+/**
+ * Permanently deletes a deck and all its associated cards.
+ *
+ * Scoped to the current user — only decks they own can be deleted.
+ *
+ * @param input - Deletion payload (deckUuid)
+ * @returns `{ success: true }` on success, or `{ error }` if unauthorized
+ *   or the deck is not found
+ */
 export async function deleteDeckAction(input: DeleteDeckInput) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };

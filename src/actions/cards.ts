@@ -16,6 +16,13 @@ const createCardSchema = z.object({
 
 type CreateCardInput = z.infer<typeof createCardSchema>;
 
+/**
+ * Creates a new flashcard in a deck owned by the current user.
+ *
+ * @param input - Card creation payload (deckUuid, front, back)
+ * @returns `{ success: true }` on success, or `{ error }` on failure
+ * @throws Never — errors are returned as `{ error }` response objects
+ */
 export async function createCardAction(input: CreateCardInput) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
@@ -43,6 +50,14 @@ const updateCardSchema = z.object({
 
 type UpdateCardInput = z.infer<typeof updateCardSchema>;
 
+/**
+ * Updates the front and back content of an existing card.
+ *
+ * Verifies the card belongs to a deck owned by the current user before writing.
+ *
+ * @param input - Update payload (cardUuid, deckUuid, front, back)
+ * @returns `{ success: true }` on success, or `{ error }` on failure
+ */
 export async function updateCardAction(input: UpdateCardInput) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
@@ -71,6 +86,14 @@ const deleteCardSchema = z.object({
 
 type DeleteCardInput = z.infer<typeof deleteCardSchema>;
 
+/**
+ * Permanently deletes a card from a deck.
+ *
+ * Verifies ownership of both the deck and card before deletion.
+ *
+ * @param input - Deletion payload (cardUuid, deckUuid)
+ * @returns `{ success: true }` on success, or `{ error }` on failure
+ */
 export async function deleteCardAction(input: DeleteCardInput) {
   const { userId } = await auth();
   if (!userId) return { error: "Unauthorized" };
@@ -98,6 +121,16 @@ const generateCardsSchema = z.object({
 
 type GenerateCardsInput = z.infer<typeof generateCardsSchema>;
 
+/**
+ * AI-generates 20 flashcards for a deck using GPT-4.1-nano (Pro feature).
+ *
+ * Requires the `ai_flashcard_generation` Clerk feature flag. The deck must
+ * have a non-empty description for the prompt to be meaningful.
+ *
+ * @param input - Generation payload (deckUuid)
+ * @returns `{ success: true }` on success, or `{ error }` if unauthorized,
+ *   feature-gated, or the AI call fails
+ */
 export async function generateCardsAction(input: GenerateCardsInput) {
   const { userId, has } = await auth();
   if (!userId) return { error: "Unauthorized" };
