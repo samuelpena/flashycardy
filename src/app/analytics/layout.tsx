@@ -1,5 +1,11 @@
 import { UserButton } from "@clerk/nextjs";
 
+/**
+ * Wraps analytics pages with a sticky top nav containing the app wordmark and
+ * the Clerk `UserButton` for account management.
+ *
+ * @param props.children - The analytics page content to render below the header
+ */
 export default function AnalyticsLayout({
   children,
 }: {

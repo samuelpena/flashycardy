@@ -14,6 +14,15 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, BarChart2Icon } from "lucide-react";
 import Link from "next/link";
 
+/**
+ * Renders the analytics page showing all study sessions for the current user.
+ *
+ * Redirects unauthenticated users to `/`. Displays an empty-state prompt when
+ * no sessions exist, otherwise renders a sortable table with per-session scores
+ * colour-coded by a badge (≥80% default, ≥50% secondary, <50% destructive).
+ *
+ * @returns The analytics page UI as a React Server Component
+ */
 export default async function AnalyticsPage() {
   const { userId } = await auth();
   if (!userId) redirect("/");
