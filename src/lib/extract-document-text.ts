@@ -20,6 +20,13 @@ async function extractPdfText(buffer: Buffer): Promise<string> {
   }
 }
 
+/**
+ * Extracts plain text from a document buffer, supporting PDF and Office formats.
+ *
+ * @param buffer - Raw file buffer of the uploaded document
+ * @returns Normalised plain-text content, truncated to 120 000 characters
+ * @throws {Error} With message `"NO_TEXT"` when no readable text can be extracted
+ */
 export async function extractPlainTextFromDocumentBuffer(buffer: Buffer): Promise<string> {
   const text = isPdfBuffer(buffer)
     ? await extractPdfText(buffer)
