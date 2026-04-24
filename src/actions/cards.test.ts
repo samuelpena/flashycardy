@@ -56,13 +56,14 @@ const CARD_UUID = "01960000-0000-7000-8000-000000000002";
 const USER_ID = "user_123";
 
 const mockDeck = {
+  id: 1,
   uuid: DECK_UUID,
   name: "Biology 101",
   description: "Basic biology concepts",
   clerkUserId: USER_ID,
   createdAt: new Date(),
   updatedAt: new Date(),
-  cards: [{ uuid: CARD_UUID, front: "Q", back: "A", deckId: 1, createdAt: new Date(), updatedAt: new Date() }],
+  cards: [{ id: 1, uuid: CARD_UUID, front: "Q", back: "A", deckId: 1, createdAt: new Date(), updatedAt: new Date() }],
 };
 
 beforeEach(() => {
