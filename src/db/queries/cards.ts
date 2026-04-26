@@ -1,11 +1,76 @@
 import { db } from "@/db";
 import { cards, decks } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
+
+type Pagination = {
+  limit: number;
+  offset: number;
+};
 
 type CardMutationResult<T = typeof cards.$inferSelect> =
   | { status: "success"; card: T }
   | { status: "deck-not-found" }
   | { status: "card-not-found" };
+
+/**
+ * Returns cards from a deck owned by the given user.
+ *
+ * @param deckUuid - UUID of the deck to read
+ * @param userId - Clerk user ID used to scope the deck
+ * @param pagination - Limit and offset for the card list
+ * @returns Status plus paginated card rows when successful
+ */
+export async function getCardsByDeckUuidAndUser(
+  deckUuid: string,
+  userId: string,
+  pagination: Pagination
+): Promise<
+  | { status: "success"; cards: (typeof cards.$inferSelect)[] }
+  | { status: "deck-not-found" }
+> {
+  const deck = await db.query.decks.findFirst({
+    where: and(eq(decks.uuid, deckUuid), eq(decks.clerkUserId, userId)),
+    columns: { id: true },
+  });
+
+  if (!deck) return { status: "deck-not-found" };
+
+  const cardRows = await db
+    .select()
+    .from(cards)
+    .where(eq(cards.deckId, deck.id))
+    .orderBy(desc(cards.createdAt))
+    .limit(pagination.limit)
+    .offset(pagination.offset);
+
+  return { status: "success", cards: cardRows };
+}
+
+/**
+ * Returns the number of cards in a deck owned by the given user.
+ *
+ * @param deckUuid - UUID of the deck to count cards for
+ * @param userId - Clerk user ID used to scope the deck
+ * @returns Status plus card count when successful
+ */
+export async function getCardCountByDeckUuidAndUser(
+  deckUuid: string,
+  userId: string
+): Promise<{ status: "success"; count: number } | { status: "deck-not-found" }> {
+  const deck = await db.query.decks.findFirst({
+    where: and(eq(decks.uuid, deckUuid), eq(decks.clerkUserId, userId)),
+    columns: { id: true },
+  });
+
+  if (!deck) return { status: "deck-not-found" };
+
+  const [result] = await db
+    .select({ count: count(cards.id) })
+    .from(cards)
+    .where(eq(cards.deckId, deck.id));
+
+  return { status: "success", count: result?.count ?? 0 };
+}
 
 /**
  * Inserts a single card into the deck identified by UUID.

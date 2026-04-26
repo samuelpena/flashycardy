@@ -7,6 +7,11 @@ type CardResult = {
   isCorrect: boolean;
 };
 
+type Pagination = {
+  limit: number;
+  offset: number;
+};
+
 type SaveStudySessionResult =
   | { status: "success"; session: typeof studySessions.$inferSelect }
   | { status: "deck-not-found" };
@@ -124,8 +129,12 @@ export async function saveStudySessionForUser(values: {
  * @param userId - Clerk user ID used to scope results to the current user
  * @returns Array of `{ cardUuid, correctCount, incorrectCount }` rows
  */
-export async function getCardRatingsByDeck(deckUuid: string, userId: string) {
-  return db
+export async function getCardRatingsByDeck(
+  deckUuid: string,
+  userId: string,
+  pagination?: Pagination
+) {
+  const query = db
     .select({
       cardUuid: cards.uuid,
       correctCount: sql<number>`count(*) filter (where ${studySessionCards.isCorrect} = true)`
@@ -144,7 +153,41 @@ export async function getCardRatingsByDeck(deckUuid: string, userId: string) {
         isNotNull(studySessionCards.cardId),
       )
     )
-    .groupBy(cards.uuid);
+    .groupBy(cards.uuid, cards.createdAt)
+    .orderBy(desc(cards.createdAt));
+
+  if (pagination) {
+    return query.limit(pagination.limit).offset(pagination.offset);
+  }
+
+  return query;
+}
+
+/**
+ * Returns the number of cards with recorded ratings in a deck.
+ *
+ * @param deckUuid - UUID of the deck to count rated cards for
+ * @param userId - Clerk user ID used to scope results to the current user
+ * @returns Number of distinct rated cards
+ */
+export async function getCardRatingsCountByDeck(deckUuid: string, userId: string) {
+  const [result] = await db
+    .select({
+      count: sql<number>`count(distinct ${cards.id})`.mapWith(Number),
+    })
+    .from(studySessionCards)
+    .innerJoin(studySessions, eq(studySessionCards.sessionId, studySessions.id))
+    .innerJoin(cards, eq(studySessionCards.cardId, cards.id))
+    .innerJoin(decks, eq(studySessions.deckId, decks.id))
+    .where(
+      and(
+        eq(studySessions.clerkUserId, userId),
+        eq(decks.uuid, deckUuid),
+        isNotNull(studySessionCards.cardId),
+      )
+    );
+
+  return result?.count ?? 0;
 }
 
 /**
@@ -153,8 +196,11 @@ export async function getCardRatingsByDeck(deckUuid: string, userId: string) {
  * @param userId - Clerk user ID
  * @returns Array of `{ deckUuid, sessionCount }` rows
  */
-export async function getStudySessionCountsByUser(userId: string) {
-  return db
+export async function getStudySessionCountsByUser(
+  userId: string,
+  pagination?: Pagination
+) {
+  const query = db
     .select({
       deckUuid: decks.uuid,
       sessionCount: count(studySessions.id),
@@ -162,7 +208,32 @@ export async function getStudySessionCountsByUser(userId: string) {
     .from(studySessions)
     .innerJoin(decks, eq(studySessions.deckId, decks.id))
     .where(eq(studySessions.clerkUserId, userId))
-    .groupBy(decks.uuid);
+    .groupBy(decks.uuid, decks.createdAt)
+    .orderBy(desc(decks.createdAt));
+
+  if (pagination) {
+    return query.limit(pagination.limit).offset(pagination.offset);
+  }
+
+  return query;
+}
+
+/**
+ * Returns the number of decks that have study sessions for a user.
+ *
+ * @param userId - Clerk user ID
+ * @returns Number of decks with at least one study session
+ */
+export async function getStudySessionDeckCountByUser(userId: string) {
+  const [result] = await db
+    .select({
+      count: sql<number>`count(distinct ${decks.id})`.mapWith(Number),
+    })
+    .from(studySessions)
+    .innerJoin(decks, eq(studySessions.deckId, decks.id))
+    .where(eq(studySessions.clerkUserId, userId));
+
+  return result?.count ?? 0;
 }
 
 /**
@@ -174,13 +245,15 @@ export async function getStudySessionCountsByUser(userId: string) {
  */
 export async function getRecentStudySessionsByUser(
   userId: string,
-  limit = 10
+  limit = 10,
+  offset = 0
 ) {
   return db.query.studySessions.findMany({
     where: eq(studySessions.clerkUserId, userId),
     with: { deck: true, sessionCards: true },
     orderBy: [desc(studySessions.completedAt)],
     limit,
+    offset,
   });
 }
 
@@ -190,10 +263,27 @@ export async function getRecentStudySessionsByUser(
  * @param userId - Clerk user ID
  * @returns Array of study session rows ordered by completion date descending
  */
-export async function getAllStudySessionsByUser(userId: string) {
+export async function getAllStudySessionsByUser(userId: string, pagination?: Pagination) {
   return db.query.studySessions.findMany({
     where: eq(studySessions.clerkUserId, userId),
     with: { deck: true },
     orderBy: [desc(studySessions.completedAt)],
+    limit: pagination?.limit,
+    offset: pagination?.offset,
   });
+}
+
+/**
+ * Returns the total number of study sessions for a user.
+ *
+ * @param userId - Clerk user ID
+ * @returns Study session count
+ */
+export async function getStudySessionCountByUser(userId: string) {
+  const [result] = await db
+    .select({ count: count(studySessions.id) })
+    .from(studySessions)
+    .where(eq(studySessions.clerkUserId, userId));
+
+  return result?.count ?? 0;
 }

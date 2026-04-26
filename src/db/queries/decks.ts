@@ -1,6 +1,11 @@
 import { db } from "@/db";
 import { decks, cards } from "@/db/schema";
-import { eq, count, and } from "drizzle-orm";
+import { eq, count, and, desc } from "drizzle-orm";
+
+type Pagination = {
+  limit: number;
+  offset: number;
+};
 
 /**
  * Returns all decks belonging to a user with their card counts, ordered by creation date.
@@ -8,8 +13,8 @@ import { eq, count, and } from "drizzle-orm";
  * @param userId - Clerk user ID
  * @returns Array of deck rows with a `cardCount` field (empty array if none exist)
  */
-export async function getDecksByUser(userId: string) {
-  return db
+export async function getDecksByUser(userId: string, pagination?: Pagination) {
+  const query = db
     .select({
       uuid: decks.uuid,
       name: decks.name,
@@ -21,7 +26,14 @@ export async function getDecksByUser(userId: string) {
     .from(decks)
     .leftJoin(cards, eq(cards.deckId, decks.id))
     .where(eq(decks.clerkUserId, userId))
-    .groupBy(decks.id);
+    .groupBy(decks.id)
+    .orderBy(desc(decks.createdAt));
+
+  if (pagination) {
+    return query.limit(pagination.limit).offset(pagination.offset);
+  }
+
+  return query;
 }
 
 /**
@@ -35,6 +47,19 @@ export async function getDeckByUuidAndUser(deckUuid: string, userId: string) {
   return db.query.decks.findFirst({
     where: and(eq(decks.uuid, deckUuid), eq(decks.clerkUserId, userId)),
     with: { cards: true },
+  });
+}
+
+/**
+ * Returns a single deck without its cards, scoped to the given user.
+ *
+ * @param deckUuid - The UUID of the deck to retrieve
+ * @param userId - Clerk user ID
+ * @returns The matching deck, or `undefined` if not found
+ */
+export async function getDeckMetadataByUuidAndUser(deckUuid: string, userId: string) {
+  return db.query.decks.findFirst({
+    where: and(eq(decks.uuid, deckUuid), eq(decks.clerkUserId, userId)),
   });
 }
 
