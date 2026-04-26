@@ -6,7 +6,12 @@ import { z } from "zod";
 import { generateText, Output } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { getDeckByUuidAndUser } from "@/db/queries/decks";
-import { insertCard, insertCards, updateCardByUuid, deleteCardByUuid } from "@/db/queries/cards";
+import {
+  deleteCardForUser,
+  insertCardForUser,
+  insertCards,
+  updateCardForUser,
+} from "@/db/queries/cards";
 
 const createCardSchema = z.object({
   deckUuid: z.string().uuid(),
@@ -32,10 +37,8 @@ export async function createCardAction(input: CreateCardInput) {
 
   const { deckUuid, front, back } = parsed.data;
 
-  const deck = await getDeckByUuidAndUser(deckUuid, userId);
-  if (!deck) return { error: "Deck not found" };
-
-  await insertCard({ deckUuid, front, back });
+  const result = await insertCardForUser(userId, { deckUuid, front, back });
+  if (result.status === "deck-not-found") return { error: "Deck not found" };
 
   revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
@@ -67,13 +70,9 @@ export async function updateCardAction(input: UpdateCardInput) {
 
   const { cardUuid, deckUuid, front, back } = parsed.data;
 
-  const deck = await getDeckByUuidAndUser(deckUuid, userId);
-  if (!deck) return { error: "Deck not found" };
-
-  const card = deck.cards.find((c) => c.uuid === cardUuid);
-  if (!card) return { error: "Card not found" };
-
-  await updateCardByUuid(cardUuid, deckUuid, { front, back });
+  const result = await updateCardForUser(userId, { cardUuid, deckUuid, front, back });
+  if (result.status === "deck-not-found") return { error: "Deck not found" };
+  if (result.status === "card-not-found") return { error: "Card not found" };
 
   revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
@@ -103,13 +102,9 @@ export async function deleteCardAction(input: DeleteCardInput) {
 
   const { cardUuid, deckUuid } = parsed.data;
 
-  const deck = await getDeckByUuidAndUser(deckUuid, userId);
-  if (!deck) return { error: "Deck not found" };
-
-  const card = deck.cards.find((c) => c.uuid === cardUuid);
-  if (!card) return { error: "Card not found" };
-
-  await deleteCardByUuid(cardUuid, deckUuid);
+  const result = await deleteCardForUser(userId, { cardUuid, deckUuid });
+  if (result.status === "deck-not-found") return { error: "Deck not found" };
+  if (result.status === "card-not-found") return { error: "Card not found" };
 
   revalidatePath(`/decks/${deckUuid}`);
   return { success: true };

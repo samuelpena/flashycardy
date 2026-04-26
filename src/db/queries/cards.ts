@@ -2,6 +2,11 @@ import { db } from "@/db";
 import { cards, decks } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 
+type CardMutationResult<T = typeof cards.$inferSelect> =
+  | { status: "success"; card: T }
+  | { status: "deck-not-found" }
+  | { status: "card-not-found" };
+
 /**
  * Inserts a single card into the deck identified by UUID.
  *
@@ -26,6 +31,34 @@ export async function insertCard({
   });
   if (!deck) throw new Error("Deck not found");
   return db.insert(cards).values({ deckId: deck.id, front, back }).returning();
+}
+
+/**
+ * Inserts a card into a deck owned by the given user.
+ *
+ * @param userId - Clerk user ID used to scope the deck
+ * @param input - Deck UUID and card text
+ * @returns Status plus the inserted card when successful
+ */
+export async function insertCardForUser(
+  userId: string,
+  input: { deckUuid: string; front: string; back: string }
+): Promise<CardMutationResult> {
+  const deck = await db.query.decks.findFirst({
+    where: and(eq(decks.uuid, input.deckUuid), eq(decks.clerkUserId, userId)),
+    columns: { id: true },
+  });
+
+  if (!deck) return { status: "deck-not-found" };
+
+  const [card] = await db
+    .insert(cards)
+    .values({ deckId: deck.id, front: input.front, back: input.back })
+    .returning();
+
+  if (!card) throw new Error("Failed to insert card");
+
+  return { status: "success", card };
 }
 
 /**
@@ -78,6 +111,35 @@ export async function updateCardByUuid(
 }
 
 /**
+ * Updates a card in a deck owned by the given user.
+ *
+ * @param userId - Clerk user ID used to scope the deck
+ * @param input - Card UUID, deck UUID, and replacement text
+ * @returns Status plus the updated card when successful
+ */
+export async function updateCardForUser(
+  userId: string,
+  input: { cardUuid: string; deckUuid: string; front: string; back: string }
+): Promise<CardMutationResult> {
+  const deck = await db.query.decks.findFirst({
+    where: and(eq(decks.uuid, input.deckUuid), eq(decks.clerkUserId, userId)),
+    columns: { id: true },
+  });
+
+  if (!deck) return { status: "deck-not-found" };
+
+  const [card] = await db
+    .update(cards)
+    .set({ front: input.front, back: input.back, updatedAt: new Date() })
+    .where(and(eq(cards.uuid, input.cardUuid), eq(cards.deckId, deck.id)))
+    .returning();
+
+  if (!card) return { status: "card-not-found" };
+
+  return { status: "success", card };
+}
+
+/**
  * Deletes a card by UUID, scoped to the given deck.
  *
  * @param cardUuid - The UUID of the card to delete
@@ -93,4 +155,32 @@ export async function deleteCardByUuid(cardUuid: string, deckUuid: string) {
   return db
     .delete(cards)
     .where(and(eq(cards.uuid, cardUuid), eq(cards.deckId, deck.id)));
+}
+
+/**
+ * Deletes a card from a deck owned by the given user.
+ *
+ * @param userId - Clerk user ID used to scope the deck
+ * @param input - Card UUID and deck UUID
+ * @returns Status plus the deleted card when successful
+ */
+export async function deleteCardForUser(
+  userId: string,
+  input: { cardUuid: string; deckUuid: string }
+): Promise<CardMutationResult> {
+  const deck = await db.query.decks.findFirst({
+    where: and(eq(decks.uuid, input.deckUuid), eq(decks.clerkUserId, userId)),
+    columns: { id: true },
+  });
+
+  if (!deck) return { status: "deck-not-found" };
+
+  const [card] = await db
+    .delete(cards)
+    .where(and(eq(cards.uuid, input.cardUuid), eq(cards.deckId, deck.id)))
+    .returning();
+
+  if (!card) return { status: "card-not-found" };
+
+  return { status: "success", card };
 }

@@ -1,6 +1,15 @@
 import { db } from "@/db";
 import { studySessions, studySessionCards, decks, cards } from "@/db/schema";
-import { eq, desc, and, isNotNull, sql, count } from "drizzle-orm";
+import { eq, desc, and, isNotNull, sql, count, inArray } from "drizzle-orm";
+
+type CardResult = {
+  cardUuid: string;
+  isCorrect: boolean;
+};
+
+type SaveStudySessionResult =
+  | { status: "success"; session: typeof studySessions.$inferSelect }
+  | { status: "deck-not-found" };
 
 /**
  * Inserts a completed study session record, resolving the deck UUID to its internal ID.
@@ -49,6 +58,63 @@ export async function insertStudySessionCards(
   values: (typeof studySessionCards.$inferInsert)[]
 ) {
   return db.insert(studySessionCards).values(values).returning();
+}
+
+/**
+ * Persists a completed study session for a deck owned by the given user.
+ *
+ * Resolves card UUIDs within the same deck before storing per-card results, so
+ * future API routes and server actions share one ownership boundary.
+ *
+ * @param values.userId - Clerk user ID of the learner
+ * @param values.deckUuid - UUID of the studied deck
+ * @param values.cardResults - Per-card correctness results
+ * @returns Status plus the inserted session when successful
+ */
+export async function saveStudySessionForUser(values: {
+  userId: string;
+  deckUuid: string;
+  cardResults: CardResult[];
+}): Promise<SaveStudySessionResult> {
+  const deck = await db.query.decks.findFirst({
+    where: and(eq(decks.uuid, values.deckUuid), eq(decks.clerkUserId, values.userId)),
+    columns: { id: true },
+  });
+
+  if (!deck) return { status: "deck-not-found" };
+
+  const cardUuids = values.cardResults.map((result) => result.cardUuid);
+  const cardRows = await db
+    .select({ id: cards.id, uuid: cards.uuid })
+    .from(cards)
+    .where(and(eq(cards.deckId, deck.id), inArray(cards.uuid, cardUuids)));
+
+  const uuidToId = new Map(cardRows.map((card) => [card.uuid, card.id]));
+  const correctCount = values.cardResults.filter((result) => result.isCorrect).length;
+  const incorrectCount = values.cardResults.length - correctCount;
+
+  const [session] = await db
+    .insert(studySessions)
+    .values({
+      clerkUserId: values.userId,
+      deckId: deck.id,
+      totalCards: values.cardResults.length,
+      correctCount,
+      incorrectCount,
+    })
+    .returning();
+
+  if (!session) throw new Error("Failed to insert study session");
+
+  await db.insert(studySessionCards).values(
+    values.cardResults.map((result) => ({
+      sessionId: session.id,
+      cardId: uuidToId.get(result.cardUuid) ?? null,
+      isCorrect: result.isCorrect,
+    }))
+  );
+
+  return { status: "success", session };
 }
 
 /**

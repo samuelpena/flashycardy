@@ -13,10 +13,10 @@ vi.mock("@/db/queries/decks", () => ({
 }));
 
 vi.mock("@/db/queries/cards", () => ({
-  insertCard: vi.fn(),
+  insertCardForUser: vi.fn(),
   insertCards: vi.fn(),
-  updateCardByUuid: vi.fn(),
-  deleteCardByUuid: vi.fn(),
+  updateCardForUser: vi.fn(),
+  deleteCardForUser: vi.fn(),
 }));
 
 vi.mock("ai", () => ({
@@ -33,7 +33,12 @@ vi.mock("@ai-sdk/openai", () => ({
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { getDeckByUuidAndUser } from "@/db/queries/decks";
-import { insertCard, insertCards, updateCardByUuid, deleteCardByUuid } from "@/db/queries/cards";
+import {
+  deleteCardForUser,
+  insertCardForUser,
+  insertCards,
+  updateCardForUser,
+} from "@/db/queries/cards";
 import { generateText } from "ai";
 import {
   createCardAction,
@@ -44,10 +49,10 @@ import {
 
 const mockAuth = vi.mocked(auth);
 const mockGetDeckByUuidAndUser = vi.mocked(getDeckByUuidAndUser);
-const mockInsertCard = vi.mocked(insertCard);
+const mockInsertCardForUser = vi.mocked(insertCardForUser);
 const mockInsertCards = vi.mocked(insertCards);
-const mockUpdateCardByUuid = vi.mocked(updateCardByUuid);
-const mockDeleteCardByUuid = vi.mocked(deleteCardByUuid);
+const mockUpdateCardForUser = vi.mocked(updateCardForUser);
+const mockDeleteCardForUser = vi.mocked(deleteCardForUser);
 const mockGenerateText = vi.mocked(generateText);
 const mockRevalidatePath = vi.mocked(revalidatePath);
 
@@ -81,7 +86,7 @@ describe("createCardAction", () => {
     const result = await createCardAction({ deckUuid: DECK_UUID, front: "Q", back: "A" });
 
     expect(result).toEqual({ error: "Unauthorized" });
-    expect(mockInsertCard).not.toHaveBeenCalled();
+    expect(mockInsertCardForUser).not.toHaveBeenCalled();
   });
 
   test("returns validation error for invalid input", async () => {
@@ -90,28 +95,27 @@ describe("createCardAction", () => {
     const result = await createCardAction({ deckUuid: DECK_UUID, front: "", back: "A" });
 
     expect(result).toMatchObject({ error: expect.objectContaining({ fieldErrors: expect.any(Object) }) });
-    expect(mockInsertCard).not.toHaveBeenCalled();
+    expect(mockInsertCardForUser).not.toHaveBeenCalled();
   });
 
   test("returns Deck not found when deck does not belong to user", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockGetDeckByUuidAndUser.mockResolvedValue(undefined);
+    mockInsertCardForUser.mockResolvedValue({ status: "deck-not-found" });
 
     const result = await createCardAction({ deckUuid: DECK_UUID, front: "Q", back: "A" });
 
     expect(result).toEqual({ error: "Deck not found" });
-    expect(mockInsertCard).not.toHaveBeenCalled();
+    expect(mockInsertCardForUser).toHaveBeenCalledWith(USER_ID, { deckUuid: DECK_UUID, front: "Q", back: "A" });
   });
 
   test("inserts card and revalidates on success", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockGetDeckByUuidAndUser.mockResolvedValue(mockDeck);
-    mockInsertCard.mockResolvedValue([] as never);
+    mockInsertCardForUser.mockResolvedValue({ status: "success", card: mockDeck.cards[0] });
 
     const result = await createCardAction({ deckUuid: DECK_UUID, front: "Q", back: "A" });
 
     expect(result).toEqual({ success: true });
-    expect(mockInsertCard).toHaveBeenCalledWith({ deckUuid: DECK_UUID, front: "Q", back: "A" });
+    expect(mockInsertCardForUser).toHaveBeenCalledWith(USER_ID, { deckUuid: DECK_UUID, front: "Q", back: "A" });
     expect(mockRevalidatePath).toHaveBeenCalledWith(`/decks/${DECK_UUID}`);
   });
 });
@@ -127,7 +131,7 @@ describe("updateCardAction", () => {
     const result = await updateCardAction({ cardUuid: CARD_UUID, deckUuid: DECK_UUID, front: "Q", back: "A" });
 
     expect(result).toEqual({ error: "Unauthorized" });
-    expect(mockUpdateCardByUuid).not.toHaveBeenCalled();
+    expect(mockUpdateCardForUser).not.toHaveBeenCalled();
   });
 
   test("returns validation error for invalid input", async () => {
@@ -136,38 +140,52 @@ describe("updateCardAction", () => {
     const result = await updateCardAction({ cardUuid: CARD_UUID, deckUuid: DECK_UUID, front: "Q", back: "" });
 
     expect(result).toMatchObject({ error: expect.objectContaining({ fieldErrors: expect.any(Object) }) });
-    expect(mockUpdateCardByUuid).not.toHaveBeenCalled();
+    expect(mockUpdateCardForUser).not.toHaveBeenCalled();
   });
 
   test("returns Deck not found when deck does not belong to user", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockGetDeckByUuidAndUser.mockResolvedValue(undefined);
+    mockUpdateCardForUser.mockResolvedValue({ status: "deck-not-found" });
 
     const result = await updateCardAction({ cardUuid: CARD_UUID, deckUuid: DECK_UUID, front: "Q", back: "A" });
 
     expect(result).toEqual({ error: "Deck not found" });
-    expect(mockUpdateCardByUuid).not.toHaveBeenCalled();
+    expect(mockUpdateCardForUser).toHaveBeenCalledWith(USER_ID, {
+      cardUuid: CARD_UUID,
+      deckUuid: DECK_UUID,
+      front: "Q",
+      back: "A",
+    });
   });
 
   test("returns Card not found when card is not in deck", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockGetDeckByUuidAndUser.mockResolvedValue({ ...mockDeck, cards: [] });
+    mockUpdateCardForUser.mockResolvedValue({ status: "card-not-found" });
 
     const result = await updateCardAction({ cardUuid: CARD_UUID, deckUuid: DECK_UUID, front: "Q", back: "A" });
 
     expect(result).toEqual({ error: "Card not found" });
-    expect(mockUpdateCardByUuid).not.toHaveBeenCalled();
+    expect(mockUpdateCardForUser).toHaveBeenCalledWith(USER_ID, {
+      cardUuid: CARD_UUID,
+      deckUuid: DECK_UUID,
+      front: "Q",
+      back: "A",
+    });
   });
 
   test("updates card and revalidates on success", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockGetDeckByUuidAndUser.mockResolvedValue(mockDeck);
-    mockUpdateCardByUuid.mockResolvedValue([] as never);
+    mockUpdateCardForUser.mockResolvedValue({ status: "success", card: mockDeck.cards[0] });
 
     const result = await updateCardAction({ cardUuid: CARD_UUID, deckUuid: DECK_UUID, front: "New Q", back: "New A" });
 
     expect(result).toEqual({ success: true });
-    expect(mockUpdateCardByUuid).toHaveBeenCalledWith(CARD_UUID, DECK_UUID, { front: "New Q", back: "New A" });
+    expect(mockUpdateCardForUser).toHaveBeenCalledWith(USER_ID, {
+      cardUuid: CARD_UUID,
+      deckUuid: DECK_UUID,
+      front: "New Q",
+      back: "New A",
+    });
     expect(mockRevalidatePath).toHaveBeenCalledWith(`/decks/${DECK_UUID}`);
   });
 });
@@ -183,7 +201,7 @@ describe("deleteCardAction", () => {
     const result = await deleteCardAction({ cardUuid: CARD_UUID, deckUuid: DECK_UUID });
 
     expect(result).toEqual({ error: "Unauthorized" });
-    expect(mockDeleteCardByUuid).not.toHaveBeenCalled();
+    expect(mockDeleteCardForUser).not.toHaveBeenCalled();
   });
 
   test("returns validation error for invalid input", async () => {
@@ -192,38 +210,37 @@ describe("deleteCardAction", () => {
     const result = await deleteCardAction({ cardUuid: "not-a-uuid", deckUuid: DECK_UUID });
 
     expect(result).toMatchObject({ error: expect.objectContaining({ fieldErrors: expect.any(Object) }) });
-    expect(mockDeleteCardByUuid).not.toHaveBeenCalled();
+    expect(mockDeleteCardForUser).not.toHaveBeenCalled();
   });
 
   test("returns Deck not found when deck does not belong to user", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockGetDeckByUuidAndUser.mockResolvedValue(undefined);
+    mockDeleteCardForUser.mockResolvedValue({ status: "deck-not-found" });
 
     const result = await deleteCardAction({ cardUuid: CARD_UUID, deckUuid: DECK_UUID });
 
     expect(result).toEqual({ error: "Deck not found" });
-    expect(mockDeleteCardByUuid).not.toHaveBeenCalled();
+    expect(mockDeleteCardForUser).toHaveBeenCalledWith(USER_ID, { cardUuid: CARD_UUID, deckUuid: DECK_UUID });
   });
 
   test("returns Card not found when card is not in deck", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockGetDeckByUuidAndUser.mockResolvedValue({ ...mockDeck, cards: [] });
+    mockDeleteCardForUser.mockResolvedValue({ status: "card-not-found" });
 
     const result = await deleteCardAction({ cardUuid: CARD_UUID, deckUuid: DECK_UUID });
 
     expect(result).toEqual({ error: "Card not found" });
-    expect(mockDeleteCardByUuid).not.toHaveBeenCalled();
+    expect(mockDeleteCardForUser).toHaveBeenCalledWith(USER_ID, { cardUuid: CARD_UUID, deckUuid: DECK_UUID });
   });
 
   test("deletes card and revalidates on success", async () => {
     mockAuth.mockResolvedValue({ userId: USER_ID } as never);
-    mockGetDeckByUuidAndUser.mockResolvedValue(mockDeck);
-    mockDeleteCardByUuid.mockResolvedValue(undefined as never);
+    mockDeleteCardForUser.mockResolvedValue({ status: "success", card: mockDeck.cards[0] });
 
     const result = await deleteCardAction({ cardUuid: CARD_UUID, deckUuid: DECK_UUID });
 
     expect(result).toEqual({ success: true });
-    expect(mockDeleteCardByUuid).toHaveBeenCalledWith(CARD_UUID, DECK_UUID);
+    expect(mockDeleteCardForUser).toHaveBeenCalledWith(USER_ID, { cardUuid: CARD_UUID, deckUuid: DECK_UUID });
     expect(mockRevalidatePath).toHaveBeenCalledWith(`/decks/${DECK_UUID}`);
   });
 });
