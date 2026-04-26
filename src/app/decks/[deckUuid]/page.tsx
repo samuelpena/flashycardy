@@ -51,18 +51,18 @@ function getPageNumbers(current: number, total: number): (number | "ellipsis")[]
   return pages;
 }
 
-export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
+export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
   const { userId } = await auth();
   if (!userId) redirect("/");
 
-  const { deckId } = await props.params;
-  const parsed = z.string().uuid().safeParse(deckId);
+  const { deckUuid } = await props.params;
+  const parsed = z.string().uuid().safeParse(deckUuid);
   if (!parsed.success) notFound();
-  const deckUuid = parsed.data;
+  const validDeckUuid = parsed.data;
 
   const [deck, cardRatingsRows] = await Promise.all([
-    getDeckByUuidAndUser(deckUuid, userId),
-    getCardRatingsByDeck(deckUuid, userId),
+    getDeckByUuidAndUser(validDeckUuid, userId),
+    getCardRatingsByDeck(validDeckUuid, userId),
   ]);
   if (!deck) notFound();
 
@@ -94,7 +94,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
     const params = new URLSearchParams();
     if (sort !== "updated") params.set("sort", sort);
     params.set("page", String(p));
-    return `/decks/${deckUuid}?${params.toString()}`;
+    return `/decks/${validDeckUuid}?${params.toString()}`;
   }
 
   return (
@@ -125,7 +125,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckId]">) {
             <Button
               variant="secondary"
               nativeButton={false}
-              render={<Link href={`/decks/${deckUuid}/study`} />}
+              render={<Link href={`/decks/${validDeckUuid}/study`} />}
             >
               <BookOpenIcon className="size-4" />
               Study

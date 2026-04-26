@@ -31,7 +31,7 @@ src/
 ├── actions/          # Server Actions for mutations (cards, decks)
 ├── app/              # Next.js App Router pages and layouts
 │   ├── dashboard/    # User dashboard (deck list)
-│   ├── decks/[deckId]/       # Deck detail and card management
+│   ├── decks/[deckUuid]/     # Deck detail and card management
 │   │   └── study/            # Study mode interface
 │   └── pricing/              # Pricing page (Clerk PricingTable)
 ├── components/       # React components
