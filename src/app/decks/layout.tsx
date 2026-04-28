@@ -1,5 +1,5 @@
-import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import { AppUserButton } from "@/components/app-user-button";
 
 export default function DecksLayout({
   children,
@@ -16,7 +16,7 @@ export default function DecksLayout({
           >
             FlashyCardy
           </Link>
-          <UserButton />
+          <AppUserButton />
         </div>
       </header>
       {children}

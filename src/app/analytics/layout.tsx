@@ -1,4 +1,4 @@
-import { UserButton } from "@clerk/nextjs";
+import { AppUserButton } from "@/components/app-user-button";
 
 /**
  * Wraps analytics pages with a sticky top nav containing the app wordmark and
@@ -18,7 +18,7 @@ export default function AnalyticsLayout({
           <span className="text-lg font-semibold tracking-tight">
             FlashyCardy
           </span>
-          <UserButton />
+          <AppUserButton />
         </div>
       </header>
       {children}

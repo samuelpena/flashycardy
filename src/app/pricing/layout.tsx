@@ -1,4 +1,4 @@
-import { UserButton } from "@clerk/nextjs";
+import { AppUserButton } from "@/components/app-user-button";
 
 export default function PricingLayout({
   children,
@@ -12,7 +12,7 @@ export default function PricingLayout({
           <span className="text-lg font-semibold tracking-tight">
             FlashyCardy
           </span>
-          <UserButton />
+          <AppUserButton />
         </div>
       </header>
       {children}
