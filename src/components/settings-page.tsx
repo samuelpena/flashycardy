@@ -84,13 +84,17 @@ export function SettingsPage() {
       <div className="mt-4 flex flex-nowrap items-center gap-4">
         <Label
           htmlFor="language-select"
-          className="shrink-0 text-base leading-[18px] font-medium tracking-tight"
+          className="shrink-0 text-[0.875rem] leading-[18px] font-medium tracking-tight"
         >
           Language
         </Label>
         <div className="shrink-0">
           <Select value={currentLanguage} onValueChange={handleLanguageChange}>
-            <SelectTrigger id="language-select" className="w-[140px] sm:w-[180px]">
+            <SelectTrigger
+              id="language-select"
+              size="sm"
+              className="w-[128px] px-2 py-0 text-[0.875rem] leading-[18px] font-normal sm:w-[152px] [&_svg]:size-3.5"
+            >
               <SelectValue>{LANGUAGE_OPTIONS[currentLanguage]}</SelectValue>
             </SelectTrigger>
             <SelectContent portal={false}>
@@ -103,7 +107,7 @@ export function SettingsPage() {
           </Select>
         </div>
         <p
-          className="min-w-0 flex-1 truncate text-sm leading-[18px] text-muted-foreground"
+          className="min-w-0 flex-1 truncate text-[0.875rem] leading-[18px] font-normal text-muted-foreground"
           title={helperText}
         >
           {helperText}
