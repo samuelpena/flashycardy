@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -23,7 +24,7 @@ function getLanguageValue(value: unknown): LanguageOption {
 }
 
 /**
- * Renders a profile settings section that lets users persist language preference.
+ * Renders the custom UserProfile Settings page: a page title plus language preference.
  */
 export function SettingsPage() {
   const { isLoaded, user } = useUser();
@@ -34,6 +35,10 @@ export function SettingsPage() {
     if (!user) return "en";
     return getLanguageValue(user.unsafeMetadata.language);
   }, [user]);
+
+  const helperText = isSaving
+    ? "Saving..."
+    : (saveMessage ?? "Choose your preferred language.");
 
   async function handleLanguageChange(value: LanguageOption | null) {
     if (!user || !value || value === currentLanguage) return;
@@ -56,29 +61,54 @@ export function SettingsPage() {
   }
 
   if (!isLoaded) {
-    return <p className="text-sm text-muted-foreground">Loading settings...</p>;
+    return (
+      <div className="space-y-4">
+        <header>
+          <h1 className="text-lg font-semibold leading-6 tracking-tight text-foreground">
+            Settings
+          </h1>
+        </header>
+        <p className="text-sm text-muted-foreground">Loading settings...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-3">
-      <div className="space-y-2">
-        <Label htmlFor="language-select">Language</Label>
-        <Select value={currentLanguage} onValueChange={handleLanguageChange}>
-          <SelectTrigger id="language-select" className="w-[220px]">
-            <SelectValue>{LANGUAGE_OPTIONS[currentLanguage]}</SelectValue>
-          </SelectTrigger>
-          <SelectContent portal={false}>
-            {(Object.keys(LANGUAGE_OPTIONS) as LanguageOption[]).map((key) => (
-              <SelectItem key={key} value={key}>
-                {LANGUAGE_OPTIONS[key]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    <div>
+      <header>
+        <h1 className="text-lg font-semibold leading-6 tracking-tight text-foreground">
+          Settings
+        </h1>
+      </header>
+      <Separator className="mt-6" />
+      <div className="mt-4 flex flex-nowrap items-center gap-4">
+        <Label
+          htmlFor="language-select"
+          className="shrink-0 text-base leading-[18px] font-medium tracking-tight"
+        >
+          Language
+        </Label>
+        <div className="shrink-0">
+          <Select value={currentLanguage} onValueChange={handleLanguageChange}>
+            <SelectTrigger id="language-select" className="w-[140px] sm:w-[180px]">
+              <SelectValue>{LANGUAGE_OPTIONS[currentLanguage]}</SelectValue>
+            </SelectTrigger>
+            <SelectContent portal={false}>
+              {(Object.keys(LANGUAGE_OPTIONS) as LanguageOption[]).map((key) => (
+                <SelectItem key={key} value={key}>
+                  {LANGUAGE_OPTIONS[key]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <p
+          className="min-w-0 flex-1 truncate text-sm leading-[18px] text-muted-foreground"
+          title={helperText}
+        >
+          {helperText}
+        </p>
       </div>
-      <p className="text-sm text-muted-foreground">
-        {isSaving ? "Saving..." : saveMessage ?? "Choose your preferred language."}
-      </p>
     </div>
   );
 }
