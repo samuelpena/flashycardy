@@ -5,6 +5,7 @@ import { PlusIcon, UploadIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,7 +26,10 @@ import { cn } from "@/lib/utils";
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 interface CreateDeckDialogProps {
+  /** Raw label for the trigger (e.g. unit tests). Otherwise translated. */
   triggerLabel?: string;
+  /** When true, uses the “create first deck” translation for the trigger. */
+  emptyStateTrigger?: boolean;
   limitReached?: boolean;
   triggerId?: string;
   /** Pro feature `document_deck_generation` — enables document tab and templates */
@@ -33,11 +37,14 @@ interface CreateDeckDialogProps {
 }
 
 export function CreateDeckDialog({
-  triggerLabel = "New Deck",
+  triggerLabel,
+  emptyStateTrigger = false,
   limitReached = false,
   triggerId,
   canGenerateDeckFromDocument = false,
 }: CreateDeckDialogProps) {
+  const t = useTranslations("CreateDeck");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -47,6 +54,10 @@ export function CreateDeckDialog({
   const [error, setError] = useState<string | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const resolvedTriggerLabel =
+    triggerLabel ??
+    (emptyStateTrigger ? t("createFirstDeck") : t("triggerDefault"));
 
   function handleOpenChange(next: boolean) {
     if (!next) {
@@ -76,7 +87,7 @@ export function CreateDeckDialog({
         } else {
           const fieldErrors = result.error.fieldErrors;
           const first = Object.values(fieldErrors).flat()[0];
-          setError(first ?? "Something went wrong.");
+          setError(first ?? tCommon("somethingWentWrong"));
         }
         return;
       }
@@ -98,13 +109,15 @@ export function CreateDeckDialog({
     const ok =
       lower.endsWith(".pdf") || lower.endsWith(".docx") || lower.endsWith(".pptx");
     if (!ok) {
-      setError("Choose a .pdf, .docx, or .pptx file.");
+      setError(t("errorWrongType"));
       setDocFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
     if (file.size > MAX_UPLOAD_BYTES) {
-      setError(`File must be at most ${MAX_UPLOAD_BYTES / (1024 * 1024)} MB.`);
+      setError(
+        t("errorFileSize", { maxMb: MAX_UPLOAD_BYTES / (1024 * 1024) }),
+      );
       setDocFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
@@ -176,7 +189,7 @@ export function CreateDeckDialog({
     e.preventDefault();
     setError(null);
     if (!docFile) {
-      setError("Select a document to upload.");
+      setError(t("errorSelectDoc"));
       return;
     }
 
@@ -185,7 +198,7 @@ export function CreateDeckDialog({
       try {
         fileBase64 = await fileToBase64(docFile);
       } catch {
-        setError("Could not read the file. Try again.");
+        setError(t("errorReadFile"));
         return;
       }
 
@@ -200,7 +213,7 @@ export function CreateDeckDialog({
         } else {
           const fieldErrors = result.error.fieldErrors;
           const first = Object.values(fieldErrors).flat()[0];
-          setError(first ?? "Something went wrong.");
+          setError(first ?? tCommon("somethingWentWrong"));
         }
         return;
       }
@@ -214,13 +227,15 @@ export function CreateDeckDialog({
     });
   }
 
+  const maxMb = MAX_UPLOAD_BYTES / (1024 * 1024);
+
   const manualForm = (
     <form onSubmit={handleSubmitManual} className="flex flex-col gap-4 pt-2">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="deck-name">Name</Label>
+        <Label htmlFor="deck-name">{t("nameLabel")}</Label>
         <Input
           id="deck-name"
-          placeholder="e.g. Spanish Vocabulary"
+          placeholder={t("namePlaceholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -230,12 +245,14 @@ export function CreateDeckDialog({
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="deck-description">
-          Description{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          {t("descriptionLabel")}{" "}
+          <span className="text-muted-foreground font-normal">
+            {t("descriptionOptional")}
+          </span>
         </Label>
         <Textarea
           id="deck-description"
-          placeholder="What is this deck about?"
+          placeholder={t("descriptionPlaceholder")}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={1000}
@@ -246,7 +263,7 @@ export function CreateDeckDialog({
       {error && <p className="text-sm text-destructive">{error}</p>}
       <DialogFooter showCloseButton>
         <Button type="submit" disabled={isPending || !name.trim()}>
-          {isPending ? "Creating…" : "Create deck"}
+          {isPending ? t("creating") : t("createDeck")}
         </Button>
       </DialogFooter>
     </form>
@@ -254,12 +271,9 @@ export function CreateDeckDialog({
 
   const documentForm = (
     <form onSubmit={handleSubmitDocument} className="flex flex-col gap-4 pt-2">
-      <p className="text-sm text-muted-foreground">
-        Upload lecture notes or slides as PDF, Word (.docx), or PowerPoint (.pptx). We extract
-        text, pick a title and description, and add 20 study questions as flashcards.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("docIntro")}</p>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="deck-document">Document</Label>
+        <Label htmlFor="deck-document">{t("documentLabel")}</Label>
         <input
           ref={fileInputRef}
           id="deck-document"
@@ -274,7 +288,7 @@ export function CreateDeckDialog({
           role="button"
           tabIndex={0}
           aria-describedby="deck-document-hint"
-          aria-label="Document upload: drag and drop a file or press Enter to choose"
+          aria-label={t("ariaUpload")}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
@@ -299,21 +313,22 @@ export function CreateDeckDialog({
             <UploadIcon className="size-8 text-muted-foreground" aria-hidden />
             <div className="space-y-1 px-2">
               <p className="text-sm text-foreground">
-                Drag and drop a file here, or{" "}
+                {t("dragDropLine1")}{" "}
                 <span className="text-primary underline decoration-primary underline-offset-4">
-                  choose file
+                  {t("chooseFile")}
                 </span>
               </p>
               <p id="deck-document-hint" className="text-xs text-muted-foreground">
-                PDF, Word (.docx), or PowerPoint (.pptx), up to {MAX_UPLOAD_BYTES / (1024 * 1024)} MB
+                {t("docHint", { maxMb })}
               </p>
             </div>
             {docFile ? (
               <p className="text-xs text-muted-foreground truncate max-w-full px-2">
-                Selected: <span className="font-medium text-foreground">{docFile.name}</span>
+                {t("selected")}{" "}
+                <span className="font-medium text-foreground">{docFile.name}</span>
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">No file selected</p>
+              <p className="text-xs text-muted-foreground">{t("noFileSelected")}</p>
             )}
           </CardContent>
         </Card>
@@ -321,7 +336,7 @@ export function CreateDeckDialog({
       {error && <p className="text-sm text-destructive">{error}</p>}
       <DialogFooter showCloseButton>
         <Button type="submit" disabled={isPending || !docFile}>
-          {isPending ? "Generating…" : "Generate deck"}
+          {isPending ? t("generating") : t("generateDeck")}
         </Button>
       </DialogFooter>
     </form>
@@ -331,30 +346,26 @@ export function CreateDeckDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button id={triggerId} />}>
         <PlusIcon className="size-4" />
-        {triggerLabel}
+        {resolvedTriggerLabel}
       </DialogTrigger>
       <DialogContent>
         {limitReached ? (
           <>
             <DialogHeader>
-              <DialogTitle>Deck limit reached</DialogTitle>
-              <DialogDescription>
-                Free plans are limited to 3 decks. Upgrade to Pro for unlimited decks and more.
-              </DialogDescription>
+              <DialogTitle>{t("limitTitle")}</DialogTitle>
+              <DialogDescription>{t("limitDescription")}</DialogDescription>
             </DialogHeader>
             <DialogFooter showCloseButton>
               <Button nativeButton={false} render={<Link href="/pricing" />}>
-                View Plans
+                {t("viewPlans")}
               </Button>
             </DialogFooter>
           </>
         ) : canGenerateDeckFromDocument ? (
           <>
             <DialogHeader>
-              <DialogTitle>Create a new deck</DialogTitle>
-              <DialogDescription>
-                Enter a name and description, or generate a deck from a document (Pro).
-              </DialogDescription>
+              <DialogTitle>{t("dialogTitle")}</DialogTitle>
+              <DialogDescription>{t("dialogDescriptionTabs")}</DialogDescription>
             </DialogHeader>
             <Tabs
               defaultValue="manual"
@@ -362,8 +373,8 @@ export function CreateDeckDialog({
               onValueChange={() => setError(null)}
             >
               <TabsList>
-                <TabsTrigger value="manual">Name &amp; description</TabsTrigger>
-                <TabsTrigger value="document">From document</TabsTrigger>
+                <TabsTrigger value="manual">{t("tabManual")}</TabsTrigger>
+                <TabsTrigger value="document">{t("tabDocument")}</TabsTrigger>
               </TabsList>
               <TabsContent value="manual" className="flex flex-col gap-0">
                 {manualForm}
@@ -376,10 +387,8 @@ export function CreateDeckDialog({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Create a new deck</DialogTitle>
-              <DialogDescription>
-                Give your deck a name and an optional description.
-              </DialogDescription>
+              <DialogTitle>{t("dialogTitle")}</DialogTitle>
+              <DialogDescription>{t("dialogDescriptionSimple")}</DialogDescription>
             </DialogHeader>
             {manualForm}
           </>

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { SparklesIcon, LoaderIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -19,6 +20,8 @@ export function GenerateCardsButton({
   deckUuid,
   hasDescription,
 }: GenerateCardsButtonProps) {
+  const tDeck = useTranslations("DeckDetail");
+  const t = useTranslations("GenerateCards");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +33,7 @@ export function GenerateCardsButton({
         setError(
           typeof result.error === "string"
             ? result.error
-            : "Failed to generate cards."
+            : t("failedGeneric"),
         );
       }
     });
@@ -42,12 +45,10 @@ export function GenerateCardsButton({
         <TooltipTrigger render={<span className="inline-flex" />}>
           <Button variant="secondary" disabled>
             <SparklesIcon className="size-4" />
-            Generate with AI
+            {tDeck("generateWithAI")}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          Add a description to your deck first so AI can generate relevant cards.
-        </TooltipContent>
+        <TooltipContent>{t("tooltipNeedDescription")}</TooltipContent>
       </Tooltip>
     );
   }
@@ -64,7 +65,7 @@ export function GenerateCardsButton({
         ) : (
           <SparklesIcon className="size-4" />
         )}
-        {isPending ? "Generating…" : "Generate with AI"}
+        {isPending ? t("generating") : tDeck("generateWithAI")}
       </Button>
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>

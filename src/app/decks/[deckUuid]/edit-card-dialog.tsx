@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { PencilIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,6 +29,8 @@ export function EditCardDialog({
   initialFront,
   initialBack,
 }: EditCardDialogProps) {
+  const t = useTranslations("EditCard");
+  const tCommon = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const [front, setFront] = useState(initialFront);
   const [back, setBack] = useState(initialBack);
@@ -54,7 +57,7 @@ export function EditCardDialog({
         setError(
           typeof result.error === "string"
             ? result.error
-            : "Please check the form and try again."
+            : tCommon("checkForm"),
         );
         return;
       }
@@ -72,38 +75,36 @@ export function EditCardDialog({
         onClick={() => setOpen(true)}
       >
         <PencilIcon className="size-3.5" />
-        <span className="sr-only">Edit card</span>
+        <span className="sr-only">{t("editSrOnly")}</span>
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Card</DialogTitle>
-            <DialogDescription>
-              Update the front and back of this flashcard.
-            </DialogDescription>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription>{t("description")}</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="edit-card-front">Front</Label>
+              <Label htmlFor="edit-card-front">{tCommon("front")}</Label>
               <Input
                 id="edit-card-front"
                 value={front}
                 onChange={(e) => setFront(e.target.value)}
-                placeholder="Front of the card"
+                placeholder={t("frontPlaceholder")}
                 required
                 disabled={isPending}
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="edit-card-back">Back</Label>
+              <Label htmlFor="edit-card-back">{tCommon("back")}</Label>
               <Input
                 id="edit-card-back"
                 value={back}
                 onChange={(e) => setBack(e.target.value)}
-                placeholder="Back of the card"
+                placeholder={t("backPlaceholder")}
                 required
                 disabled={isPending}
               />
@@ -118,10 +119,10 @@ export function EditCardDialog({
                 onClick={() => handleOpenChange(false)}
                 disabled={isPending}
               >
-                Cancel
+                {tCommon("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Saving…" : "Save changes"}
+                {isPending ? tCommon("saving") : tCommon("save")}
               </Button>
             </DialogFooter>
           </form>

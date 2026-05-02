@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Joyride, type EventData, STATUS } from "react-joyride";
+import { useTranslations } from "next-intl";
 
 const TOUR_STORAGE_KEY = "flashycardy_tour_seen";
 
 export function DashboardTour() {
+  const t = useTranslations("DashboardTour");
   const [run, setRun] = useState(false);
 
   useEffect(() => {
@@ -27,9 +29,8 @@ export function DashboardTour() {
       steps={[
         {
           target: "#new-deck-btn",
-          title: "Create a New Deck",
-          content:
-            "New Deck is where you create a flashcard deck. Click it to add your first deck and start studying!",
+          title: t("step1Title"),
+          content: t("step1Content"),
           skipBeacon: true,
           placement: "bottom",
         },

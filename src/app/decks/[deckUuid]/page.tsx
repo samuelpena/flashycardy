@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Show } from "@clerk/nextjs";
 import { redirect, notFound } from "next/navigation";
 import { z } from "zod";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getDeckByUuidAndUser } from "@/db/queries/decks";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +22,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ArrowLeftIcon, PlusIcon, LayersIcon, BookOpenIcon, SparklesIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  PlusIcon,
+  LayersIcon,
+  BookOpenIcon,
+  SparklesIcon,
+  ThumbsUpIcon,
+  ThumbsDownIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { EditDeckDialog } from "./edit-deck-dialog";
 import { DeleteDeckDialog } from "./delete-deck-dialog";
@@ -52,13 +61,17 @@ function getPageNumbers(current: number, total: number): (number | "ellipsis")[]
 }
 
 export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
-  const { userId } = await auth();
-  if (!userId) redirect("/");
+  const t = await getTranslations("DeckDetail");
+  const tCommon = await getTranslations("Common");
+  const locale = await getLocale();
 
   const { deckUuid } = await props.params;
   const parsed = z.string().uuid().safeParse(deckUuid);
   if (!parsed.success) notFound();
   const validDeckUuid = parsed.data;
+
+  const { userId } = await auth();
+  if (!userId) redirect("/");
 
   const [deck, cardRatingsRows] = await Promise.all([
     getDeckByUuidAndUser(validDeckUuid, userId),
@@ -66,9 +79,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
   ]);
   if (!deck) notFound();
 
-  const cardRatings = new Map(
-    cardRatingsRows.map((r) => [r.cardUuid, r])
-  );
+  const cardRatings = new Map(cardRatingsRows.map((r) => [r.cardUuid, r]));
 
   const { sort: rawSort, page: pageParam } = await props.searchParams;
   const sort: CardSortOption =
@@ -77,8 +88,8 @@ export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
   const currentPage = Math.max(1, parseInt(String(pageParam ?? "1"), 10) || 1);
 
   const sortedCards = [...deck.cards].sort((a, b) => {
-    if (sort === "az") return a.front.localeCompare(b.front);
-    if (sort === "za") return b.front.localeCompare(a.front);
+    if (sort === "az") return a.front.localeCompare(b.front, locale);
+    if (sort === "za") return b.front.localeCompare(a.front, locale);
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
   });
 
@@ -105,7 +116,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit mb-1"
         >
           <ArrowLeftIcon className="size-3.5" />
-          Back to decks
+          {t("backToDecks")}
         </Link>
         <div className="flex flex-col gap-3 pt-8">
           <div className="flex items-center gap-3 flex-wrap">
@@ -113,7 +124,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
               {deck.name}
             </h1>
             <Badge variant="secondary">
-              {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
+              {tCommon("cardCount", { count: deck.cards.length })}
             </Badge>
           </div>
           {deck.description && (
@@ -128,18 +139,25 @@ export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
               render={<Link href={`/decks/${validDeckUuid}/study`} />}
             >
               <BookOpenIcon className="size-4" />
-              Study
+              {t("study")}
             </Button>
             <Show
               when={{ feature: "ai_flashcard_generation" }}
               fallback={
-                <Button variant="secondary" nativeButton={false} render={<Link href="/pricing" />}>
+                <Button
+                  variant="secondary"
+                  nativeButton={false}
+                  render={<Link href="/pricing" />}
+                >
                   <SparklesIcon className="size-4" />
-                  Generate with AI
+                  {t("generateWithAI")}
                 </Button>
               }
             >
-              <GenerateCardsButton deckUuid={deck.uuid} hasDescription={!!deck.description} />
+              <GenerateCardsButton
+                deckUuid={deck.uuid}
+                hasDescription={!!deck.description}
+              />
             </Show>
             <AddCardDialog deckUuid={deck.uuid} />
             <EditDeckDialog
@@ -163,9 +181,9 @@ export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
             <LayersIcon className="size-6 text-muted-foreground" />
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-lg font-semibold">No cards yet</p>
+            <p className="text-lg font-semibold">{t("emptyCardsTitle")}</p>
             <p className="text-sm text-muted-foreground max-w-xs">
-              Add your first card to start studying this deck.
+              {t("emptyCardsDescription")}
             </p>
           </div>
           <AddCardDialog
@@ -173,7 +191,7 @@ export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
             trigger={
               <Button>
                 <PlusIcon className="size-4" />
-                Add your first card
+                {t("addFirstCard")}
               </Button>
             }
           />
@@ -185,14 +203,16 @@ export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
               <Card key={card.uuid} className="flex flex-col">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Front
+                    {t("fieldFront")}
                   </CardTitle>
-                  <p className="text-sm font-medium leading-snug line-clamp-2 h-[2.625rem]">{card.front}</p>
+                  <p className="text-sm font-medium leading-snug line-clamp-2 h-[2.625rem]">
+                    {card.front}
+                  </p>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-2 pt-0">
                   <div className="h-px w-full bg-border" />
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Back
+                    {t("fieldBack")}
                   </p>
                   <p className="text-sm text-muted-foreground leading-snug line-clamp-3 h-[3.8rem]">
                     {card.back}
@@ -262,7 +282,9 @@ export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
                   <PaginationNext
                     href={buildPageHref(safePage + 1)}
                     aria-disabled={safePage === totalPages}
-                    className={safePage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    className={
+                      safePage === totalPages ? "pointer-events-none opacity-50" : ""
+                    }
                   />
                 </PaginationItem>
               </PaginationContent>

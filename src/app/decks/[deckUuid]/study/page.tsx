@@ -1,21 +1,24 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { z } from "zod";
+import { getTranslations } from "next-intl/server";
 import { getDeckByUuidAndUser } from "@/db/queries/decks";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { StudyClient } from "./study-client";
 
 export default async function StudyPage(
-  props: PageProps<"/decks/[deckUuid]/study">
+  props: PageProps<"/decks/[deckUuid]/study">,
 ) {
-  const { userId } = await auth();
-  if (!userId) redirect("/");
+  const t = await getTranslations("StudyPage");
 
   const { deckUuid } = await props.params;
   const parsed = z.string().uuid().safeParse(deckUuid);
   if (!parsed.success) notFound();
   const validDeckUuid = parsed.data;
+
+  const { userId } = await auth();
+  if (!userId) redirect("/");
 
   const deck = await getDeckByUuidAndUser(validDeckUuid, userId);
   if (!deck) notFound();
@@ -28,10 +31,10 @@ export default async function StudyPage(
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit mb-2"
         >
           <ArrowLeftIcon className="size-3.5" />
-          Back to {deck.name}
+          {t("backToDeck", { name: deck.name })}
         </Link>
         <h1 className="text-2xl font-bold tracking-tight">
-          Study: {deck.name}
+          {t("title", { name: deck.name })}
         </h1>
         {deck.description && (
           <p className="text-muted-foreground text-sm mt-1">

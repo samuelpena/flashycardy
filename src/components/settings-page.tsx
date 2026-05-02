@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useUser } from "@clerk/nextjs";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -11,53 +13,65 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { updateUserLanguageAction } from "@/actions/locale";
+import { normalizeLocale, type AppLocale } from "@/i18n/config";
 
-type LanguageOption = "en" | "es";
-
-const LANGUAGE_OPTIONS: Record<LanguageOption, string> = {
-  en: "English",
-  es: "Spanish",
-};
-
-function getLanguageValue(value: unknown): LanguageOption {
-  return value === "es" ? "es" : "en";
-}
+const LANGUAGE_VALUES: AppLocale[] = ["en", "es"];
 
 /**
  * Renders the custom UserProfile Settings page: a page title plus language preference.
  */
 export function SettingsPage() {
+  const t = useTranslations("Settings");
+  const router = useRouter();
   const { isLoaded, user } = useUser();
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  /** Clerk `useUser()` metadata lags behind server updates; keep UI in sync until the client refetches. */
+  const [optimisticLocale, setOptimisticLocale] = useState<AppLocale | null>(
+    null,
+  );
 
-  const currentLanguage = useMemo<LanguageOption>(() => {
+  const serverLocale = useMemo<AppLocale>(() => {
     if (!user) return "en";
-    return getLanguageValue(user.unsafeMetadata.language);
+    const meta = user.unsafeMetadata as Record<string, unknown> | undefined;
+    return normalizeLocale(meta?.language);
   }, [user]);
 
-  const helperText = isSaving
-    ? "Saving..."
-    : (saveMessage ?? "Choose your preferred language.");
+  const selectedLocale = optimisticLocale ?? serverLocale;
 
-  async function handleLanguageChange(value: LanguageOption | null) {
-    if (!user || !value || value === currentLanguage) return;
+  useEffect(() => {
+    setOptimisticLocale(null);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (optimisticLocale != null && optimisticLocale === serverLocale) {
+      setOptimisticLocale(null);
+    }
+  }, [optimisticLocale, serverLocale]);
+
+  const helperText = isSaving
+    ? t("helperSaving")
+    : (saveMessage ?? t("helperDefault"));
+
+  async function handleLanguageChange(value: AppLocale | null) {
+    if (!user || !value || value === selectedLocale) return;
+    setOptimisticLocale(value);
     setIsSaving(true);
     setSaveMessage(null);
 
-    try {
-      await user.update({
-        unsafeMetadata: {
-          ...user.unsafeMetadata,
-          language: value,
-        },
-      });
-      setSaveMessage("Language saved.");
-    } catch {
-      setSaveMessage("Unable to save language. Please try again.");
-    } finally {
-      setIsSaving(false);
+    const result = await updateUserLanguageAction({ locale: value });
+
+    if (result && "error" in result) {
+      setOptimisticLocale(null);
+      setSaveMessage(
+        typeof result.error === "string" ? result.error : t("saveError"),
+      );
+    } else {
+      setSaveMessage(t("saved"));
+      router.refresh();
     }
+    setIsSaving(false);
   }
 
   if (!isLoaded) {
@@ -65,10 +79,10 @@ export function SettingsPage() {
       <div className="space-y-4">
         <header>
           <h1 className="text-lg font-semibold leading-6 tracking-tight text-foreground">
-            Settings
+            {t("title")}
           </h1>
         </header>
-        <p className="text-sm text-muted-foreground">Loading settings...</p>
+        <p className="text-sm text-muted-foreground">{t("loading")}</p>
       </div>
     );
   }
@@ -77,7 +91,7 @@ export function SettingsPage() {
     <div>
       <header>
         <h1 className="text-lg font-semibold leading-6 tracking-tight text-foreground">
-          Settings
+          {t("title")}
         </h1>
       </header>
       <Separator className="mt-6" />
@@ -86,21 +100,30 @@ export function SettingsPage() {
           htmlFor="language-select"
           className="shrink-0 text-[0.875rem] leading-[18px] font-medium tracking-tight"
         >
-          Language
+          {t("language")}
         </Label>
         <div className="shrink-0">
-          <Select value={currentLanguage} onValueChange={handleLanguageChange}>
+          <Select
+            value={selectedLocale}
+            onValueChange={(v) =>
+              handleLanguageChange(normalizeLocale(v) as AppLocale)
+            }
+          >
             <SelectTrigger
               id="language-select"
               size="sm"
               className="w-[128px] px-2 py-0 text-[0.875rem] leading-[18px] font-normal sm:w-[152px] [&_svg]:size-3.5"
             >
-              <SelectValue>{LANGUAGE_OPTIONS[currentLanguage]}</SelectValue>
+              <SelectValue>
+                {selectedLocale === "es"
+                  ? t("languageOption_es")
+                  : t("languageOption_en")}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent portal={false}>
-              {(Object.keys(LANGUAGE_OPTIONS) as LanguageOption[]).map((key) => (
+              {LANGUAGE_VALUES.map((key) => (
                 <SelectItem key={key} value={key}>
-                  {LANGUAGE_OPTIONS[key]}
+                  {key === "es" ? t("languageOption_es") : t("languageOption_en")}
                 </SelectItem>
               ))}
             </SelectContent>

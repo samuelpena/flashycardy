@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getTranslations } from "next-intl/server";
 import { generateText, Output } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { getDeckByUuidAndUser } from "@/db/queries/decks";
@@ -13,13 +14,7 @@ import {
   updateCardForUser,
 } from "@/db/queries/cards";
 
-const createCardSchema = z.object({
-  deckUuid: z.string().uuid(),
-  front: z.string().min(1, "Front is required"),
-  back: z.string().min(1, "Back is required"),
-});
-
-type CreateCardInput = z.infer<typeof createCardSchema>;
+type CreateCardInput = { deckUuid: string; front: string; back: string };
 
 /**
  * Creates a new flashcard in a deck owned by the current user.
@@ -29,8 +24,16 @@ type CreateCardInput = z.infer<typeof createCardSchema>;
  * @throws Never — errors are returned as `{ error }` response objects
  */
 export async function createCardAction(input: CreateCardInput) {
+  const tVal = await getTranslations("Validation");
+  const tAct = await getTranslations("Actions");
+  const createCardSchema = z.object({
+    deckUuid: z.string().uuid(),
+    front: z.string().min(1, tVal("frontRequired")),
+    back: z.string().min(1, tVal("backRequired")),
+  });
+
   const { userId } = await auth();
-  if (!userId) return { error: "Unauthorized" };
+  if (!userId) return { error: tAct("unauthorized") };
 
   const parsed = createCardSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
@@ -38,20 +41,18 @@ export async function createCardAction(input: CreateCardInput) {
   const { deckUuid, front, back } = parsed.data;
 
   const result = await insertCardForUser(userId, { deckUuid, front, back });
-  if (result.status === "deck-not-found") return { error: "Deck not found" };
+  if (result.status === "deck-not-found") return { error: tAct("deckNotFound") };
 
   revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }
 
-const updateCardSchema = z.object({
-  cardUuid: z.string().uuid(),
-  deckUuid: z.string().uuid(),
-  front: z.string().min(1, "Front is required"),
-  back: z.string().min(1, "Back is required"),
-});
-
-type UpdateCardInput = z.infer<typeof updateCardSchema>;
+type UpdateCardInput = {
+  cardUuid: string;
+  deckUuid: string;
+  front: string;
+  back: string;
+};
 
 /**
  * Updates the front and back content of an existing card.
@@ -62,8 +63,17 @@ type UpdateCardInput = z.infer<typeof updateCardSchema>;
  * @returns `{ success: true }` on success, or `{ error }` on failure
  */
 export async function updateCardAction(input: UpdateCardInput) {
+  const tVal = await getTranslations("Validation");
+  const tAct = await getTranslations("Actions");
+  const updateCardSchema = z.object({
+    cardUuid: z.string().uuid(),
+    deckUuid: z.string().uuid(),
+    front: z.string().min(1, tVal("frontRequired")),
+    back: z.string().min(1, tVal("backRequired")),
+  });
+
   const { userId } = await auth();
-  if (!userId) return { error: "Unauthorized" };
+  if (!userId) return { error: tAct("unauthorized") };
 
   const parsed = updateCardSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
@@ -71,19 +81,14 @@ export async function updateCardAction(input: UpdateCardInput) {
   const { cardUuid, deckUuid, front, back } = parsed.data;
 
   const result = await updateCardForUser(userId, { cardUuid, deckUuid, front, back });
-  if (result.status === "deck-not-found") return { error: "Deck not found" };
-  if (result.status === "card-not-found") return { error: "Card not found" };
+  if (result.status === "deck-not-found") return { error: tAct("deckNotFound") };
+  if (result.status === "card-not-found") return { error: tAct("cardNotFound") };
 
   revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }
 
-const deleteCardSchema = z.object({
-  cardUuid: z.string().uuid(),
-  deckUuid: z.string().uuid(),
-});
-
-type DeleteCardInput = z.infer<typeof deleteCardSchema>;
+type DeleteCardInput = { cardUuid: string; deckUuid: string };
 
 /**
  * Permanently deletes a card from a deck.
@@ -94,8 +99,14 @@ type DeleteCardInput = z.infer<typeof deleteCardSchema>;
  * @returns `{ success: true }` on success, or `{ error }` on failure
  */
 export async function deleteCardAction(input: DeleteCardInput) {
+  const tAct = await getTranslations("Actions");
+  const deleteCardSchema = z.object({
+    cardUuid: z.string().uuid(),
+    deckUuid: z.string().uuid(),
+  });
+
   const { userId } = await auth();
-  if (!userId) return { error: "Unauthorized" };
+  if (!userId) return { error: tAct("unauthorized") };
 
   const parsed = deleteCardSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
@@ -103,18 +114,14 @@ export async function deleteCardAction(input: DeleteCardInput) {
   const { cardUuid, deckUuid } = parsed.data;
 
   const result = await deleteCardForUser(userId, { cardUuid, deckUuid });
-  if (result.status === "deck-not-found") return { error: "Deck not found" };
-  if (result.status === "card-not-found") return { error: "Card not found" };
+  if (result.status === "deck-not-found") return { error: tAct("deckNotFound") };
+  if (result.status === "card-not-found") return { error: tAct("cardNotFound") };
 
   revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }
 
-const generateCardsSchema = z.object({
-  deckUuid: z.string().uuid(),
-});
-
-type GenerateCardsInput = z.infer<typeof generateCardsSchema>;
+type GenerateCardsInput = { deckUuid: string };
 
 /**
  * AI-generates 20 flashcards for a deck using GPT-4.1-nano (Pro feature).
@@ -127,11 +134,16 @@ type GenerateCardsInput = z.infer<typeof generateCardsSchema>;
  *   feature-gated, or the AI call fails
  */
 export async function generateCardsAction(input: GenerateCardsInput) {
+  const tAct = await getTranslations("Actions");
+  const generateCardsSchema = z.object({
+    deckUuid: z.string().uuid(),
+  });
+
   const { userId, has } = await auth();
-  if (!userId) return { error: "Unauthorized" };
+  if (!userId) return { error: tAct("unauthorized") };
 
   if (!has({ feature: "ai_flashcard_generation" })) {
-    return { error: "AI flashcard generation requires a Pro plan." };
+    return { error: tAct("aiGenProRequired") };
   }
 
   const parsed = generateCardsSchema.safeParse(input);
@@ -140,10 +152,10 @@ export async function generateCardsAction(input: GenerateCardsInput) {
   const { deckUuid } = parsed.data;
 
   const deck = await getDeckByUuidAndUser(deckUuid, userId);
-  if (!deck) return { error: "Deck not found" };
+  if (!deck) return { error: tAct("deckNotFound") };
 
   if (!deck.description) {
-    return { error: "Add a description to your deck before generating cards." };
+    return { error: tAct("addDescriptionFirst") };
   }
 
   const cardSchema = z.object({
@@ -167,7 +179,7 @@ Deck description: ${deck.description ?? "No description provided."}
 Each card should have a concise question or term on the front and a clear, accurate answer on the back.`,
   });
 
-  if (!output) return { error: "Failed to generate cards. Please try again." };
+  if (!output) return { error: tAct("generateCardsFailed") };
 
   await insertCards(
     deckUuid,

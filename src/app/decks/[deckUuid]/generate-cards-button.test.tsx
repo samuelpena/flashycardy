@@ -1,6 +1,8 @@
 import { expect, test, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { NextIntlClientProvider } from "next-intl";
+import { enMessages } from "@/test/render-with-intl";
 import { GenerateCardsButton } from "./generate-cards-button";
 
 vi.mock("@/actions/cards", () => ({
@@ -8,7 +10,11 @@ vi.mock("@/actions/cards", () => ({
 }));
 
 function renderWithTooltip(ui: React.ReactElement) {
-  return render(<TooltipProvider>{ui}</TooltipProvider>);
+  return render(
+    <NextIntlClientProvider locale="en" messages={enMessages}>
+      <TooltipProvider>{ui}</TooltipProvider>
+    </NextIntlClientProvider>,
+  );
 }
 
 const DECK_UUID = "01960000-0000-7000-8000-000000000001";

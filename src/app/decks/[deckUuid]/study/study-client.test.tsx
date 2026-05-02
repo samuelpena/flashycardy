@@ -1,5 +1,6 @@
 import { expect, test, describe, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
+import { renderWithIntl } from "@/test/render-with-intl";
 import { StudyClient } from "./study-client";
 
 vi.mock("@/actions/study-sessions", () => ({
@@ -28,14 +29,14 @@ function flipAndRate(rating: "correct" | "incorrect" = "correct") {
 
 describe("StudyClient — empty deck", () => {
   test("shows empty state message when no cards are provided", () => {
-    render(<StudyClient deckUuid={DECK_UUID} cards={[]} />);
+    renderWithIntl(<StudyClient deckUuid={DECK_UUID} cards={[]} />);
     expect(screen.getByText("No cards in this deck")).toBeDefined();
   });
 });
 
 describe("StudyClient — with cards", () => {
   beforeEach(() => {
-    render(<StudyClient deckUuid={DECK_UUID} cards={CARDS} />);
+    renderWithIntl(<StudyClient deckUuid={DECK_UUID} cards={CARDS} />);
   });
 
   test("shows progress counter starting at 1 / total", () => {
@@ -119,7 +120,7 @@ const SINGLE_CARD_UUID = "01960000-0000-7000-8000-000000000099";
 
 describe("StudyClient — completion screen", () => {
   test("shows completion screen after rating all cards", () => {
-    render(<StudyClient deckUuid={DECK_UUID} cards={CARDS} />);
+    renderWithIntl(<StudyClient deckUuid={DECK_UUID} cards={CARDS} />);
     flipAndRate("correct");
     flipAndRate("correct");
     flipAndRate("correct");
@@ -128,7 +129,7 @@ describe("StudyClient — completion screen", () => {
   });
 
   test("shows correct/incorrect counts on completion screen", () => {
-    render(<StudyClient deckUuid={DECK_UUID} cards={CARDS} />);
+    renderWithIntl(<StudyClient deckUuid={DECK_UUID} cards={CARDS} />);
 
     flipAndRate("correct");
     flipAndRate("incorrect");
@@ -140,7 +141,7 @@ describe("StudyClient — completion screen", () => {
   });
 
   test("Restart resets back to the first card and clears results", () => {
-    render(<StudyClient deckUuid={DECK_UUID} cards={CARDS} />);
+    renderWithIntl(<StudyClient deckUuid={DECK_UUID} cards={CARDS} />);
     flipAndRate("correct");
     flipAndRate("correct");
     flipAndRate("correct");
@@ -151,25 +152,25 @@ describe("StudyClient — completion screen", () => {
 
 describe("StudyClient — single card", () => {
   test("shows Reveal & Finish button when only one card is present", () => {
-    render(<StudyClient deckUuid={DECK_UUID} cards={[{ uuid: SINGLE_CARD_UUID, front: "Q", back: "A" }]} />);
+    renderWithIntl(<StudyClient deckUuid={DECK_UUID} cards={[{ uuid: SINGLE_CARD_UUID, front: "Q", back: "A" }]} />);
     expect(screen.getByRole("button", { name: /reveal & finish/i })).toBeDefined();
   });
 
   test("flips single card when Reveal & Finish is clicked", () => {
-    render(<StudyClient deckUuid={DECK_UUID} cards={[{ uuid: SINGLE_CARD_UUID, front: "Q", back: "A" }]} />);
+    renderWithIntl(<StudyClient deckUuid={DECK_UUID} cards={[{ uuid: SINGLE_CARD_UUID, front: "Q", back: "A" }]} />);
     fireEvent.click(screen.getByRole("button", { name: /reveal & finish/i }));
     expect(screen.getByRole("button", { name: /mark as correct/i })).toBeDefined();
   });
 
   test("completion message uses singular 'card'", () => {
-    render(<StudyClient deckUuid={DECK_UUID} cards={[{ uuid: SINGLE_CARD_UUID, front: "Q", back: "A" }]} />);
+    renderWithIntl(<StudyClient deckUuid={DECK_UUID} cards={[{ uuid: SINGLE_CARD_UUID, front: "Q", back: "A" }]} />);
     fireEvent.click(screen.getByRole("button", { name: /reveal & finish/i }));
     fireEvent.click(screen.getByRole("button", { name: /mark as correct/i }));
     expect(screen.getByText(/you studied all 1 card\./i)).toBeDefined();
   });
 
   test("completes session after rating the single card", () => {
-    render(<StudyClient deckUuid={DECK_UUID} cards={[{ uuid: SINGLE_CARD_UUID, front: "Q", back: "A" }]} />);
+    renderWithIntl(<StudyClient deckUuid={DECK_UUID} cards={[{ uuid: SINGLE_CARD_UUID, front: "Q", back: "A" }]} />);
     const card = screen.getByRole("button", { name: /card showing front/i });
     fireEvent.click(card);
     fireEvent.click(screen.getByRole("button", { name: /mark as correct/i }));

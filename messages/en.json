@@ -1,0 +1,247 @@
+{
+  "Metadata": {
+    "title": "Flashy Cardy",
+    "description": "Learn anything by creating, managing, and studying flashcards."
+  },
+  "HomePage": {
+    "heading": "Flashycardy",
+    "tagline": "Your personal flashcard platform"
+  },
+  "Auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up"
+  },
+  "Common": {
+    "appName": "FlashyCardy",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "edit": "Edit",
+    "delete": "Delete",
+    "name": "Name",
+    "description": "Description",
+    "descriptionOptional": "(optional)",
+    "front": "Front",
+    "back": "Back",
+    "somethingWentWrong": "Something went wrong.",
+    "checkForm": "Please check the form and try again.",
+    "tryAgain": "Something went wrong. Try again.",
+    "deckLimitBanner": "{used}/{limit} decks used",
+    "cardCount": "{count, plural, one {# card} other {# cards}}",
+    "updatedLabel": "Updated {date}",
+    "openDeckAria": "Open {name}"
+  },
+  "Settings": {
+    "title": "Settings",
+    "loading": "Loading settings…",
+    "language": "Language",
+    "languageOption_en": "English",
+    "languageOption_es": "Spanish",
+    "helperSaving": "Saving…",
+    "helperDefault": "Choose your preferred language.",
+    "saved": "Language saved.",
+    "saveError": "Unable to save language. Please try again."
+  },
+  "ClerkProfile": {
+    "settingsLabel": "Settings"
+  },
+  "Dashboard": {
+    "title": "Your Decks",
+    "subtitle": "Manage and study your flashcard decks.",
+    "analytics": "Analytics",
+    "emptyTitle": "No decks yet",
+    "emptyDescription": "Create your first deck to start building and studying flashcards.",
+    "createFirstDeck": "Create your first deck",
+    "fieldName": "Name",
+    "fieldDescription": "Description",
+    "nameHeader": "Name",
+    "descriptionHeader": "Description"
+  },
+  "DeckSort": {
+    "updated": "Last updated",
+    "az": "A → Z",
+    "za": "Z → A"
+  },
+  "CardSort": {
+    "updated": "Last updated",
+    "az": "A → Z",
+    "za": "Z → A"
+  },
+  "DeckDetail": {
+    "backToDecks": "Back to decks",
+    "study": "Study",
+    "generateWithAI": "Generate with AI",
+    "addCard": "Add Card",
+    "emptyCardsTitle": "No cards yet",
+    "emptyCardsDescription": "Add your first card to start studying this deck.",
+    "addFirstCard": "Add your first card",
+    "fieldFront": "Front",
+    "fieldBack": "Back"
+  },
+  "StudyPage": {
+    "backToDeck": "Back to {name}",
+    "title": "Study: {name}"
+  },
+  "StudyClient": {
+    "emptyTitle": "No cards in this deck",
+    "emptyDescription": "Add some cards to start studying.",
+    "sessionComplete": "Session complete!",
+    "studiedAll": "You studied all {count} {count, plural, one {card} other {cards}}.",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "score": "Score",
+    "skippedOne": "1 card was skipped without a rating.",
+    "skippedMany": "{count} cards were skipped without a rating.",
+    "savingResults": "Saving results…",
+    "saveFailed": "Failed to save results.",
+    "shuffleRestart": "Shuffle & restart",
+    "restart": "Restart",
+    "shuffle": "Shuffle",
+    "flipHint": "Click or press Space to flip",
+    "spaceKey": "Space",
+    "didYouGetIt": "Did you get it right?",
+    "previous": "Previous",
+    "nope": "Nope",
+    "gotIt": "Got it",
+    "next": "Next",
+    "revealFinish": "Reveal & Finish",
+    "keyboardHints": "Use ← → to navigate · Space to flip",
+    "ariaBack": "Card showing back — click to show front",
+    "ariaFront": "Card showing front — click to show back",
+    "ariaMarkIncorrect": "Mark as incorrect",
+    "ariaMarkCorrect": "Mark as correct",
+    "ariaUpload": "Document upload: drag and drop a file or press Enter to choose"
+  },
+  "Analytics": {
+    "backToDashboard": "Back to dashboard",
+    "title": "Analytics",
+    "subtitle": "A record of all your study sessions.",
+    "emptyTitle": "No sessions yet",
+    "emptyDescription": "Complete a study session to start tracking your progress here.",
+    "goStudy": "Go study a deck",
+    "colId": "ID",
+    "colDeck": "Deck",
+    "colTotalCards": "Total Cards",
+    "colCorrect": "Correct",
+    "colIncorrect": "Incorrect",
+    "colScore": "Score",
+    "colCompletedAt": "Completed At"
+  },
+  "Pricing": {
+    "title": "Choose Your plan",
+    "subtitle": "Unlock the full potential of your flashcard learning experience with our flexible pricing plans."
+  },
+  "BackButton": {
+    "label": "Back"
+  },
+  "CreateDeck": {
+    "triggerDefault": "New Deck",
+    "createFirstDeck": "Create your first deck",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Spanish Vocabulary",
+    "descriptionLabel": "Description",
+    "descriptionOptional": "(optional)",
+    "descriptionPlaceholder": "What is this deck about?",
+    "creating": "Creating…",
+    "createDeck": "Create deck",
+    "limitTitle": "Deck limit reached",
+    "limitDescription": "Free plans are limited to 3 decks. Upgrade to Pro for unlimited decks and more.",
+    "viewPlans": "View Plans",
+    "dialogTitle": "Create a new deck",
+    "dialogDescriptionTabs": "Enter a name and description, or generate a deck from a document (Pro).",
+    "dialogDescriptionSimple": "Give your deck a name and an optional description.",
+    "tabManual": "Name & description",
+    "tabDocument": "From document",
+    "docIntro": "Upload lecture notes or slides as PDF, Word (.docx), or PowerPoint (.pptx). We extract text, pick a title and description, and add 20 study questions as flashcards.",
+    "documentLabel": "Document",
+    "dragDropLine1": "Drag and drop a file here, or",
+    "chooseFile": "choose file",
+    "docHint": "PDF, Word (.docx), or PowerPoint (.pptx), up to {maxMb} MB",
+    "selected": "Selected:",
+    "noFileSelected": "No file selected",
+    "generating": "Generating…",
+    "generateDeck": "Generate deck",
+    "errorWrongType": "Choose a .pdf, .docx, or .pptx file.",
+    "errorFileSize": "File must be at most {maxMb} MB.",
+    "errorSelectDoc": "Select a document to upload.",
+    "errorReadFile": "Could not read the file. Try again.",
+    "ariaUpload": "Document upload: drag and drop a file or press Enter to choose"
+  },
+  "EditDeck": {
+    "title": "Edit Deck",
+    "description": "Update the name and description of this deck.",
+    "namePlaceholder": "Deck name",
+    "descriptionPlaceholder": "Optional description",
+    "editAria": "Edit deck",
+    "editSrOnly": "Edit deck"
+  },
+  "EditDeckPage": {
+    "descriptionOptional": "(optional)",
+    "descriptionPlaceholder": "What is this deck about?"
+  },
+  "DeleteDeck": {
+    "title": "Delete «{name}»?",
+    "description": "This cannot be undone. The deck will be removed from your library. {cards}",
+    "cardsNone": "There are no cards in this deck.",
+    "cardsOne": "The 1 card in this deck will be permanently deleted.",
+    "cardsMany": "All {count} cards in this deck will be permanently deleted.",
+    "deleteDeck": "Delete deck",
+    "deleting": "Deleting…",
+    "deleteAria": "Delete deck",
+    "deleteSrOnly": "Delete deck",
+    "buttonDeleteDeck": "Delete deck"
+  },
+  "AddCard": {
+    "title": "Add New Card",
+    "description": "Create a new flashcard for this deck. Add content for both the front and back of the card.",
+    "frontPlaceholder": "Front of the card",
+    "backPlaceholder": "Back of the card",
+    "creating": "Creating…",
+    "createCard": "Create Card",
+    "triggerDefault": "Add Card"
+  },
+  "EditCard": {
+    "title": "Edit Card",
+    "description": "Update the front and back of this flashcard.",
+    "frontPlaceholder": "Front of the card",
+    "backPlaceholder": "Back of the card",
+    "editSrOnly": "Edit card"
+  },
+  "DeleteCard": {
+    "title": "Delete card?",
+    "description": "This action cannot be undone. The card will be permanently deleted.",
+    "deleting": "Deleting…",
+    "deleteSrOnly": "Delete card"
+  },
+  "GenerateCards": {
+    "tooltipNeedDescription": "Add a description to your deck first so AI can generate relevant cards.",
+    "generating": "Generating…",
+    "failedGeneric": "Failed to generate cards."
+  },
+  "DashboardTour": {
+    "step1Title": "Create a New Deck",
+    "step1Content": "New Deck is where you create a flashcard deck. Click it to add your first deck and start studying!"
+  },
+  "Actions": {
+    "unauthorized": "Unauthorized",
+    "deckLimitReached": "You've reached the 3-deck limit on the free plan. Upgrade to Pro for unlimited decks.",
+    "documentDeckProRequired": "Document-based deck generation requires a Pro plan with this feature enabled.",
+    "unsupportedFileType": "Unsupported file type. Upload a .pdf, .docx, or .pptx file.",
+    "invalidFileData": "Invalid file data.",
+    "fileSizeExceeded": "File must be non-empty and at most {maxMb} MB.",
+    "noTextInFile": "Could not read any text from this file. Try another format or export.",
+    "documentReadError": "Could not read this document. Check the file and try again.",
+    "deckGenFailed": "Could not generate a deck from this document. Try again with a clearer file.",
+    "saveDeckFailed": "Failed to save the deck. Please try again.",
+    "deckNotFound": "Deck not found",
+    "cardNotFound": "Card not found",
+    "aiGenProRequired": "AI flashcard generation requires a Pro plan.",
+    "addDescriptionFirst": "Add a description to your deck before generating cards.",
+    "generateCardsFailed": "Failed to generate cards. Please try again."
+  },
+  "Validation": {
+    "nameRequired": "Name is required",
+    "frontRequired": "Front is required",
+    "backRequired": "Back is required"
+  }
+}

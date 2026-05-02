@@ -2,21 +2,13 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
+import { getTranslations } from "next-intl/server";
 import { saveStudySessionForUser } from "@/db/queries/study-sessions";
 
-const saveStudySessionSchema = z.object({
-  deckUuid: z.string().uuid(),
-  cardResults: z
-    .array(
-      z.object({
-        cardUuid: z.string().uuid(),
-        isCorrect: z.boolean(),
-      })
-    )
-    .min(1),
-});
-
-type SaveStudySessionInput = z.infer<typeof saveStudySessionSchema>;
+type SaveStudySessionInput = {
+  deckUuid: string;
+  cardResults: { cardUuid: string; isCorrect: boolean }[];
+};
 
 /**
  * Persists the results of a completed study session for a deck.
@@ -30,8 +22,21 @@ type SaveStudySessionInput = z.infer<typeof saveStudySessionSchema>;
  *   unauthorized, deck not found, or validation fails
  */
 export async function saveStudySessionAction(input: SaveStudySessionInput) {
+  const tAct = await getTranslations("Actions");
+  const saveStudySessionSchema = z.object({
+    deckUuid: z.string().uuid(),
+    cardResults: z
+      .array(
+        z.object({
+          cardUuid: z.string().uuid(),
+          isCorrect: z.boolean(),
+        }),
+      )
+      .min(1),
+  });
+
   const { userId } = await auth();
-  if (!userId) return { error: "Unauthorized" };
+  if (!userId) return { error: tAct("unauthorized") };
 
   const parsed = saveStudySessionSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
@@ -39,7 +44,7 @@ export async function saveStudySessionAction(input: SaveStudySessionInput) {
   const { deckUuid, cardResults } = parsed.data;
 
   const result = await saveStudySessionForUser({ userId, deckUuid, cardResults });
-  if (result.status === "deck-not-found") return { error: "Deck not found" };
+  if (result.status === "deck-not-found") return { error: tAct("deckNotFound") };
 
   return { success: true, sessionUuid: result.session.uuid };
 }

@@ -3,6 +3,8 @@ import { Poppins } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ui } from "@clerk/ui";
 import { dark } from "@clerk/ui/themes";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
@@ -12,24 +14,32 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  title: "Flashy Cardy",
-  description: "Learn anything by creating, managing, and studying flashcards.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Metadata");
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${poppins.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider ui={ui} appearance={{ theme: dark }} afterSignOutUrl="/">
-          <TooltipProvider>{children}</TooltipProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <TooltipProvider>{children}</TooltipProvider>
+          </NextIntlClientProvider>
         </ClerkProvider>
       </body>
     </html>

@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithIntl } from "@/test/render-with-intl";
 import { EditCardDialog } from "./edit-card-dialog";
 
 vi.mock("@/actions/cards", () => ({
@@ -10,7 +11,7 @@ const DECK_UUID = "01960000-0000-7000-8000-000000000001";
 const CARD_UUID = "01960000-0000-7000-8000-000000000002";
 
 test("renders the edit icon button with accessible label", () => {
-  render(
+  renderWithIntl(
     <EditCardDialog
       cardUuid={CARD_UUID}
       deckUuid={DECK_UUID}

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -26,6 +27,8 @@ export function DeleteDeckDialog({
   deckName,
   cardCount,
 }: DeleteDeckDialogProps) {
+  const t = useTranslations("DeleteDeck");
+  const tCommon = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -43,7 +46,7 @@ export function DeleteDeckDialog({
         setError(
           typeof result.error === "string"
             ? result.error
-            : "Something went wrong. Try again.",
+            : tCommon("tryAgain"),
         );
         return;
       }
@@ -53,10 +56,10 @@ export function DeleteDeckDialog({
 
   const cardsPhrase =
     cardCount === 0
-      ? "There are no cards in this deck."
+      ? t("cardsNone")
       : cardCount === 1
-        ? "The 1 card in this deck will be permanently deleted."
-        : `All ${cardCount} cards in this deck will be permanently deleted.`;
+        ? t("cardsOne")
+        : t("cardsMany", { count: cardCount });
 
   return (
     <>
@@ -65,19 +68,18 @@ export function DeleteDeckDialog({
         size="icon"
         className="size-7 shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
         onClick={() => handleOpenChange(true)}
-        aria-label="Delete deck"
+        aria-label={t("deleteAria")}
       >
         <Trash2Icon className="size-3.5" />
-        <span className="sr-only">Delete deck</span>
+        <span className="sr-only">{t("deleteSrOnly")}</span>
       </Button>
 
       <AlertDialog open={open} onOpenChange={handleOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{`Delete "${deckName}"?`}</AlertDialogTitle>
+            <AlertDialogTitle>{t("title", { name: deckName })}</AlertDialogTitle>
             <AlertDialogDescription>
-              This cannot be undone. The deck will be removed from your
-              library. {cardsPhrase}
+              {t("description", { cards: cardsPhrase })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {error && (
@@ -86,7 +88,9 @@ export function DeleteDeckDialog({
             </p>
           )}
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>
+              {tCommon("cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
@@ -95,7 +99,7 @@ export function DeleteDeckDialog({
               disabled={isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isPending ? "Deleting…" : "Delete deck"}
+              {isPending ? t("deleting") : t("deleteDeck")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

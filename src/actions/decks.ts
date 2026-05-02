@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { generateText, Output } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import {
   deleteDeckByUuidAndUser,
@@ -14,14 +15,9 @@ import {
 } from "@/db/queries/decks";
 import { extractPlainTextFromDocumentBuffer } from "@/lib/extract-document-text";
 
-const createDeckSchema = z.object({
-  name: z.string().min(1, "Name is required").max(255),
-  description: z.string().max(1000).optional(),
-});
-
-type CreateDeckInput = z.infer<typeof createDeckSchema>;
-
 const FREE_DECK_LIMIT = 3;
+
+type CreateDeckInput = { name: string; description?: string };
 
 /**
  * Creates a new deck owned by the current user.
@@ -34,8 +30,15 @@ const FREE_DECK_LIMIT = 3;
  *   limit reached, or validation fails
  */
 export async function createDeckAction(input: CreateDeckInput) {
+  const tVal = await getTranslations("Validation");
+  const tAct = await getTranslations("Actions");
+  const createDeckSchema = z.object({
+    name: z.string().min(1, tVal("nameRequired")).max(255),
+    description: z.string().max(1000).optional(),
+  });
+
   const { userId, has } = await auth();
-  if (!userId) return { error: "Unauthorized" };
+  if (!userId) return { error: tAct("unauthorized") };
 
   const parsed = createDeckSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
@@ -45,7 +48,7 @@ export async function createDeckAction(input: CreateDeckInput) {
   if (!hasUnlimitedDecks) {
     const deckCount = await getDeckCountByUser(userId);
     if (deckCount >= FREE_DECK_LIMIT) {
-      return { error: "You've reached the 3-deck limit on the free plan. Upgrade to Pro for unlimited decks." };
+      return { error: tAct("deckLimitReached") };
     }
   }
 
@@ -59,12 +62,7 @@ export async function createDeckAction(input: CreateDeckInput) {
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
-const createDeckFromDocumentSchema = z.object({
-  fileBase64: z.string().min(1),
-  fileName: z.string().min(1).max(255),
-});
-
-type CreateDeckFromDocumentInput = z.infer<typeof createDeckFromDocumentSchema>;
+type CreateDeckFromDocumentInput = { fileBase64: string; fileName: string };
 
 const allowedDocExtensions = new Set([".pdf", ".docx", ".pptx"]);
 
@@ -93,11 +91,17 @@ const deckFromDocumentOutputSchema = z.object({
  *   unauthorized, feature-gated, file is invalid, or AI generation fails
  */
 export async function createDeckFromDocumentAction(input: CreateDeckFromDocumentInput) {
+  const tAct = await getTranslations("Actions");
+  const createDeckFromDocumentSchema = z.object({
+    fileBase64: z.string().min(1),
+    fileName: z.string().min(1).max(255),
+  });
+
   const { userId, has } = await auth();
-  if (!userId) return { error: "Unauthorized" };
+  if (!userId) return { error: tAct("unauthorized") };
 
   if (!has({ feature: "document_deck_generation" })) {
-    return { error: "Document-based deck generation requires a Pro plan with this feature enabled." };
+    return { error: tAct("documentDeckProRequired") };
   }
 
   const parsed = createDeckFromDocumentSchema.safeParse(input);
@@ -107,25 +111,29 @@ export async function createDeckFromDocumentAction(input: CreateDeckFromDocument
 
   const ext = fileName.toLowerCase().slice(fileName.lastIndexOf("."));
   if (!allowedDocExtensions.has(ext)) {
-    return { error: "Unsupported file type. Upload a .pdf, .docx, or .pptx file." };
+    return { error: tAct("unsupportedFileType") };
   }
 
   let buffer: Buffer;
   try {
     buffer = Buffer.from(fileBase64, "base64");
   } catch {
-    return { error: "Invalid file data." };
+    return { error: tAct("invalidFileData") };
   }
 
   if (buffer.length === 0 || buffer.length > MAX_UPLOAD_BYTES) {
-    return { error: `File must be non-empty and at most ${MAX_UPLOAD_BYTES / (1024 * 1024)} MB.` };
+    return {
+      error: tAct("fileSizeExceeded", {
+        maxMb: MAX_UPLOAD_BYTES / (1024 * 1024),
+      }),
+    };
   }
 
   const hasUnlimitedDecks = has({ feature: "unlimited_decks" });
   if (!hasUnlimitedDecks) {
     const deckCount = await getDeckCountByUser(userId);
     if (deckCount >= FREE_DECK_LIMIT) {
-      return { error: "You've reached the 3-deck limit on the free plan. Upgrade to Pro for unlimited decks." };
+      return { error: tAct("deckLimitReached") };
     }
   }
 
@@ -135,9 +143,9 @@ export async function createDeckFromDocumentAction(input: CreateDeckFromDocument
   } catch (err) {
     const code = err instanceof Error ? err.message : "";
     if (code === "NO_TEXT") {
-      return { error: "Could not read any text from this file. Try another format or export." };
+      return { error: tAct("noTextInFile") };
     }
-    return { error: "Could not read this document. Check the file and try again." };
+    return { error: tAct("documentReadError") };
   }
 
   const { output } = await generateText({
@@ -158,7 +166,7 @@ ${documentText}
   });
 
   if (!output) {
-    return { error: "Could not generate a deck from this document. Try again with a clearer file." };
+    return { error: tAct("deckGenFailed") };
   }
 
   const deck = await insertDeckWithCards(
@@ -171,7 +179,7 @@ ${documentText}
   );
 
   if (!deck) {
-    return { error: "Failed to save the deck. Please try again." };
+    return { error: tAct("saveDeckFailed") };
   }
 
   revalidatePath("/dashboard");
@@ -179,13 +187,11 @@ ${documentText}
   return { success: true, deckUuid: deck.uuid };
 }
 
-const updateDeckSchema = z.object({
-  deckUuid: z.string().uuid(),
-  name: z.string().min(1, "Name is required").max(255),
-  description: z.string().max(1000).optional(),
-});
-
-type UpdateDeckInput = z.infer<typeof updateDeckSchema>;
+type UpdateDeckInput = {
+  deckUuid: string;
+  name: string;
+  description?: string;
+};
 
 /**
  * Updates the name and description of an existing deck.
@@ -197,8 +203,16 @@ type UpdateDeckInput = z.infer<typeof updateDeckSchema>;
  *   deck not found, or validation fails
  */
 export async function updateDeckAction(input: UpdateDeckInput) {
+  const tVal = await getTranslations("Validation");
+  const tAct = await getTranslations("Actions");
+  const updateDeckSchema = z.object({
+    deckUuid: z.string().uuid(),
+    name: z.string().min(1, tVal("nameRequired")).max(255),
+    description: z.string().max(1000).optional(),
+  });
+
   const { userId } = await auth();
-  if (!userId) return { error: "Unauthorized" };
+  if (!userId) return { error: tAct("unauthorized") };
 
   const parsed = updateDeckSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
@@ -210,18 +224,14 @@ export async function updateDeckAction(input: UpdateDeckInput) {
     description: description ?? null,
   });
 
-  if (!updated.length) return { error: "Deck not found" };
+  if (!updated.length) return { error: tAct("deckNotFound") };
 
   revalidatePath("/dashboard");
   revalidatePath(`/decks/${deckUuid}`);
   return { success: true };
 }
 
-const deleteDeckSchema = z.object({
-  deckUuid: z.string().uuid(),
-});
-
-type DeleteDeckInput = z.infer<typeof deleteDeckSchema>;
+type DeleteDeckInput = { deckUuid: string };
 
 /**
  * Permanently deletes a deck and all its associated cards.
@@ -233,8 +243,13 @@ type DeleteDeckInput = z.infer<typeof deleteDeckSchema>;
  *   or the deck is not found
  */
 export async function deleteDeckAction(input: DeleteDeckInput) {
+  const tAct = await getTranslations("Actions");
+  const deleteDeckSchema = z.object({
+    deckUuid: z.string().uuid(),
+  });
+
   const { userId } = await auth();
-  if (!userId) return { error: "Unauthorized" };
+  if (!userId) return { error: tAct("unauthorized") };
 
   const parsed = deleteDeckSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.flatten() };
@@ -242,7 +257,7 @@ export async function deleteDeckAction(input: DeleteDeckInput) {
   const { deckUuid } = parsed.data;
 
   const deleted = await deleteDeckByUuidAndUser(deckUuid, userId);
-  if (!deleted.length) return { error: "Deck not found" };
+  if (!deleted.length) return { error: tAct("deckNotFound") };
 
   revalidatePath("/dashboard");
   revalidatePath(`/decks/${deckUuid}`);

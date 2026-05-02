@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
+import { renderWithIntl } from "@/test/render-with-intl";
 import { BackButton } from "./back-button";
 
 const mockBack = vi.fn();
@@ -9,12 +10,12 @@ vi.mock("next/navigation", () => ({
 }));
 
 test("renders a Back button", () => {
-  render(<BackButton />);
+  renderWithIntl(<BackButton />);
   expect(screen.getByRole("button", { name: /back/i })).toBeDefined();
 });
 
 test("calls router.back when clicked", () => {
-  render(<BackButton />);
+  renderWithIntl(<BackButton />);
   fireEvent.click(screen.getByRole("button", { name: /back/i }));
   expect(mockBack).toHaveBeenCalledTimes(1);
 });

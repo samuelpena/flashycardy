@@ -1,0 +1,247 @@
+{
+  "Metadata": {
+    "title": "Flashy Cardy",
+    "description": "Aprende de todo creando, gestionando y estudiando tarjetas de memoria."
+  },
+  "HomePage": {
+    "heading": "Flashycardy",
+    "tagline": "Tu plataforma personal de tarjetas"
+  },
+  "Auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse"
+  },
+  "Common": {
+    "appName": "FlashyCardy",
+    "cancel": "Cancelar",
+    "save": "Guardar cambios",
+    "saving": "Guardando…",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "name": "Nombre",
+    "description": "Descripción",
+    "descriptionOptional": "(opcional)",
+    "front": "Frente",
+    "back": "Reverso",
+    "somethingWentWrong": "Algo salió mal.",
+    "checkForm": "Revisa el formulario e inténtalo de nuevo.",
+    "tryAgain": "Algo salió mal. Inténtalo de nuevo.",
+    "deckLimitBanner": "{used}/{limit} mazos usados",
+    "cardCount": "{count, plural, one {# tarjeta} other {# tarjetas}}",
+    "updatedLabel": "Actualizado {date}",
+    "openDeckAria": "Abrir {name}"
+  },
+  "Settings": {
+    "title": "Ajustes",
+    "loading": "Cargando ajustes…",
+    "language": "Idioma",
+    "languageOption_en": "Inglés",
+    "languageOption_es": "Español",
+    "helperSaving": "Guardando…",
+    "helperDefault": "Elige tu idioma preferido.",
+    "saved": "Idioma guardado.",
+    "saveError": "No se pudo guardar el idioma. Inténtalo de nuevo."
+  },
+  "ClerkProfile": {
+    "settingsLabel": "Ajustes"
+  },
+  "Dashboard": {
+    "title": "Tus mazos",
+    "subtitle": "Gestiona y estudia tus mazos de tarjetas.",
+    "analytics": "Analíticas",
+    "emptyTitle": "Aún no hay mazos",
+    "emptyDescription": "Crea tu primer mazo para empezar a crear y estudiar tarjetas.",
+    "createFirstDeck": "Crea tu primer mazo",
+    "fieldName": "Nombre",
+    "fieldDescription": "Descripción",
+    "nameHeader": "Nombre",
+    "descriptionHeader": "Descripción"
+  },
+  "DeckSort": {
+    "updated": "Última actualización",
+    "az": "A → Z",
+    "za": "Z → A"
+  },
+  "CardSort": {
+    "updated": "Última actualización",
+    "az": "A → Z",
+    "za": "Z → A"
+  },
+  "DeckDetail": {
+    "backToDecks": "Volver a mazos",
+    "study": "Estudiar",
+    "generateWithAI": "Generar con IA",
+    "addCard": "Añadir tarjeta",
+    "emptyCardsTitle": "Aún no hay tarjetas",
+    "emptyCardsDescription": "Añade tu primera tarjeta para estudiar este mazo.",
+    "addFirstCard": "Añade tu primera tarjeta",
+    "fieldFront": "Frente",
+    "fieldBack": "Reverso"
+  },
+  "StudyPage": {
+    "backToDeck": "Volver a {name}",
+    "title": "Estudiar: {name}"
+  },
+  "StudyClient": {
+    "emptyTitle": "No hay tarjetas en este mazo",
+    "emptyDescription": "Añade tarjetas para empezar a estudiar.",
+    "sessionComplete": "¡Sesión completada!",
+    "studiedAll": "Estudiaste las {count} {count, plural, one {tarjeta} other {tarjetas}}.",
+    "correct": "Correctas",
+    "incorrect": "Incorrectas",
+    "score": "Puntuación",
+    "skippedOne": "1 tarjeta se omitió sin calificar.",
+    "skippedMany": "{count} tarjetas se omitieron sin calificar.",
+    "savingResults": "Guardando resultados…",
+    "saveFailed": "No se pudieron guardar los resultados.",
+    "shuffleRestart": "Barajar y reiniciar",
+    "restart": "Reiniciar",
+    "shuffle": "Barajar",
+    "flipHint": "Haz clic o pulsa Espacio para voltear",
+    "spaceKey": "Espacio",
+    "didYouGetIt": "¿Lo acertaste?",
+    "previous": "Anterior",
+    "nope": "No",
+    "gotIt": "Sí",
+    "next": "Siguiente",
+    "revealFinish": "Mostrar y terminar",
+    "keyboardHints": "Usa ← → para navegar · Espacio para voltear",
+    "ariaBack": "Tarjeta mostrando el reverso — haz clic para ver el frente",
+    "ariaFront": "Tarjeta mostrando el frente — haz clic para ver el reverso",
+    "ariaMarkIncorrect": "Marcar como incorrecta",
+    "ariaMarkCorrect": "Marcar como correcta",
+    "ariaUpload": "Subir documento: arrastra un archivo o pulsa Entrar para elegir"
+  },
+  "Analytics": {
+    "backToDashboard": "Volver al panel",
+    "title": "Analíticas",
+    "subtitle": "Registro de todas tus sesiones de estudio.",
+    "emptyTitle": "Aún no hay sesiones",
+    "emptyDescription": "Completa una sesión de estudio para ver tu progreso aquí.",
+    "goStudy": "Ir a estudiar un mazo",
+    "colId": "ID",
+    "colDeck": "Mazo",
+    "colTotalCards": "Total tarjetas",
+    "colCorrect": "Correctas",
+    "colIncorrect": "Incorrectas",
+    "colScore": "Puntuación",
+    "colCompletedAt": "Completada"
+  },
+  "Pricing": {
+    "title": "Elige tu plan",
+    "subtitle": "Desbloquea todo el potencial de tu aprendizaje con tarjetas y nuestros planes flexibles."
+  },
+  "BackButton": {
+    "label": "Atrás"
+  },
+  "CreateDeck": {
+    "triggerDefault": "Mazo nuevo",
+    "createFirstDeck": "Crea tu primer mazo",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "p. ej. Vocabulario de español",
+    "descriptionLabel": "Descripción",
+    "descriptionOptional": "(opcional)",
+    "descriptionPlaceholder": "¿De qué trata este mazo?",
+    "creating": "Creando…",
+    "createDeck": "Crear mazo",
+    "limitTitle": "Límite de mazos alcanzado",
+    "limitDescription": "Los planes gratuitos tienen un máximo de 3 mazos. Pásate a Pro para mazos ilimitados y más.",
+    "viewPlans": "Ver planes",
+    "dialogTitle": "Crear un mazo nuevo",
+    "dialogDescriptionTabs": "Introduce nombre y descripción, o genera un mazo desde un documento (Pro).",
+    "dialogDescriptionSimple": "Ponle un nombre y una descripción opcional a tu mazo.",
+    "tabManual": "Nombre y descripción",
+    "tabDocument": "Desde documento",
+    "docIntro": "Sube apuntes o diapositivas en PDF, Word (.docx) o PowerPoint (.pptx). Extraemos el texto, elegimos título y descripción, y añadimos 20 preguntas como tarjetas.",
+    "documentLabel": "Documento",
+    "dragDropLine1": "Arrastra un archivo aquí, o",
+    "chooseFile": "elige archivo",
+    "docHint": "PDF, Word (.docx) o PowerPoint (.pptx), hasta {maxMb} MB",
+    "selected": "Seleccionado:",
+    "noFileSelected": "Ningún archivo seleccionado",
+    "generating": "Generando…",
+    "generateDeck": "Generar mazo",
+    "errorWrongType": "Elige un archivo .pdf, .docx o .pptx.",
+    "errorFileSize": "El archivo debe tener como máximo {maxMb} MB.",
+    "errorSelectDoc": "Selecciona un documento para subir.",
+    "errorReadFile": "No se pudo leer el archivo. Inténtalo de nuevo.",
+    "ariaUpload": "Subir documento: arrastra un archivo o pulsa Entrar para elegir"
+  },
+  "EditDeck": {
+    "title": "Editar mazo",
+    "description": "Actualiza el nombre y la descripción de este mazo.",
+    "namePlaceholder": "Nombre del mazo",
+    "descriptionPlaceholder": "Descripción opcional",
+    "editAria": "Editar mazo",
+    "editSrOnly": "Editar mazo"
+  },
+  "EditDeckPage": {
+    "descriptionOptional": "(opcional)",
+    "descriptionPlaceholder": "¿De qué trata este mazo?"
+  },
+  "DeleteDeck": {
+    "title": "¿Eliminar «{name}»?",
+    "description": "No se puede deshacer. El mazo se eliminará de tu biblioteca. {cards}",
+    "cardsNone": "No hay tarjetas en este mazo.",
+    "cardsOne": "La única tarjeta de este mazo se eliminará permanentemente.",
+    "cardsMany": "Las {count} tarjetas de este mazo se eliminarán permanentemente.",
+    "deleteDeck": "Eliminar mazo",
+    "deleting": "Eliminando…",
+    "deleteAria": "Eliminar mazo",
+    "deleteSrOnly": "Eliminar mazo",
+    "buttonDeleteDeck": "Eliminar mazo"
+  },
+  "AddCard": {
+    "title": "Añadir tarjeta",
+    "description": "Crea una tarjeta nueva para este mazo. Añade contenido al frente y al reverso.",
+    "frontPlaceholder": "Frente de la tarjeta",
+    "backPlaceholder": "Reverso de la tarjeta",
+    "creating": "Creando…",
+    "createCard": "Crear tarjeta",
+    "triggerDefault": "Añadir tarjeta"
+  },
+  "EditCard": {
+    "title": "Editar tarjeta",
+    "description": "Actualiza el frente y el reverso de esta tarjeta.",
+    "frontPlaceholder": "Frente de la tarjeta",
+    "backPlaceholder": "Reverso de la tarjeta",
+    "editSrOnly": "Editar tarjeta"
+  },
+  "DeleteCard": {
+    "title": "¿Eliminar tarjeta?",
+    "description": "Esta acción no se puede deshacer. La tarjeta se eliminará permanentemente.",
+    "deleting": "Eliminando…",
+    "deleteSrOnly": "Eliminar tarjeta"
+  },
+  "GenerateCards": {
+    "tooltipNeedDescription": "Añade primero una descripción al mazo para que la IA pueda generar tarjetas relevantes.",
+    "generating": "Generando…",
+    "failedGeneric": "No se pudieron generar las tarjetas."
+  },
+  "DashboardTour": {
+    "step1Title": "Crea un mazo nuevo",
+    "step1Content": "«Mazo nuevo» es donde creas un mazo de tarjetas. ¡Haz clic para añadir tu primer mazo y empezar a estudiar!"
+  },
+  "Actions": {
+    "unauthorized": "No autorizado",
+    "deckLimitReached": "Has alcanzado el límite de 3 mazos en el plan gratuito. Pásate a Pro para mazos ilimitados.",
+    "documentDeckProRequired": "Generar mazos desde documentos requiere un plan Pro con esta función activada.",
+    "unsupportedFileType": "Tipo de archivo no admitido. Sube un .pdf, .docx o .pptx.",
+    "invalidFileData": "Datos de archivo no válidos.",
+    "fileSizeExceeded": "El archivo debe ser no vacío y de como máximo {maxMb} MB.",
+    "noTextInFile": "No se pudo leer texto de este archivo. Prueba otro formato o exportación.",
+    "documentReadError": "No se pudo leer este documento. Revisa el archivo e inténtalo de nuevo.",
+    "deckGenFailed": "No se pudo generar un mazo desde este documento. Prueba con un archivo más claro.",
+    "saveDeckFailed": "No se pudo guardar el mazo. Inténtalo de nuevo.",
+    "deckNotFound": "Mazo no encontrado",
+    "cardNotFound": "Tarjeta no encontrada",
+    "aiGenProRequired": "La generación de tarjetas con IA requiere un plan Pro.",
+    "addDescriptionFirst": "Añade una descripción al mazo antes de generar tarjetas.",
+    "generateCardsFailed": "No se pudieron generar las tarjetas. Inténtalo de nuevo."
+  },
+  "Validation": {
+    "nameRequired": "El nombre es obligatorio",
+    "frontRequired": "El frente es obligatorio",
+    "backRequired": "El reverso es obligatorio"
+  }
+}

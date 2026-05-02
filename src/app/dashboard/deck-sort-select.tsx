@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Select,
   SelectContent,
@@ -11,20 +12,21 @@ import {
 
 export type DeckSortOption = "updated" | "az" | "za";
 
-const SORT_LABELS: Record<DeckSortOption, string> = {
-  updated: "Last updated",
-  az: "A → Z",
-  za: "Z → A",
-};
-
 interface DeckSortSelectProps {
   currentSort: DeckSortOption;
 }
 
 export function DeckSortSelect({ currentSort }: DeckSortSelectProps) {
+  const t = useTranslations("DeckSort");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const labels: Record<DeckSortOption, string> = {
+    updated: t("updated"),
+    az: t("az"),
+    za: t("za"),
+  };
 
   function handleChange(value: DeckSortOption | null) {
     const params = new URLSearchParams(searchParams.toString());
@@ -41,12 +43,12 @@ export function DeckSortSelect({ currentSort }: DeckSortSelectProps) {
   return (
     <Select value={currentSort} onValueChange={handleChange}>
       <SelectTrigger className="w-[140px]">
-        <SelectValue>{SORT_LABELS[currentSort]}</SelectValue>
+        <SelectValue>{labels[currentSort]}</SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {(Object.keys(SORT_LABELS) as DeckSortOption[]).map((key) => (
+        {(Object.keys(labels) as DeckSortOption[]).map((key) => (
           <SelectItem key={key} value={key}>
-            {SORT_LABELS[key]}
+            {labels[key]}
           </SelectItem>
         ))}
       </SelectContent>

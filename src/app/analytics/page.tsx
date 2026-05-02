@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { getAllStudySessionsByUser } from "@/db/queries/study-sessions";
 import {
   Table,
@@ -27,6 +28,9 @@ export default async function AnalyticsPage() {
   const { userId } = await auth();
   if (!userId) redirect("/");
 
+  const t = await getTranslations("Analytics");
+  const format = await getFormatter();
+
   const sessions = await getAllStudySessionsByUser(userId);
 
   return (
@@ -37,14 +41,14 @@ export default async function AnalyticsPage() {
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit mb-1"
         >
           <ArrowLeftIcon className="size-3.5" />
-          Back to dashboard
+          {t("backToDashboard")}
         </Link>
         <div className="flex flex-col gap-1 pt-4">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Analytics
+            {t("title")}
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base">
-            A record of all your study sessions.
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -55,13 +59,13 @@ export default async function AnalyticsPage() {
             <BarChart2Icon className="size-6 text-muted-foreground" />
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-lg font-semibold">No sessions yet</p>
+            <p className="text-lg font-semibold">{t("emptyTitle")}</p>
             <p className="text-sm text-muted-foreground max-w-xs">
-              Complete a study session to start tracking your progress here.
+              {t("emptyDescription")}
             </p>
           </div>
           <Button variant="secondary" nativeButton={false} render={<Link href="/dashboard" />}>
-            Go study a deck
+            {t("goStudy")}
           </Button>
         </div>
       ) : (
@@ -69,13 +73,13 @@ export default async function AnalyticsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Deck</TableHead>
-                <TableHead className="text-center">Total Cards</TableHead>
-                <TableHead className="text-center">Correct</TableHead>
-                <TableHead className="text-center">Incorrect</TableHead>
-                <TableHead className="text-center">Score</TableHead>
-                <TableHead>Completed At</TableHead>
+                <TableHead>{t("colId")}</TableHead>
+                <TableHead>{t("colDeck")}</TableHead>
+                <TableHead className="text-center">{t("colTotalCards")}</TableHead>
+                <TableHead className="text-center">{t("colCorrect")}</TableHead>
+                <TableHead className="text-center">{t("colIncorrect")}</TableHead>
+                <TableHead className="text-center">{t("colScore")}</TableHead>
+                <TableHead>{t("colCompletedAt")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -118,13 +122,10 @@ export default async function AnalyticsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {new Intl.DateTimeFormat("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
-                      }).format(new Date(session.completedAt))}
+                      {format.dateTime(new Date(session.completedAt), {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
                     </TableCell>
                   </TableRow>
                 );

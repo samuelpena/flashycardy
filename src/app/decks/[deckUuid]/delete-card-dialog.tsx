@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -21,6 +22,8 @@ interface DeleteCardDialogProps {
 }
 
 export function DeleteCardDialog({ cardUuid, deckUuid }: DeleteCardDialogProps) {
+  const t = useTranslations("DeleteCard");
+  const tCommon = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -40,20 +43,19 @@ export function DeleteCardDialog({ cardUuid, deckUuid }: DeleteCardDialogProps) 
         onClick={() => setOpen(true)}
       >
         <Trash2Icon className="size-3.5" />
-        <span className="sr-only">Delete card</span>
+        <span className="sr-only">{t("deleteSrOnly")}</span>
       </Button>
 
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete card?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The card will be permanently
-              deleted.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("description")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>
+              {tCommon("cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
@@ -62,7 +64,7 @@ export function DeleteCardDialog({ cardUuid, deckUuid }: DeleteCardDialogProps) 
               disabled={isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isPending ? "Deleting…" : "Delete"}
+              {isPending ? t("deleting") : tCommon("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

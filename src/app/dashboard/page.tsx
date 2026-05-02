@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { getDecksByUser } from "@/db/queries/decks";
 import {
   Card,
@@ -39,6 +40,11 @@ export default async function DashboardPage({
   const { userId, has } = await auth();
   if (!userId) redirect("/");
 
+  const t = await getTranslations("Dashboard");
+  const tCommon = await getTranslations("Common");
+  const format = await getFormatter();
+  const locale = await getLocale();
+
   const { page: pageParam, sort: rawSort } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
   const sort: DeckSortOption =
@@ -50,16 +56,18 @@ export default async function DashboardPage({
   ]);
 
   const sessionCounts = new Map(
-    sessionCountRows.map((r) => [r.deckUuid, r.sessionCount])
+    sessionCountRows.map((r) => [r.deckUuid, r.sessionCount]),
   );
 
   const hasUnlimitedDecks = has({ feature: "unlimited_decks" });
-  const canGenerateDeckFromDocument = has({ feature: "document_deck_generation" });
+  const canGenerateDeckFromDocument = has({
+    feature: "document_deck_generation",
+  });
   const limitReached = !hasUnlimitedDecks && userDecks.length >= FREE_DECK_LIMIT;
 
   const sortedDecks = [...userDecks].sort((a, b) => {
-    if (sort === "az") return a.name.localeCompare(b.name);
-    if (sort === "za") return b.name.localeCompare(a.name);
+    if (sort === "az") return a.name.localeCompare(b.name, locale);
+    if (sort === "za") return b.name.localeCompare(a.name, locale);
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
   });
 
@@ -78,7 +86,10 @@ export default async function DashboardPage({
     return `/dashboard?${params.toString()}`;
   }
 
-  function getPageNumbers(current: number, total: number): (number | "ellipsis")[] {
+  function getPageNumbers(
+    current: number,
+    total: number,
+  ): (number | "ellipsis")[] {
     if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
 
     const pages: (number | "ellipsis")[] = [1];
@@ -100,21 +111,30 @@ export default async function DashboardPage({
       <DashboardTour />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Decks</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            {t("title")}
+          </h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-            Manage and study your flashcard decks.
+            {t("subtitle")}
             {!hasUnlimitedDecks && (
               <span className="ml-2 text-xs">
-                {userDecks.length}/{FREE_DECK_LIMIT} decks used
+                {tCommon("deckLimitBanner", {
+                  used: userDecks.length,
+                  limit: FREE_DECK_LIMIT,
+                })}
               </span>
             )}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:shrink-0">
           {userDecks.length > 0 && <DeckSortSelect currentSort={sort} />}
-          <Button variant="outline" nativeButton={false} render={<Link href="/analytics" />}>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href="/analytics" />}
+          >
             <BarChart2Icon className="size-4" />
-            Analytics
+            {t("analytics")}
           </Button>
           <CreateDeckDialog
             limitReached={limitReached}
@@ -130,13 +150,13 @@ export default async function DashboardPage({
             <LayersIcon className="size-6 text-muted-foreground" />
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-lg font-semibold">No decks yet</p>
+            <p className="text-lg font-semibold">{t("emptyTitle")}</p>
             <p className="text-sm text-muted-foreground max-w-xs">
-              Create your first deck to start building and studying flashcards.
+              {t("emptyDescription")}
             </p>
           </div>
           <CreateDeckDialog
-            triggerLabel="Create your first deck"
+            emptyStateTrigger
             limitReached={limitReached}
             canGenerateDeckFromDocument={canGenerateDeckFromDocument}
           />
@@ -145,31 +165,34 @@ export default async function DashboardPage({
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {paginatedDecks.map((deck) => (
-              <Card key={deck.uuid} className="relative flex flex-col hover:border-primary/50 transition-colors cursor-pointer">
+              <Card
+                key={deck.uuid}
+                className="relative flex flex-col hover:border-primary/50 transition-colors cursor-pointer"
+              >
                 <Link
                   href={`/decks/${deck.uuid}`}
                   className="absolute inset-0 rounded-xl"
-                  aria-label={`Open ${deck.name}`}
+                  aria-label={tCommon("openDeckAria", { name: deck.name })}
                 />
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex flex-col gap-1 flex-1 min-w-0">
                       <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Name
+                        {t("nameHeader")}
                       </CardTitle>
                       <p className="text-sm font-medium leading-snug line-clamp-2 h-[2.625rem]">
                         {deck.name}
                       </p>
                     </div>
                     <Badge variant="secondary" className="relative z-10 shrink-0">
-                      {deck.cardCount} {deck.cardCount === 1 ? "card" : "cards"}
+                      {tCommon("cardCount", { count: deck.cardCount })}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-2 pt-0">
                   <div className="h-px w-full bg-border" />
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Description
+                    {t("descriptionHeader")}
                   </p>
                   <p className="text-sm text-muted-foreground leading-snug line-clamp-3 h-[3.8rem]">
                     {deck.description ?? ""}
@@ -178,12 +201,11 @@ export default async function DashboardPage({
                 <CardFooter className="relative z-10 pt-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <p className="text-xs text-muted-foreground">
-                      Updated{" "}
-                      {new Intl.DateTimeFormat("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      }).format(deck.updatedAt)}
+                      {tCommon("updatedLabel", {
+                        date: format.dateTime(deck.updatedAt, {
+                          dateStyle: "medium",
+                        }),
+                      })}
                     </p>
                     {(sessionCounts.get(deck.uuid) ?? 0) > 0 && (
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -216,7 +238,9 @@ export default async function DashboardPage({
                   <PaginationPrevious
                     href={buildPageHref(safePage - 1)}
                     aria-disabled={safePage === 1}
-                    className={safePage === 1 ? "pointer-events-none opacity-50" : ""}
+                    className={
+                      safePage === 1 ? "pointer-events-none opacity-50" : ""
+                    }
                   />
                 </PaginationItem>
 
@@ -241,7 +265,11 @@ export default async function DashboardPage({
                   <PaginationNext
                     href={buildPageHref(safePage + 1)}
                     aria-disabled={safePage === totalPages}
-                    className={safePage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    className={
+                      safePage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }
                   />
                 </PaginationItem>
               </PaginationContent>

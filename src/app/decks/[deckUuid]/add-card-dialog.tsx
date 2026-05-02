@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { PlusIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,6 +22,8 @@ interface AddCardDialogProps {
 }
 
 export function AddCardDialog({ deckUuid, trigger }: AddCardDialogProps) {
+  const t = useTranslations("AddCard");
+  const tCommon = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
@@ -47,7 +50,7 @@ export function AddCardDialog({ deckUuid, trigger }: AddCardDialogProps) {
         setError(
           typeof result.error === "string"
             ? result.error
-            : "Please check the form and try again."
+            : tCommon("checkForm"),
         );
         return;
       }
@@ -62,7 +65,7 @@ export function AddCardDialog({ deckUuid, trigger }: AddCardDialogProps) {
         {trigger ?? (
           <Button>
             <PlusIcon className="size-4" />
-            Add Card
+            {t("triggerDefault")}
           </Button>
         )}
       </span>
@@ -70,33 +73,30 @@ export function AddCardDialog({ deckUuid, trigger }: AddCardDialogProps) {
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add New Card</DialogTitle>
-            <DialogDescription>
-              Create a new flashcard for this deck. Add content for both the
-              front and back of the card.
-            </DialogDescription>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription>{t("description")}</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="card-front">Front</Label>
+              <Label htmlFor="card-front">{tCommon("front")}</Label>
               <Input
                 id="card-front"
                 value={front}
                 onChange={(e) => setFront(e.target.value)}
-                placeholder="Front of the card"
+                placeholder={t("frontPlaceholder")}
                 required
                 disabled={isPending}
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="card-back">Back</Label>
+              <Label htmlFor="card-back">{tCommon("back")}</Label>
               <Input
                 id="card-back"
                 value={back}
                 onChange={(e) => setBack(e.target.value)}
-                placeholder="Back of the card"
+                placeholder={t("backPlaceholder")}
                 required
                 disabled={isPending}
               />
@@ -111,10 +111,10 @@ export function AddCardDialog({ deckUuid, trigger }: AddCardDialogProps) {
                 onClick={() => handleOpenChange(false)}
                 disabled={isPending}
               >
-                Cancel
+                {tCommon("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Creating…" : "Create Card"}
+                {isPending ? t("creating") : t("createCard")}
               </Button>
             </DialogFooter>
           </form>

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { PencilIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,6 +27,9 @@ export function EditDeckDialog({
   initialName,
   initialDescription,
 }: EditDeckDialogProps) {
+  const t = useTranslations("EditDeck");
+  const tPage = useTranslations("EditDeckPage");
+  const tCommon = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription ?? "");
@@ -56,7 +60,7 @@ export function EditDeckDialog({
         setError(
           typeof result.error === "string"
             ? result.error
-            : "Please check the form and try again."
+            : tCommon("checkForm"),
         );
         return;
       }
@@ -69,23 +73,23 @@ export function EditDeckDialog({
     <>
       <Button variant="outline" onClick={() => setOpen(true)}>
         <PencilIcon className="size-4" />
-        Edit
+        {tCommon("edit")}
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Deck</DialogTitle>
+            <DialogTitle>{t("title")}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="deck-name">Name</Label>
+              <Label htmlFor="deck-name">{tCommon("name")}</Label>
               <Input
                 id="deck-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Deck name"
+                placeholder={t("namePlaceholder")}
                 required
                 disabled={isPending}
               />
@@ -93,16 +97,16 @@ export function EditDeckDialog({
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="deck-description">
-                Description{" "}
+                {tCommon("description")}{" "}
                 <span className="text-muted-foreground font-normal">
-                  (optional)
+                  {tPage("descriptionOptional")}
                 </span>
               </Label>
               <Textarea
                 id="deck-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="What is this deck about?"
+                placeholder={tPage("descriptionPlaceholder")}
                 rows={3}
                 disabled={isPending}
               />
@@ -119,10 +123,10 @@ export function EditDeckDialog({
                 onClick={() => handleOpenChange(false)}
                 disabled={isPending}
               >
-                Cancel
+                {tCommon("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Saving…" : "Save changes"}
+                {isPending ? tCommon("saving") : tCommon("save")}
               </Button>
             </DialogFooter>
           </form>

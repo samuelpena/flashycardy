@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithIntl } from "@/test/render-with-intl";
 import { AuthButtons } from "./auth-buttons";
 
 vi.mock("@clerk/nextjs", () => ({
@@ -8,7 +9,7 @@ vi.mock("@clerk/nextjs", () => ({
 }));
 
 test("renders Sign in and Sign up buttons", () => {
-  render(<AuthButtons />);
+  renderWithIntl(<AuthButtons />);
   expect(screen.getByRole("button", { name: /sign in/i })).toBeDefined();
   expect(screen.getByRole("button", { name: /sign up/i })).toBeDefined();
 });

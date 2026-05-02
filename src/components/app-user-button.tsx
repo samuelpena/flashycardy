@@ -1,6 +1,7 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { Settings } from "lucide-react";
 import { SettingsPage } from "@/components/settings-page";
 
@@ -8,10 +9,12 @@ import { SettingsPage } from "@/components/settings-page";
  * Renders the Clerk user menu with an in-profile Settings page.
  */
 export function AppUserButton() {
+  const t = useTranslations("ClerkProfile");
+
   return (
     <UserButton>
       <UserButton.UserProfilePage
-        label="Settings"
+        label={t("settingsLabel")}
         labelIcon={
           <Settings
             aria-hidden
