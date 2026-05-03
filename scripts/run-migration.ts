@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "@dotenvx/dotenvx/config";
 import { neon } from "@neondatabase/serverless";
 
 async function main() {
