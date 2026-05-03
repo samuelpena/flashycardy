@@ -39,6 +39,7 @@
     "languageOption_es": "Spanish",
     "helperSaving": "Saving…",
     "helperDefault": "Choose your preferred language.",
+    "save": "Save",
     "saved": "Language saved.",
     "saveError": "Unable to save language. Please try again."
   },

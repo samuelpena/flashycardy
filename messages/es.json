@@ -39,11 +39,12 @@
     "languageOption_es": "Español",
     "helperSaving": "Guardando…",
     "helperDefault": "Elige tu idioma preferido.",
+    "save": "Guardar",
     "saved": "Idioma guardado.",
     "saveError": "No se pudo guardar el idioma. Inténtalo de nuevo."
   },
   "ClerkProfile": {
-    "settingsLabel": "Ajustes"
+    "settingsLabel": "Settings"
   },
   "Dashboard": {
     "title": "Tus mazos",
