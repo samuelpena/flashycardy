@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "dotenvx run --convention=nextjs -- sh -c 'pnpm run test:unit && next dev'",
+    "dev": "dotenvx run --convention=nextjs -- sh -c 'pnpm test:unit && pnpm db:migrate:dev:programmatic && next dev'",
     "build": "dotenvx run --convention=nextjs -- next build",
+    "vercel-build": "pnpm run db:migrate:prod:programmatic && next build",
     "start": "dotenvx run --convention=nextjs -- next start",
     "lint": "eslint",
     "db:generate:prod": "dotenvx run --convention=nextjs -- drizzle-kit generate --config=drizzle.config.ts",
