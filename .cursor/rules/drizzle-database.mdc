@@ -9,9 +9,7 @@ All database access must go through Drizzle ORM. Never use raw SQL strings or di
 
 ## Schema
 
-Tables and relations are defined in `src/db/schema.ts`:
-- `decks` — belongs to a `clerkUserId`, has many `cards`
-- `cards` — belongs to a `deckId` (cascades on delete)
+Tables live in **`src/db/schema/`** as **domain files** (e.g. `decks.ts`, `cards.ts`); **`src/db/schema/index.ts`** re-exports tables and **`relations`** for Drizzle Kit and `db.query`. See **`drizzle-schema-migrations.mdc`** for layout rules and the generate/migrate workflow.
 
 Always import tables and relations from `@/db/schema`, and the `db` client from `@/db`.
 
@@ -46,27 +44,18 @@ await db.delete(cards).where(eq(cards.id, cardId));
 
 ## Schema Changes — Codebase First
 
-This project follows the **codebase first** approach: `src/db/schema.ts` is the source of truth, kept under version control. Never alter the database directly.
+This project follows the **codebase first** approach: **`src/db/schema/`** is the source of truth, kept under version control. Never alter the database directly to “fix” drift without a generated migration.
 
 ### Workflow
 
-1. **Edit the schema** in `src/db/schema.ts`
-2. **Generate a migration** — compares current schema against the previous snapshot and writes a new SQL migration file:
-   ```bash
-   pnpm db:generate
-   # → drizzle/migrations/<timestamp>_<name>/migration.sql
-   ```
-3. **Apply the migration** — reads unapplied migration files, checks the database's migration history, then runs only new migrations:
-   ```bash
-   pnpm db:migrate
-   ```
+Development migrations live under **`drizzle/dev/`** (`drizzle.dev.config.ts`); production under **`drizzle/prod/`** (`drizzle.config.ts`). For the full step-by-step (including **`pnpm db:generate:dev`** and **`pnpm db:migrate:dev:programmatic`**), follow **`drizzle-schema-migrations.mdc`**.
 
 ### How `drizzle-kit generate` works
 
-- Reads the previous migration snapshots from `drizzle/`
+- Reads the previous migration snapshots from the config’s **`out`** folder (`drizzle/dev` or `drizzle/prod`)
 - Diffs current schema against the last snapshot
 - Prompts for renames when needed
-- Writes a new `migration.sql` + `snapshot.json` into a timestamped folder
+- Writes a new `migration.sql` + `snapshot.json` into a timestamped folder under that **`out`** path
 
 ### How `drizzle-kit migrate` works
 
@@ -76,8 +65,7 @@ This project follows the **codebase first** approach: `src/db/schema.ts` is the 
 
 ### Rules
 
-- All schema changes go in `src/db/schema.ts` — never write raw `ALTER TABLE` or `CREATE TABLE` statements by hand
-- Always run `pnpm db:generate` after every schema change to produce a versioned migration file
-- Always run `pnpm db:migrate` to apply pending migrations — never skip straight to pushing changes
-- Commit both the updated `schema.ts` and the generated migration files together
+- All schema changes go in **`src/db/schema/`** — never write raw `ALTER TABLE` or `CREATE TABLE` statements by hand; use **Drizzle Kit** to generate SQL.
+- After schema edits, run **`pnpm db:generate:dev`** (dev) or **`pnpm db:generate:prod`** (prod track), then apply with the matching **programmatic** migrate script — never skip migrations for persisted environments.
+- Commit updated schema files and the generated migration folders together.
 - Never use `drizzle-kit push` in production — it bypasses the migration history and is for prototyping only
