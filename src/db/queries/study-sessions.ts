@@ -1,5 +1,10 @@
 import { db } from "@/db";
-import { studySessions, studySessionCards, decks, cards } from "@/db/schema";
+import {
+  studySessions,
+  studySessionCards,
+  decks,
+  cards,
+} from "@/db/schema";
 import { eq, desc, and, isNotNull, sql, count, inArray } from "drizzle-orm";
 
 type CardResult = {
