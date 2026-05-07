@@ -4,7 +4,7 @@
 .cursor/
 
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -47,3 +47,12 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# monorepo (Next app)
+apps/web/.next/
+apps/web/out/
+apps/web/playwright-report/
+apps/web/test-results/
+
+# turborepo
+.turbo

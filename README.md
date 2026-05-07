@@ -27,7 +27,7 @@ A full-stack flashcard application for creating, managing, and studying flashcar
 ## Architecture
 
 ```
-src/
+apps/web/src/
 ├── actions/          # Server Actions for mutations (cards, decks)
 ├── app/              # Next.js App Router pages and layouts
 │   ├── dashboard/    # User dashboard (deck list)
@@ -44,8 +44,8 @@ src/
 ```
 
 **Data flow:**
-- **Data fetching** happens in Server Components via query helpers in `src/db/queries/`
-- **Mutations** go through Server Actions in `src/actions/` which delegate to query helpers
+- **Data fetching** happens in Server Components via query helpers in `apps/web/src/db/queries/`
+- **Mutations** go through Server Actions in `apps/web/src/actions/` which delegate to query helpers
 - **AI card generation** is a Server Action that calls OpenAI through the Vercel AI SDK, validates output with Zod, and bulk-inserts cards into the database
 - **Auth** is enforced on every server-side operation via Clerk's `auth()` — all queries are scoped to the authenticated user
 
@@ -60,13 +60,15 @@ src/
 
 ### 1. Install dependencies
 
+From the repository root (pnpm workspace):
+
 ```bash
-npm install
+pnpm install
 ```
 
 ### 2. Set up environment variables
 
-Create a `.env` file in the project root:
+Keep `.env`, `.env.development`, and `.env.production` in the **repository root**. Scripts under `apps/web` load them via paths like `../../.env`.
 
 ```env
 DATABASE_URL=postgresql://user:password@host/database?sslmode=require
@@ -78,25 +80,29 @@ OPENAI_API_KEY=sk-proj-...
 ### 3. Run database migrations
 
 ```bash
-npx drizzle-kit generate
-npx drizzle-kit migrate
+pnpm --filter @flashycardy/web db:generate:dev
+pnpm --filter @flashycardy/web db:migrate:dev:programmatic
 ```
 
 ### 4. Start the development server
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Vercel (monorepo)
+
+Set the Vercel project **Root Directory** to `apps/web`, turn on **Include files outside the root directory in the Build Step**, and keep the production **Build Command** using `vercel-build` from `apps/web` (migrations + `next build`). Environment variables remain on the Vercel project unchanged.
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Create production build |
-| `npm start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npx drizzle-kit generate` | Generate Drizzle migrations from schema |
-| `npx drizzle-kit migrate` | Apply migrations to database |
+| `pnpm dev` | Start `apps/web` via Turborepo |
+| `pnpm build` | Production build for `apps/web` |
+| `pnpm --filter @flashycardy/web start` | Start production server |
+| `pnpm lint` | Run ESLint for `apps/web` |
+| `pnpm --filter @flashycardy/web db:generate:dev` | Generate dev Drizzle migrations |
+| `pnpm --filter @flashycardy/web db:migrate:dev:programmatic` | Apply dev migrations programmatically |
