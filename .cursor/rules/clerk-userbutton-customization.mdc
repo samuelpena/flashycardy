@@ -1,0 +1,88 @@
+---
+description: Extending the Clerk UserButton with custom menu items, links, and pages
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Clerk UserButton Customization
+
+Extend `<UserButton />` with custom actions, links, and pages using Clerk's built-in sub-components. Never build a separate settings menu outside of `<UserButton />`.
+
+## Custom Menu Items
+
+Two types of custom items are available:
+
+- `<UserButton.Action>` — triggers an action or opens a custom profile page
+- `<UserButton.Link>` — navigates to an internal or external URL
+
+All custom items go inside `<UserButton.MenuItems>`.
+
+## Adding an Action
+
+```tsx
+<UserButton>
+  <UserButton.MenuItems>
+    <UserButton.Action
+      label="App Settings"
+      labelIcon={<SettingsIcon />}
+      open="app-settings"
+    />
+  </UserButton.MenuItems>
+
+  <UserButton.UserProfilePage label="App Settings" labelIcon={<SettingsIcon />} url="app-settings">
+    <div>
+      <h1>App Settings</h1>
+      <p>Custom settings content here</p>
+    </div>
+  </UserButton.UserProfilePage>
+</UserButton>
+```
+
+## Adding a Link
+
+```tsx
+<UserButton>
+  <UserButton.MenuItems>
+    <UserButton.Link label="Pricing" labelIcon={<CreditCardIcon />} href="/pricing" />
+  </UserButton.MenuItems>
+</UserButton>
+```
+
+## Reordering Default Items
+
+Target built-in items with `label="manageAccount"` or `label="signOut"` to reorder them:
+
+```tsx
+<UserButton.MenuItems>
+  <UserButton.Action label="manageAccount" />
+  <UserButton.Link label="Pricing" labelIcon={<CreditCardIcon />} href="/pricing" />
+  <UserButton.Action label="signOut" />
+</UserButton.MenuItems>
+```
+
+## Conditional Rendering
+
+Gate menu items behind Clerk permissions or billing features:
+
+```tsx
+const { has, isLoaded } = useAuth();
+if (!isLoaded) return null;
+
+const isPro = has({ plan: "pro" });
+
+<UserButton>
+  {isPro && (
+    <UserButton.MenuItems>
+      <UserButton.Action label="Pro Settings" labelIcon={<StarIcon />} open="pro-settings" />
+    </UserButton.MenuItems>
+  )}
+</UserButton>
+```
+
+## Rules
+
+- All custom menu items must be placed inside `<UserButton.MenuItems>`
+- Use `<UserButton.Action>` with `open` prop to link to a `<UserButton.UserProfilePage>`
+- Use `<UserButton.Link>` for navigation — all three props (`label`, `labelIcon`, `href`) are required
+- Use `label="manageAccount"` or `label="signOut"` to reorder default items — never recreate them
+- Gate items behind Clerk `has()` checks when tied to billing plans or permissions

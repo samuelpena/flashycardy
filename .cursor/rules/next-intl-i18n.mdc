@@ -1,0 +1,56 @@
+---
+description: Internationalization with next-intl — Clerk + guest cookie locale, messages
+alwaysApply: true
+---
+
+# Internationalization (next-intl)
+
+The app uses **[next-intl](https://next-intl.dev/)** for UI strings and locale-aware formatting. Prefer **no path-prefix locales** (`/en/...`).
+
+## Locale resolution
+
+- **`getRequestConfig`** (`src/i18n/request.ts`): on **every request**, resolve `locale` — **if a Clerk user is present**, use **only Clerk** (`clerkClient.users.getUser`, reading **`unsafeMetadata.language`** normalized to supported slugs). **If signed out**, use **only** a validated **`locale` cookie** (or default `en`). **Never** use the cookie for locale when the user is signed in.
+- **Signed-in users**: read/write preferred language via **Clerk user metadata** (saved from `src/components/settings-page.tsx` through a **Server Action** that validates allowed locales with **Zod**, then updates the user via the **Clerk server SDK** — never trust client-supplied user ids).
+- **Signed-out users**: **`locale` cookie** is the only guest mechanism for remembering language choice (still validate against supported locales when reading and writing).
+
+## Stack
+
+- **`messages/{locale}.json`** — nested message trees; ICU message syntax for plurals, rich text, and variables.
+- **`src/i18n/request.ts`** — `getRequestConfig`: implement the branch above, validate against supported locales, `import()` the matching JSON, return `{ locale, messages, ... }`.
+- **`next.config.ts`** — `createNextIntlPlugin` pointing at `./src/i18n/request.ts` (or this repo’s path).
+- **Root `src/app/layout.tsx`** — `NextIntlClientProvider` with **`locale` + `messages`** from the server so the tree matches what `getRequestConfig` resolved for that request.
+
+## Usage
+
+```tsx
+// ✅ Async Server Component
+import { getTranslations } from "next-intl/server";
+const t = await getTranslations("HomePage");
+
+// ✅ Client Component
+"use client";
+import { useTranslations } from "next-intl";
+const t = useTranslations("HomePage");
+```
+
+- Use **`getLocale()`** / **`useLocale()`** for dates, numbers, lists, and RTL-aware layout.
+- Avoid raw user-facing strings; keys live in **`messages/*.json`**.
+
+## Changing language (settings)
+
+- **Signed in**: **Server Action** updates **Clerk metadata** only (Zod-validated locale slugs); then **`router.refresh()`** so the next request re-reads Clerk.
+- **Signed out**: set or clear the **`locale` cookie** only (Zod-validated, Server Action or equivalent); **do not** write guest locale to Clerk. Refresh so `getRequestConfig` picks up the cookie.
+
+## Anti-patterns
+
+```tsx
+// ❌ BAD — hardcoded UI copy
+<h1>My Decks</h1>
+
+// ❌ BAD — using the `locale` cookie for locale when a Clerk user is signed in
+
+// ✅ GOOD — messages + t()
+<h1>{t("title")}</h1>
+```
+
+Do **not** introduce a second i18n stack; extend **`messages/`** and next-intl APIs only.

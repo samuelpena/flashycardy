@@ -1,0 +1,55 @@
+---
+description: Extending Clerk UserProfile with custom pages and links for app settings
+globs: **/layout.tsx
+alwaysApply: false
+---
+
+# Clerk UserProfile — Custom Pages & Links
+
+Extend `<UserProfile />` via `<UserButton />` sub-components to add custom pages (e.g. App Settings) to the profile sidenav. This project uses `<UserButton />` in modal mode (the default), so always use `<UserButton.UserProfilePage />` and `<UserButton.UserProfileLink />`.
+
+## Adding a Custom Page
+
+All props (`label`, `labelIcon`, `url`, `children`) are **required**.
+
+```tsx
+import { UserButton } from "@clerk/nextjs";
+
+<UserButton>
+  <UserButton.UserProfilePage label="App Settings" labelIcon={<SettingsIcon />} url="app-settings">
+    <AppSettingsPage />
+  </UserButton.UserProfilePage>
+</UserButton>
+```
+
+## Adding a Custom Link
+
+```tsx
+<UserButton>
+  <UserButton.UserProfileLink label="Homepage" labelIcon={<HomeIcon />} url="/" />
+</UserButton>
+```
+
+## Reordering Default Routes
+
+Target built-in pages with `label="account"` or `label="security"` to reposition them. The first item **cannot** be a custom link.
+
+```tsx
+<UserButton>
+  <UserButton.UserProfilePage label="App Settings" labelIcon={<SettingsIcon />} url="app-settings">
+    <AppSettingsPage />
+  </UserButton.UserProfilePage>
+  <UserButton.UserProfilePage label="account" />
+  <UserButton.UserProfilePage label="security" />
+</UserButton>
+```
+
+## Rules
+
+- Use `<UserButton.UserProfilePage />` — never `<UserProfile.Page />` (project uses modal mode)
+- Use `<UserButton.UserProfileLink />` — never `<UserProfile.Link />`
+- All four props (`label`, `labelIcon`, `url`, `children`) are required for custom pages
+- All three props (`label`, `labelIcon`, `url`) are required for custom links
+- Extract page content into its own component — never inline large JSX as children
+- The first sidenav item cannot be a custom link when reordering
+- Custom page components must be Client Components (`"use client"`) if they use hooks or interactivity

@@ -1,0 +1,92 @@
+---
+description: TSDoc documentation standards for exported functions, types, and classes
+globs: **/*.ts,**/*.tsx
+alwaysApply: false
+---
+
+# TSDoc Documentation
+
+Document all exported functions, classes, and types with TSDoc format.
+
+## Standard Shape
+
+```typescript
+/**
+ * Brief one-line description of what the function does.
+ *
+ * @param userId - The Clerk user ID used to scope the query
+ * @param deckId - The numeric primary key of the deck
+ * @returns The matching deck, or `null` if not found
+ * @throws {Error} When the database query fails
+ * @example
+ * ```typescript
+ * const deck = await getDeckByIdAndUser(42, userId);
+ * if (!deck) return notFound();
+ * ```
+ */
+export async function getDeckByIdAndUser(
+  deckId: number,
+  userId: string
+): Promise<Deck | null> { ... }
+```
+
+## What to Document
+
+| Export type | Requires TSDoc |
+|---|---|
+| Exported function / async function | ✅ Always |
+| Exported Server Action | ✅ Always |
+| Exported React component | ✅ Always (brief `@param props` line) |
+| Exported type / interface | ✅ Always (inline property comments are fine) |
+| Non-exported helpers | ⬜ Optional |
+
+## Tags Reference
+
+- `@param name - description` — one line per parameter
+- `@returns` — what is returned (skip for `void`)
+- `@throws {ErrorType}` — known error cases
+- `@example` — runnable snippet in a fenced ` ```typescript ` block
+- `@deprecated` — with migration note when removing APIs
+- `@internal` — marks intentionally unexported helpers
+
+## Project-Specific Patterns
+
+### Server Actions (`src/actions/`)
+```typescript
+/**
+ * Creates a new deck owned by the current user.
+ *
+ * @param title - Human-readable deck name
+ * @returns The newly created deck row
+ * @throws {Error} When the user is not authenticated
+ */
+export async function createDeck(title: string): Promise<Deck> { ... }
+```
+
+### DB Query Helpers (`src/db/queries/`)
+```typescript
+/**
+ * Returns all decks belonging to a user, ordered by creation date descending.
+ *
+ * @param userId - Clerk user ID
+ * @returns Array of deck rows (empty array if none exist)
+ */
+export async function getDecksByUser(userId: string): Promise<Deck[]> { ... }
+```
+
+### React Components
+```typescript
+/**
+ * Renders the interactive flashcard study session UI.
+ *
+ * @param props.deck - The deck being studied, including its cards
+ */
+export function StudyClient({ deck }: StudyClientProps) { ... }
+```
+
+## Rules
+
+- Use `/** */` (JSDoc-style) — never `//` or `/* */` for TSDoc
+- Keep the first line a concise imperative sentence ("Creates…", "Returns…", "Renders…")
+- Do **not** repeat type information already visible in the signature
+- Run `pnpm run typecheck` after edits — zero errors required

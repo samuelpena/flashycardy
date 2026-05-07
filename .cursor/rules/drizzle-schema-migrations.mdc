@@ -1,0 +1,59 @@
+---
+description: Drizzle schema by domain, drizzle-kit-only DDL, and dev migration workflow
+globs: src/db/schema/**/*.ts,drizzle.config.ts,drizzle.dev.config.ts,src/db/migrate.ts
+alwaysApply: false
+---
+
+# Drizzle schema layout and migrations
+
+## Source of truth and tooling
+
+- **All** table additions, column changes, and removals are expressed in TypeScript schema and turned into SQL **only** via **Drizzle Kit** (`drizzle-kit generate`). Never author `CREATE TABLE` / `ALTER TABLE` / `DROP` migration SQL by hand.
+- **Drizzle Kit** reads the **`schema`** path from config (`drizzle.dev.config.ts` for local dev, `drizzle.config.ts` for production-oriented generates). Both point at `./src/db/schema`.
+
+## Organize schemas by domain
+
+- Use a **`src/db/schema/`** directory — **not** a single giant `schema.ts`.
+- Split **one domain per file** (e.g. `decks.ts`, `cards.ts`, `study-sessions.ts`). Name files after the bounded context, not arbitrary grouping.
+- **`src/db/schema/index.ts`** re-exports tables and defines **`relations(...)`** so relational queries and Kit see one coherent schema entry.
+
+```typescript
+// ✅ GOOD — domain file decks.ts exports table; index.ts re-exports
+// decks.ts
+export const decks = pgTable(/* ... */);
+
+// index.ts
+export * from "./decks";
+export * from "./cards";
+```
+
+```sql
+-- ❌ BAD — hand-edited migration.sql for schema changes
+ALTER TABLE decks ADD COLUMN foo text;
+```
+
+## Validate schema changes in development
+
+- **Development** migrations are generated against **`drizzle.dev.config.ts`** (output: `drizzle/dev/`). Programmatic migrate uses that folder when not in production (`src/db/migrate.ts`).
+- Schema work is **not done** until it **migrates successfully** against the dev database using the project’s programmatic migrate script.
+
+### Required workflow (development)
+
+1. Edit schema under **`src/db/schema/`** (domain files + `index.ts` as needed).
+2. **`pnpm db:generate:dev`** — produces a new migration under `drizzle/dev/`.
+3. **`pnpm db:migrate:dev:programmatic`** — applies pending migrations to the dev DB (uses `.env` + `.env.development` per `package.json`).
+
+```bash
+pnpm db:generate:dev
+pnpm db:migrate:dev:programmatic
+```
+
+### Production-oriented generates
+
+- Use **`pnpm db:generate:prod`** with `drizzle.config.ts` when producing **`drizzle/prod/`** migrations for release; apply with **`pnpm db:migrate:prod:programmatic`** in production pipelines as configured.
+
+## Rules
+
+- Import app tables from **`@/db/schema`** (the barrel), not deep paths into domain files.
+- Commit **schema TypeScript** and **generated migration artifacts** together for the environment they target (`drizzle/dev` vs `drizzle/prod`).
+- Do **not** use `drizzle-kit push` as a substitute for migrations when the goal is versioned, reviewable schema history.

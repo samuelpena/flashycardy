@@ -1,0 +1,179 @@
+---
+description: Patterns for building public API routes consumable by web, mobile, and third-party clients
+globs: src/app/api/**/*.ts
+alwaysApply: false
+---
+
+# Public API Conventions
+
+This project exposes a public REST API under `src/app/api/` consumed by the Next.js web app, a future mobile app, and any third-party client. All public routes must follow these conventions.
+
+## Consistent Response Shape
+
+Every route must return a uniform JSON envelope so clients can handle responses generically.
+
+```typescript
+// ✅ GOOD — consistent envelope
+return NextResponse.json({ data: decks }, { status: 200 });
+return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+// ❌ BAD — inconsistent shape
+return NextResponse.json(decks);
+return NextResponse.json({ message: "error" });
+```
+
+## Reusable `withAuth` Middleware
+
+Rather than repeating auth checks in every handler, wrap handlers with `withAuth`.
+
+```typescript
+// src/lib/api/with-auth.ts
+import { auth } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
+
+type Handler = (
+  req: NextRequest,
+  context: { params: Promise<Record<string, string>>; userId: string }
+) => Promise<NextResponse>;
+
+export function withAuth(handler: Handler) {
+  return async (
+    req: NextRequest,
+    context: { params: Promise<Record<string, string>> }
+  ) => {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return handler(req, { ...context, userId });
+  };
+}
+```
+
+```typescript
+// src/app/api/decks/route.ts
+import { withAuth } from "@/lib/api/with-auth";
+import { getDecksByUser } from "@/db/queries/decks";
+
+export const GET = withAuth(async (_req, { userId }) => {
+  const decks = await getDecksByUser(userId);
+  return NextResponse.json({ data: decks });
+});
+```
+
+## Query Parameters
+
+Use `request.nextUrl.searchParams` — never parse `request.url` manually. Use consistent, industry-standard names such as `page`, `pageSize`, `limit`, `offset`, or `cursor`; do not invent route-specific pagination parameter names.
+
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+
+export const GET = withAuth(async (req, { userId }) => {
+  const limit = Number(req.nextUrl.searchParams.get("limit") ?? 20);
+  const offset = Number(req.nextUrl.searchParams.get("offset") ?? 0);
+  const { items, totalItems } = await getDecksByUser(userId, { limit, offset });
+  return NextResponse.json({
+    data: items,
+    metadata: { total_items: totalItems, per_page: limit },
+    links: {
+      next: "https://example.com/api/decks?limit=20&offset=20",
+      prev: null,
+      first: "https://example.com/api/decks?limit=20&offset=0",
+      last: "https://example.com/api/decks?limit=20&offset=80",
+    },
+  });
+});
+```
+
+## Pagination — Required for Collection Routes
+
+All public API routes that return collections must support pagination. Use standard query parameters such as `limit` and `offset`, apply defaults in the route handler, and pass pagination options into the shared query function.
+
+Paginated responses must include:
+
+- `data`: The items for the current page.
+- `metadata`: Descriptive pagination details. Include `total_items` and `per_page` at minimum. For page-based systems, also include `total_pages` and `current_page`.
+- `links`: Full URLs for `next`, `prev`, `first`, and `last` pages so clients can navigate without constructing URLs manually.
+
+```typescript
+export const GET = withAuth(async (req, { userId }) => {
+  const limit = Number(req.nextUrl.searchParams.get("limit") ?? 20);
+  const offset = Number(req.nextUrl.searchParams.get("offset") ?? 0);
+  const { items, totalItems } = await getDecksByUser(userId, { limit, offset });
+
+  return NextResponse.json({
+    data: items,
+    metadata: {
+      total_items: totalItems,
+      per_page: limit,
+    },
+    links: {
+      next: "https://example.com/api/decks?limit=20&offset=20",
+      prev: null,
+      first: "https://example.com/api/decks?limit=20&offset=0",
+      last: "https://example.com/api/decks?limit=20&offset=80",
+    },
+  });
+});
+```
+
+## CORS — Required for All Public Routes
+
+Every route under `src/app/api/` must export an `OPTIONS` handler and include CORS headers so mobile and third-party clients can call it.
+
+```typescript
+// src/lib/api/cors.ts
+export const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export function withCors(res: NextResponse): NextResponse {
+  Object.entries(CORS_HEADERS).forEach(([k, v]) => res.headers.set(k, v));
+  return res;
+}
+```
+
+```typescript
+// Preflight — add to every public route file
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+```
+
+## Dynamic Route Segments
+
+```typescript
+// src/app/api/decks/[id]/route.ts
+export const GET = withAuth(async (_req, { params, userId }) => {
+  const { id } = await params;
+  const deck = await getDeckByIdAndUser(Number(id), userId);
+  if (!deck) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json({ data: deck });
+});
+```
+
+## Server Actions vs. Public API
+
+| Scenario | Use |
+|---|---|
+| Mutation only used inside the Next.js web app | Server Action |
+| Data or mutation needed by mobile / third-party | Public Route Handler |
+| Read data only used in Server Components | Direct DB query in Server Component |
+
+Move shared logic to `src/db/queries/` so both Server Actions and Route Handlers call the same function.
+
+## Rules
+
+- Return `{ data }` on success, `{ error }` on failure — always use the envelope shape
+- Use `withAuth` wrapper — never repeat the `auth()` + `401` check inline
+- Export `OPTIONS` + set CORS headers on every route file
+- Paginate every collection route with `limit` and `offset` query parameters
+- Include paginated response `metadata` with at least `total_items` and `per_page`
+- Include full pagination `links` for `next`, `prev`, `first`, and `last`
+- Use consistent standard pagination parameter names: `page`, `pageSize`, `limit`, `offset`, or `cursor`
+- Parse query params via `req.nextUrl.searchParams` — never `new URL(req.url)`
+- Delegate all DB access to `src/db/queries/*` — no inline Drizzle queries in route files
+- Scope every query to `userId` — never expose another user's data
+- `params` is a `Promise` in Next.js 15+ — always `await params` before destructuring

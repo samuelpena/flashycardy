@@ -1,0 +1,127 @@
+---
+description: Accessibility testing conventions using @axe-core/playwright in Playwright E2E tests
+globs: tests/**/*.spec.ts
+alwaysApply: false
+---
+
+# Accessibility Testing with Playwright
+
+Use `@axe-core/playwright` to run axe accessibility scans inside Playwright tests. Never roll custom accessibility checks.
+
+## Installation
+
+```bash
+pnpm add -D @axe-core/playwright
+```
+
+## Basic Page Scan
+
+```ts
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+test.describe('homepage', () => {
+  test('should not have any automatically detectable accessibility issues', async ({ page }) => {
+    await page.goto('/');
+
+    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
+  });
+});
+```
+
+## WCAG A/AA Compliance Scan
+
+Constrain scans to WCAG A and AA success criteria only:
+
+```ts
+const accessibilityScanResults = await new AxeBuilder({ page })
+  .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+  .analyze();
+
+expect(accessibilityScanResults.violations).toEqual([]);
+```
+
+## Shared Fixture (Preferred Pattern)
+
+Create `tests/axe-test.ts` to share common configuration across all accessibility tests:
+
+```ts
+// tests/axe-test.ts
+import { test as base } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+type AxeFixture = { makeAxeBuilder: () => AxeBuilder };
+
+export const test = base.extend<AxeFixture>({
+  makeAxeBuilder: async ({ page }, use) => {
+    const makeAxeBuilder = () =>
+      new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']);
+    await use(makeAxeBuilder);
+  },
+});
+export { expect } from '@playwright/test';
+```
+
+Then use it in test files:
+
+```ts
+import { test, expect } from './axe-test';
+
+test('decks page accessibility', async ({ page, makeAxeBuilder }) => {
+  await page.goto('/decks');
+
+  const accessibilityScanResults = await makeAxeBuilder().analyze();
+
+  expect(accessibilityScanResults.violations).toEqual([]);
+});
+```
+
+## Handling Known Issues
+
+Exclude a specific element (and its descendants) when a fix is pending:
+
+```ts
+const results = await new AxeBuilder({ page })
+  .exclude('#element-with-known-issue')
+  .analyze();
+```
+
+Disable a specific rule by ID:
+
+```ts
+const results = await new AxeBuilder({ page })
+  .disableRules(['duplicate-id'])
+  .analyze();
+```
+
+Use fingerprint snapshots (not full violation snapshots) to track known issues:
+
+```ts
+// ✅ GOOD — snapshot only the fingerprint
+expect(violationFingerprints(results)).toMatchSnapshot();
+
+function violationFingerprints(scanResults: Awaited<ReturnType<AxeBuilder['analyze']>>) {
+  return JSON.stringify(
+    scanResults.violations.map(v => ({
+      rule: v.id,
+      targets: v.nodes.map(n => n.target),
+    })),
+    null,
+    2,
+  );
+}
+
+// ❌ BAD — brittle, breaks on any HTML change
+expect(results.violations).toMatchSnapshot();
+```
+
+## Rules
+
+- Always import `AxeBuilder` from `@axe-core/playwright` — never write manual DOM checks
+- Always scope scans to WCAG tags (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`) unless intentionally broader
+- Use the shared `makeAxeBuilder` fixture for any test file with more than one accessibility scan
+- Always `waitFor()` dynamic content before calling `.analyze()`
+- Use `.exclude()` or `.disableRules()` only for known issues with a comment explaining why
+- Never snapshot the full `violations` array — use fingerprints instead
