@@ -148,6 +148,19 @@ Each app deploys as its **own Vercel project**, both pointing at the same Git re
 - **Environment variables** → none required
 - **Domain** → ships on the auto-generated `*.vercel.app` URL; a custom `docs.<domain>` subdomain can be attached later.
 
+### Ignored Build Step (cross-app)
+
+Both apps ship a [`vercel.json`](apps/web/vercel.json) with [`ignoreCommand`](https://vercel.com/docs/project-configuration/git-settings#ignored-build-step) (see [`apps/docs/vercel.json`](apps/docs/vercel.json) for docs) that runs a repo script:
+
+| Project | Script |
+|---------|--------|
+| Web | [`scripts/vercel-ignore-build-web.sh`](scripts/vercel-ignore-build-web.sh) |
+| Docs | [`scripts/vercel-ignore-build-docs.sh`](scripts/vercel-ignore-build-docs.sh) |
+
+Each script diffs `VERCEL_GIT_PREVIOUS_SHA` → `VERCEL_GIT_COMMIT_SHA` (set by Vercel) against a path allow-list for that app: its `apps/<app>` tree, `packages/`, root workspace files (`package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`), and its own ignore script. **Exit 0 skips the build; exit 1 runs it.** If `VERCEL_GIT_PREVIOUS_SHA` is missing (first deployment on a branch/project), the script exits **1** so the build always runs.
+
+If you previously set an **Ignored Build Step** in the Vercel dashboard for either project, remove it or align it with these scripts so two commands do not fight each other.
+
 ## Scripts
 
 | Command | Description |
