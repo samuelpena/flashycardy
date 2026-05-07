@@ -19,7 +19,7 @@ node_modules
 /test-results
 
 # next.js
-/.next/
+.next/
 /out/
 
 # production
@@ -49,8 +49,6 @@ next-env.d.ts
 /.clerk/
 
 # monorepo (Next app)
-apps/web/.next/
-apps/web/out/
 apps/web/playwright-report/
 apps/web/test-results/
 
