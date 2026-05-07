@@ -1,5 +1,0 @@
-1:"$Sreact.fragment"
-2:I[31703,["/_next/static/chunks/0h64jn7h-_2hv.js","/_next/static/chunks/0gcuw.wcv2_cj.js","/_next/static/chunks/17otzse80f882.js","/_next/static/chunks/02-vmsi~cke42.js","/_next/static/chunks/0g2e3nw~vnz_9.js"],"ViewportBoundary"]
-3:I[31703,["/_next/static/chunks/0h64jn7h-_2hv.js","/_next/static/chunks/0gcuw.wcv2_cj.js","/_next/static/chunks/17otzse80f882.js","/_next/static/chunks/02-vmsi~cke42.js","/_next/static/chunks/0g2e3nw~vnz_9.js"],"MetadataBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","h",{"children":[["$","meta",null,{"name":"robots","content":"noindex"}],["$","$L2",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L3",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"Flashycardy Docs"}],["$","meta","1",{"name":"description","content":"Documentation for the Flashycardy flashcard app."}]]}]}]}],null]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"r68F_2WYUkF_yo8-OBvNp"}

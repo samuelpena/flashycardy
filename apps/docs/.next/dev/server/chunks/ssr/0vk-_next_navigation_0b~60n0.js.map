@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":["file:///Users/samuelpena/projects/flashycardy/node_modules/.pnpm/next%4016.2.1_%40babel%2Bcore%407.29.0_%40opentelemetry%2Bapi%401.9.0_%40playwright%2Btest%401.59.1_babel-p_433635f851adfd4848092ab0e3255b21/node_modules/next/navigation.js"],"sourcesContent":["module.exports = require('./dist/client/components/navigation')\n"],"names":["module","exports"],"mappings":"AAAAA,OAAOC,OAAO","ignoreList":[0]}}]
-}

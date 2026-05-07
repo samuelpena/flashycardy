@@ -1,7 +1,0 @@
-{"timestamp":"00:00:00.623","source":"Server","level":"LOG","message":"- Experiments (use with caution):"}
-{"timestamp":"00:00:00.624","source":"Server","level":"LOG","message":"  · optimizePackageImports"}
-{"timestamp":"00:00:00.624","source":"Server","level":"LOG","message":""}
-{"timestamp":"00:00:03.632","source":"Server","level":"LOG","message":"○ Compiling /[[...mdxPath]] ..."}
-{"timestamp":"00:00:05.341","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
-{"timestamp":"00:00:21.650","source":"Server","level":"LOG","message":"- \"\\u001b[31merror\\u001b[0m\" \"[nextra]\" \"Error while loading\" {} Error: Cannot find module 'private-next-content-dir/undefined'"}
-{"timestamp":"00:00:21.655","source":"Server","level":"LOG","message":"- \"\\u001b[31merror\\u001b[0m\" \"[nextra]\" \"Error while loading\" {} Error: Cannot find module 'private-next-content-dir/undefined'"}
