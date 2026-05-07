@@ -26,6 +26,21 @@ A full-stack flashcard application for creating, managing, and studying flashcar
 
 ## Architecture
 
+This repository is a **pnpm + Turborepo monorepo**. Each deployable surface lives under `apps/`; shared code lives under `packages/`.
+
+```
+flashycardy/
+├── apps/
+│   ├── web/          # @flashycardy/web — Next.js 16 app (primary product, Vercel)
+│   └── docs/         # @flashycardy/docs — Nextra 4 documentation site (separate Vercel project)
+├── packages/         # Shared packages (added on demand; empty for now)
+├── package.json      # Workspace root (Turborepo entrypoints)
+├── turbo.json        # Pipeline definitions
+└── pnpm-workspace.yaml
+```
+
+### `apps/web` — Flashycardy app
+
 ```
 apps/web/src/
 ├── actions/          # Server Actions for mutations (cards, decks)
@@ -37,13 +52,34 @@ apps/web/src/
 ├── components/       # React components
 │   └── ui/           # Shadcn/UI primitives
 ├── db/
-│   ├── schema.ts     # Drizzle schema (decks, cards tables)
+│   ├── schema/       # Drizzle schema by domain (decks, cards, study-sessions)
 │   ├── index.ts      # Drizzle client (Neon serverless connection)
 │   └── queries/      # Typed query helpers (decks.ts, cards.ts)
 └── lib/              # Utility functions
 ```
 
-**Data flow:**
+### `apps/docs` — Documentation site
+
+A lightweight, standalone Next.js app powered by [Nextra 4](https://nextra.site/) and `nextra-theme-docs`. It does **not** import from `apps/web`, has no database/auth/AI dependencies, and ships its own theme (no Tailwind, no shadcn). Content lives as MDX files.
+
+```
+apps/docs/
+├── app/
+│   ├── layout.tsx              # Nextra <Layout> with server-side getPageMap()
+│   └── [[...mdxPath]]/page.tsx # Nextra catch-all route
+├── content/                    # MDX pages (sidebar order via _meta.ts)
+│   ├── _meta.ts
+│   ├── index.mdx
+│   ├── getting-started.mdx
+│   └── architecture.mdx
+├── mdx-components.tsx
+├── next.config.mjs             # withNextra(...)
+└── package.json
+```
+
+Dev port for docs is **3001**, so you can run web (3000) and docs (3001) side by side.
+
+**Data flow (`apps/web`):**
 - **Data fetching** happens in Server Components via query helpers in `apps/web/src/db/queries/`
 - **Mutations** go through Server Actions in `apps/web/src/actions/` which delegate to query helpers
 - **AI card generation** is a Server Action that calls OpenAI through the Vercel AI SDK, validates output with Zod, and bulk-inserts cards into the database
@@ -87,22 +123,46 @@ pnpm --filter @flashycardy/web db:migrate:dev:programmatic
 ### 4. Start the development server
 
 ```bash
-pnpm dev
+pnpm dev          # apps/web on http://localhost:3000
+pnpm dev:docs     # apps/docs on http://localhost:3001
+pnpm dev:all      # both, in parallel
 ```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Vercel (monorepo)
 
-Set the Vercel project **Root Directory** to `apps/web`, turn on **Include files outside the root directory in the Build Step**, and keep the production **Build Command** using `vercel-build` from `apps/web` (migrations + `next build`). Environment variables remain on the Vercel project unchanged.
+Each app deploys as its **own Vercel project**, both pointing at the same Git repo.
+
+### `apps/web` (primary)
+
+- **Root Directory** → `apps/web`
+- **Include files outside the root directory in the Build Step** → ON
+- **Production Build Command** → `pnpm vercel-build` (migrates Drizzle, then `next build`)
+- Environment variables (`DATABASE_URL`, Clerk, OpenAI) live on this project.
+
+### `apps/docs` (documentation)
+
+- **Root Directory** → `apps/docs`
+- **Include files outside the root directory in the Build Step** → ON
+- **Framework Preset** → Next.js (auto-detected)
+- **Build Command** → default (`next build`); no migrations, no `vercel-build`
+- **Environment variables** → none required
+- **Domain** → ships on the auto-generated `*.vercel.app` URL; a custom `docs.<domain>` subdomain can be attached later.
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `pnpm dev` | Start `apps/web` via Turborepo |
+| `pnpm dev` | Start `apps/web` via Turborepo (port 3000) |
+| `pnpm dev:docs` | Start `apps/docs` via Turborepo (port 3001) |
+| `pnpm dev:all` | Start both apps in parallel |
 | `pnpm build` | Production build for `apps/web` |
-| `pnpm --filter @flashycardy/web start` | Start production server |
+| `pnpm build:docs` | Production build for `apps/docs` |
+| `pnpm build:all` | Build all apps |
 | `pnpm lint` | Run ESLint for `apps/web` |
+| `pnpm lint:docs` | Run ESLint for `apps/docs` |
+| `pnpm lint:all` | Run ESLint across all apps |
+| `pnpm test:unit` | Run Vitest unit tests for `apps/web` |
+| `pnpm test:e2e` | Run Playwright E2E tests for `apps/web` |
+| `pnpm --filter @flashycardy/web start` | Start the web production server |
 | `pnpm --filter @flashycardy/web db:generate:dev` | Generate dev Drizzle migrations |
 | `pnpm --filter @flashycardy/web db:migrate:dev:programmatic` | Apply dev migrations programmatically |

@@ -1,0 +1,36 @@
+import type { Metadata } from "next";
+import { Footer, Layout, Navbar } from "nextra-theme-docs";
+import { Head } from "nextra/components";
+import { getPageMap } from "nextra/page-map";
+import "nextra-theme-docs/style.css";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Flashycardy Docs",
+    template: "%s — Flashycardy Docs",
+  },
+  description: "Documentation for the Flashycardy flashcard app.",
+};
+
+const navbar = <Navbar logo={<b>Flashycardy</b>} />;
+const footer = <Footer>{`© ${new Date().getFullYear()} Flashycardy.`}</Footer>;
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const pageMap = await getPageMap();
+
+  return (
+    <html lang="en" dir="ltr" suppressHydrationWarning>
+      <Head />
+      <body>
+        <Layout
+          navbar={navbar}
+          footer={footer}
+          pageMap={pageMap}
+          docsRepositoryBase="https://github.com/flashycardy/flashycardy/tree/main/apps/docs"
+        >
+          {children}
+        </Layout>
+      </body>
+    </html>
+  );
+}
