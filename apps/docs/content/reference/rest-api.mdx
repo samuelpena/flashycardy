@@ -1,0 +1,257 @@
+---
+title: HTTP API (REST)
+---
+
+# HTTP API (REST)
+
+Public JSON API served by `apps/web` under the `/api` path. All routes require an authenticated Clerk session (Bearer token or session cookie, depending on client). Unauthenticated requests receive **`401`** with body `{ "error": "Unauthorized" }`.
+
+## Conventions
+
+### Base URL
+
+Paths below are relative to your deployment origin (for local dev, typically `http://localhost:3000`). Example: **`GET /api/decks`**.
+
+### JSON envelope
+
+| Outcome | Body shape | Typical status |
+|--------|------------|----------------|
+| Success (single resource or scalar wrapper) | `{ "data": … }` | `200`, or `201` when noted |
+| Success (paginated **list**) | `{ "data": [ … ], "meta": { … }, "links": { … } }` | `200` |
+| Success (single resource **with** pagination metadata for a nested list) | `{ "data": { … }, "meta": { … }, "links": { … } }` | `200` |
+| Error | `{ "error": "<message>" }` | `400`, `401`, `403`, `404`, `500` as applicable |
+
+### Pagination query parameters
+
+Used by every **GET** that returns paginated data:
+
+| Parameter | Type | Default | Constraints |
+|-----------|------|---------|-------------|
+| `page` | integer | `1` | ≥ `1` |
+| `pageSize` | integer | `20` | `1` … `100` |
+
+Invalid values yield **`400`** with `{ "error": "Invalid page" }` or `{ "error": "Invalid pageSize" }`.
+
+Paginated responses include:
+
+- **`meta`**: `{ "total_items", "per_page", "total_pages", "current_page" }`
+- **`links`**: `{ "next", "prev", "first", "last" }` — absolute URLs; `next` / `prev` may be `null`.
+
+### CORS
+
+Every route exports **`OPTIONS`**, which responds with **`204`** and headers:
+
+- `Access-Control-Allow-Origin: *`
+- `Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS`
+- `Access-Control-Allow-Headers: Content-Type, Authorization`
+
+Successful and error JSON responses from other methods include the same CORS headers.
+
+---
+
+## Decks
+
+### `GET /api/decks`
+
+Lists the current user’s decks (paginated).
+
+- **Auth**: required  
+- **Query**: `page`, `pageSize`  
+- **Success**: `{ "data": Deck[], "meta", "links" }`
+
+### `POST /api/decks`
+
+Creates a deck. Free plan users are limited to **3** decks unless they have Clerk feature **`unlimited_decks`**.
+
+- **Auth**: required (Clerk `has` used for plan gating)  
+- **Body** (JSON):
+
+```json
+{
+  "name": "string (1–255 chars, required)",
+  "description": "optional string, max 1000",
+  "cards": [
+    { "front": "string (required)", "back": "string (required)" }
+  ]
+}
+```
+
+`cards` is optional; when present and non-empty, the deck is created with those cards in one operation.
+
+- **Success**: `{ "data": Deck }` with status **`201`**
+- **Errors**: `400` invalid body; **`403`** `{ "error": "Deck limit reached for the free plan" }`; `500` create failure
+
+### `GET /api/decks/count`
+
+Returns how many decks the user has.
+
+- **Auth**: required  
+- **Success**: `{ "data": { "count": number } }`
+
+---
+
+## Single deck (by UUID)
+
+Path parameter **`deckUuid`**: UUID v4.
+
+### `GET /api/decks/[deckUuid]`
+
+Returns deck metadata and **paginated** cards for that deck in one payload.
+
+- **Auth**: required  
+- **Query**: `page`, `pageSize` (apply to the **cards** list)  
+- **Success**: `{ "data": { …deckFields, "cards": Card[] }, "meta", "links" }`  
+  Pagination **`meta` / `links`** describe the card list, not a list of decks.
+- **Errors**: `400` invalid UUID; `404` deck not found
+
+### `PUT /api/decks/[deckUuid]`
+
+Full replace of `name` and `description`.
+
+- **Body**: `{ "name": "string (required)", "description": "optional string | null" }`
+- **Success**: `{ "data": Deck }`
+- **Errors**: `400` invalid UUID or body; `404` not found
+
+### `PATCH /api/decks/[deckUuid]`
+
+Partial update; at least one of `name`, `description` must be present.
+
+- **Body**: `{ "name"?: string, "description"?: string | null }`
+- **Success**: `{ "data": Deck }`
+- **Errors**: `400` invalid UUID or body; `404` not found
+
+### `DELETE /api/decks/[deckUuid]`
+
+Deletes the deck.
+
+- **Success**: `{ "data": Deck }` (deleted row)
+- **Errors**: `400` invalid UUID; `404` not found
+
+---
+
+## Cards (scoped to a deck)
+
+### `GET /api/decks/[deckUuid]/cards`
+
+Lists cards for the deck (paginated).
+
+- **Auth**: required  
+- **Query**: `page`, `pageSize`  
+- **Success**: `{ "data": Card[], "meta", "links" }`
+- **Errors**: `400` invalid UUID; `404` deck not found
+
+### `POST /api/decks/[deckUuid]/cards`
+
+Creates one card.
+
+- **Body**: `{ "front": "string (required)", "back": "string (required)" }`
+- **Success**: `{ "data": Card }` with status **`201`**
+- **Errors**: `400` invalid UUID or body; `404` deck not found
+
+---
+
+## Single card
+
+Path parameters: **`deckUuid`**, **`cardUuid`** (UUIDs).
+
+### `GET /api/decks/[deckUuid]/cards/[cardUuid]`
+
+- **Success**: `{ "data": Card }`
+- **Errors**: `400` invalid parameters; `404` deck or card not found
+
+### `PUT /api/decks/[deckUuid]/cards/[cardUuid]`
+
+Replace both sides.
+
+- **Body**: `{ "front": "string (required)", "back": "string (required)" }`
+- **Success**: `{ "data": Card }`
+
+### `PATCH /api/decks/[deckUuid]/cards/[cardUuid]`
+
+Partial update; at least one of `front`, `back` required.
+
+- **Body**: `{ "front"?: string, "back"?: string }`
+- **Success**: `{ "data": Card }`
+
+### `DELETE /api/decks/[deckUuid]/cards/[cardUuid]`
+
+- **Success**: `{ "data": Card }` (deleted row)
+- **Errors**: `404` deck or card not found
+
+---
+
+## Ratings (per deck)
+
+### `GET /api/decks/[deckUuid]/ratings`
+
+Aggregated rating counts per card in the deck (user-scoped; deck must belong to the user).
+
+- **Auth**: required  
+- **Query**: `page`, `pageSize`  
+- **Success**: `{ "data": …[], "meta", "links" }` where each item is `{ "cardUuid": string, "correctCount": number, "incorrectCount": number }`
+- **Errors**: `400` invalid UUID; `404` deck not found
+
+---
+
+## Study sessions
+
+### `GET /api/study-sessions`
+
+Lists the user’s study sessions (paginated), each including a nested `deck` relation from the ORM.
+
+- **Auth**: required  
+- **Query**: `page`, `pageSize`  
+- **Success**: `{ "data": …[], "meta", "links" }`
+
+### `POST /api/study-sessions`
+
+Persists a completed (or in-progress) session with per-card results.
+
+- **Body**:
+
+```json
+{
+  "deckUuid": "uuid",
+  "cardResults": [
+    { "cardUuid": "uuid", "isCorrect": true }
+  ]
+}
+```
+
+`cardResults` must contain at least one entry.
+
+- **Success**: `{ "data": … }` with status **`201`**
+- **Errors**: `400` invalid body; `404` `{ "error": "Deck not found" }` if the deck is missing or not owned
+
+### `GET /api/study-sessions/counts`
+
+Paginated **session counts grouped by deck** for the current user (one row per deck that has sessions).
+
+- **Auth**: required  
+- **Query**: `page`, `pageSize`  
+- **Success**: `{ "data": …[], "meta", "links" }` where each item is `{ "deckUuid": string, "sessionCount": number }`
+
+---
+
+## Summary table
+
+| Method | Path |
+|--------|------|
+| `OPTIONS` | All paths below (preflight) |
+| `GET` | `/api/decks` |
+| `POST` | `/api/decks` |
+| `GET` | `/api/decks/count` |
+| `GET` | `/api/decks/[deckUuid]` |
+| `PUT` | `/api/decks/[deckUuid]` |
+| `PATCH` | `/api/decks/[deckUuid]` |
+| `DELETE` | `/api/decks/[deckUuid]` |
+| `GET` | `/api/decks/[deckUuid]/cards` |
+| `POST` | `/api/decks/[deckUuid]/cards` |
+| `GET` | `/api/decks/[deckUuid]/cards/[cardUuid]` |
+| `PUT` | `/api/decks/[deckUuid]/cards/[cardUuid]` |
+| `PATCH` | `/api/decks/[deckUuid]/cards/[cardUuid]` |
+| `DELETE` | `/api/decks/[deckUuid]/cards/[cardUuid]` |
+| `GET` | `/api/decks/[deckUuid]/ratings` |
+| `GET` | `/api/study-sessions` |
+| `POST` | `/api/study-sessions` |
+| `GET` | `/api/study-sessions/counts` |
