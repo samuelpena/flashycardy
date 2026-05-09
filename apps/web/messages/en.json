@@ -44,7 +44,8 @@
     "saveError": "Unable to save language. Please try again."
   },
   "ClerkProfile": {
-    "settingsLabel": "Settings"
+    "settingsLabel": "Settings",
+    "helpDocsLabel": "Help"
   },
   "Dashboard": {
     "title": "Your Decks",

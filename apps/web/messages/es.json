@@ -44,7 +44,8 @@
     "saveError": "No se pudo guardar el idioma. Inténtalo de nuevo."
   },
   "ClerkProfile": {
-    "settingsLabel": "Settings"
+    "settingsLabel": "Ajustes",
+    "helpDocsLabel": "Ayuda"
   },
   "Dashboard": {
     "title": "Tus mazos",

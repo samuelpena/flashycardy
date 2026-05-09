@@ -130,6 +130,39 @@
 }
 
 /*
+ * Clerk UserButton popover (avatar menu): must stack above the app shell
+ * sticky header (`z-50`) and align with high-z portaled UI (e.g. Select
+ * `z-[1000]`). Without this, the menu can paint behind the header or look
+ * broken.
+ *
+ * Custom menu rows use `userButtonPopoverCustomItemButtonIconBox`; built-in
+ * Manage account / Sign out use `userButtonPopoverActionButtonIconBox`. Both
+ * mount React `labelIcon` via a nested div (ExternalElementMounter) — that
+ * wrapper must flex so the portaled SVG is measurable and visible.
+ */
+.cl-userButtonPopoverRootBox {
+  z-index: 1000;
+}
+
+.cl-userButtonPopoverActionButtonIconBox,
+.cl-userButtonPopoverCustomItemButtonIconBox {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cl-userButtonPopoverActionButtonIconBox > div,
+.cl-userButtonPopoverCustomItemButtonIconBox > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  min-height: 1rem;
+}
+
+/*
  * Clerk UserProfile (UserButton modal): React `labelIcon` is portaled into
  * `.cl-navbarButtonIcon__custom-page-*`. With bundled `@clerk/ui`, that slot
  * can stay empty or inherit a text color that matches the control background.
