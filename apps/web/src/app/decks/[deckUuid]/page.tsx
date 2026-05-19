@@ -60,7 +60,10 @@ function getPageNumbers(current: number, total: number): (number | "ellipsis")[]
   return pages;
 }
 
-export default async function DeckPage(props: PageProps<"/decks/[deckUuid]">) {
+export default async function DeckPage(props: {
+  params: Promise<{ deckUuid: string }>;
+  searchParams: Promise<{ sort?: string; page?: string }>;
+}) {
   const t = await getTranslations("DeckDetail");
   const tCommon = await getTranslations("Common");
   const locale = await getLocale();
