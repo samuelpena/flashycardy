@@ -1,0 +1,220 @@
+---
+title: MCP architecture & dependencies
+---
+
+# MCP architecture & dependencies
+
+How **`apps/web`** wires Clerk OAuth discovery, the Streamable HTTP MCP endpoint, and tool handlers. For client setup, see [Model Context Protocol (MCP)](./mcp).
+
+## File dependency tree
+
+Imports **within** the three areas (`app/.well-known`, `app/api/mcp`, `lib/mcp`) plus their main **external** dependencies. Dashed lines are **logical** links (URL paths), not TypeScript imports.
+
+```
+apps/web/src/
+│
+├── app/.well-known/                          (OAuth metadata — no lib/mcp imports)
+│   ├── oauth-authorization-server/
+│   │   └── route.ts
+│   │       ├── @clerk/mcp-tools/next → authServerMetadataHandlerClerk
+│   │       └── @clerk/mcp-tools/next → metadataCorsOptionsRequestHandler (OPTIONS)
+│   │
+│   └── oauth-protected-resource/mcp/
+│       └── route.ts
+│           ├── @clerk/mcp-tools/next → protectedResourceHandlerClerk
+│           └── @clerk/mcp-tools/next → metadataCorsOptionsRequestHandler (OPTIONS)
+│
+├── app/api/mcp/
+│   └── route.ts                              (HTTP entry — Streamable MCP)
+│       ├── mcp-handler → createMcpHandler, withMcpAuth
+│       ├── @/lib/mcp/register-tools.ts ───────────────┐
+│       ├── @/lib/mcp/verify-mcp-token.ts ─────────────┤
+│       │                                              │
+│       │   resourceMetadataPath (config only)         │
+│       │   ═══════════════════════════════════════    │
+│       └── points to ──► /.well-known/oauth-protected-resource/mcp
+│
+└── lib/mcp/
+    │
+    ├── verify-mcp-token.ts ◄────────────────── used only by app/api/mcp/route.ts
+    │   ├── @clerk/nextjs/server → auth({ acceptsToken: "oauth_token" })
+    │   ├── @clerk/mcp-tools/next → verifyClerkToken
+    │   ├── @clerk/backend → createClerkClient, authenticateRequest (session fallback)
+    │   └── @modelcontextprotocol/sdk → AuthInfo type
+    │
+    ├── register-tools.ts ◄──────────────────── called from createMcpHandler callback
+    │   ├── extra.ts → parseMcpAuthExtra
+    │   ├── tool-result.ts → mcpToolError
+    │   ├── @modelcontextprotocol/sdk → McpServer
+    │   ├── zod
+    │   └── tools/*.ts (17 runners + input schemas) ──┐
+    │                                                  │
+    ├── extra.ts                                       │
+    │   ├── zod                                        │
+    │   └── @modelcontextprotocol/sdk → AuthInfo       │
+    │                                                  │
+    ├── tool-context.ts          (type only, no imports)
+    ├── tool-result.ts           (type + helpers, no lib/mcp imports)
+    ├── pagination-args.ts       (zod; used by list-style tools)
+    ├── constants.ts → FREE_DECK_LIMIT (used by create-deck)
+    │
+    └── tools/
+        ├── create-deck.ts ──────► constants, tool-context, tool-result, @/db/queries/decks
+        ├── list-decks.ts ───────► pagination-args, tool-context, tool-result, @/db/queries/decks
+        ├── get-deck-count.ts ───► tool-context, tool-result, @/db/queries/decks
+        ├── get-deck.ts ─────────► pagination-args, tool-context, tool-result, decks + cards queries
+        ├── replace-deck.ts ─────► tool-context, tool-result, @/db/queries/decks
+        ├── patch-deck.ts ───────► tool-context, tool-result, @/db/queries/decks
+        ├── delete-deck.ts ──────► tool-context, tool-result, @/db/queries/decks
+        ├── list-cards.ts ───────► pagination-args, tool-context, tool-result, @/db/queries/cards
+        ├── create-card.ts ──────► tool-context, tool-result, @/db/queries/cards
+        ├── get-card.ts ─────────► tool-context, tool-result, decks + cards queries
+        ├── replace-card.ts ─────► tool-context, tool-result, @/db/queries/cards
+        ├── patch-card.ts ───────► tool-context, tool-result, decks + cards queries
+        ├── delete-card.ts ──────► tool-context, tool-result, @/db/queries/cards
+        ├── list-ratings.ts ─────► pagination-args, tool-context, tool-result, decks + study-sessions queries
+        ├── list-study-sessions.ts ► pagination-args, tool-context, tool-result, study-sessions queries
+        ├── create-study-session.ts ► tool-context, tool-result, study-sessions queries
+        ├── list-study-session-counts.ts ► pagination-args, tool-context, tool-result, study-sessions queries
+        │
+        └── *.test.ts ───────────► vitest; mocks @/db/queries/* + local run* under test
+```
+
+### Layer summary
+
+| Layer | Path | Role |
+|-------|------|------|
+| Discovery | `app/.well-known/**` | RFC 9728 / 8414 metadata for MCP OAuth (Clerk handlers). |
+| Transport | `app/api/mcp/route.ts` | `mcp-handler` + auth wrapper; exposes GET/POST/DELETE on `/api/mcp`. |
+| Auth | `lib/mcp/verify-mcp-token.ts` | Bearer → `AuthInfo` (OAuth first, session JWT fallback). |
+| Registry | `lib/mcp/register-tools.ts` | Registers 17 tools; maps `authInfo.extra` → `McpToolContext`. |
+| Execution | `lib/mcp/tools/*` | Zod input + `run*` → Drizzle query helpers (`@/db/queries/*`). |
+
+---
+
+## Third-party connection flow (OAuth + MCP)
+
+How an external MCP host (Cursor, Claude Desktop via `mcp-remote`, custom agent, etc.) discovers Clerk, obtains a token, lists tools, and calls them.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Client as Third-party MCP client
+  participant MetaPR as GET /.well-known/oauth-protected-resource/mcp
+  participant MetaAS as GET /.well-known/oauth-authorization-server
+  participant Clerk as Clerk OAuth / IdP
+  participant MCP as POST /api/mcp
+  participant Auth as verifyMcpToken
+  participant Tools as register-tools + tools/*
+
+  Note over Client,MetaAS: Discovery (RFC 9728 / 8414)
+  Client->>MetaPR: Fetch protected resource metadata
+  MetaPR-->>Client: resource, authorization_servers, scopes_supported
+  Client->>MetaAS: Optional: authorization server metadata
+  MetaAS-->>Client: authorize/token endpoints, registration, etc.
+
+  Note over Client,Clerk: OAuth 2.0 (Clerk Dashboard: OAuth app + dynamic client registration if required)
+  Client->>Clerk: Register client / authorize user / token exchange
+  Clerk-->>Client: OAuth access_token
+
+  Note over Client,MCP: MCP session (Streamable HTTP)
+  Client->>MCP: initialize (Authorization: Bearer access_token)
+  MCP->>Auth: withMcpAuth → verifyMcpToken(req, token)
+  Auth->>Auth: auth(oauth_token) + verifyClerkToken
+  alt OAuth valid
+    Auth-->>MCP: AuthInfo { extra: userId, hasUnlimitedDecks }
+  else Session JWT fallback
+    Auth->>Auth: authenticateRequest(session_token)
+    Auth-->>MCP: AuthInfo { extra: userId, hasUnlimitedDecks }
+  end
+  MCP-->>Client: initialize result (server capabilities)
+
+  Client->>MCP: tools/list
+  MCP-->>Client: list_decks, create_deck, … (17 tools)
+
+  Client->>MCP: tools/call (e.g. list_decks)
+  MCP->>Tools: requireToolContext → runListDecks(ctx, args)
+  Tools->>Tools: @/db/queries/decks (scoped by ctx.userId)
+  Tools-->>MCP: JSON text { data, meta }
+  MCP-->>Client: tool result
+```
+
+### Flow diagram (components)
+
+```mermaid
+flowchart TB
+  subgraph client [Third-party system]
+    Agent[MCP host / agent]
+  end
+
+  subgraph flashycardy [Flashycardy apps/web]
+    subgraph discovery [app/.well-known]
+      PR["/oauth-protected-resource/mcp<br/>protectedResourceHandlerClerk"]
+      AS["/oauth-authorization-server<br/>authServerMetadataHandlerClerk"]
+    end
+
+    subgraph endpoint [app/api/mcp]
+      Route["route.ts<br/>createMcpHandler + withMcpAuth"]
+    end
+
+    subgraph lib [lib/mcp]
+      Verify[verify-mcp-token.ts]
+      Reg[register-tools.ts]
+      Run[tools/run*]
+    end
+
+    DB[(Drizzle @/db/queries)]
+  end
+
+  subgraph clerk [Clerk]
+    OAuth[OAuth authorize / token]
+    VerifyAPI[verifyClerkToken + session JWT API]
+  end
+
+  Agent -->|1. GET metadata| PR
+  Agent -->|1b. GET optional| AS
+  PR -.->|points to| OAuth
+  AS -.->|points to| OAuth
+
+  Agent -->|2. OAuth login / token| OAuth
+  OAuth -->|access_token| Agent
+
+  Agent -->|3. Bearer on /api/mcp| Route
+  Route --> Verify
+  Verify -->|oauth_token| VerifyAPI
+  Verify -->|fallback session_token| VerifyAPI
+  Verify -->|AuthInfo.extra| Reg
+  Reg --> Run
+  Run --> DB
+```
+
+### MCP methods the client typically uses
+
+| Phase | MCP / HTTP | What happens |
+|-------|------------|----------------|
+| Discovery | `GET` well-known URLs | Client learns Clerk issuer, scopes (`profile`, `email`), and resource identifier for `/api/mcp`. |
+| OAuth | Clerk-hosted | User consents; client receives **OAuth access token** (recommended). |
+| Session | `POST /api/mcp` | `initialize` — `withMcpAuth` runs **`verifyMcpToken`** before handler body runs. |
+| Tools | `tools/list` | **`registerFlashycardyMcpTools`** exposes 17 tool names + Zod-shaped inputs. |
+| Invoke | `tools/call` | Handler reads **`parseMcpAuthExtra`**, calls **`run*`** with **`McpToolContext`**, returns REST-shaped JSON in text content. |
+
+### Auth decision inside `verifyMcpToken`
+
+```mermaid
+flowchart TD
+  A[Bearer token present?] -->|no| U[undefined → 401 via withMcpAuth]
+  A -->|yes| B[auth acceptsToken oauth_token]
+  B --> C[verifyClerkToken]
+  C -->|userId in extra| D[AuthInfo + hasUnlimitedDecks from oauthAuth.has]
+  C -->|no| E[authenticateRequest session_token]
+  E -->|signed-in| F[AuthInfo + hasUnlimitedDecks from session has]
+  E -->|not signed-in| U
+```
+
+---
+
+## Related
+
+- [Model Context Protocol (MCP)](./mcp) — endpoints, tools table, client config
+- [Deploy MCP on Vercel](../how-to/vercel-mcp-production) — production checklist
+- [HTTP API (REST)](./rest-api) — same data model; session/cookie auth vs MCP OAuth

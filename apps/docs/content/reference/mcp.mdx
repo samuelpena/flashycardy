@@ -1,0 +1,103 @@
+---
+title: Model Context Protocol (MCP)
+---
+
+# Model Context Protocol (MCP)
+
+`apps/web` exposes a **Streamable HTTP** MCP server for AI clients at **`/api/mcp`**. Tools mirror the public [HTTP API (REST)](./rest-api) (decks, cards, study sessions, ratings) and use the same Drizzle query helpers.
+
+## Authentication (Clerk)
+
+MCP requests must send **`Authorization: Bearer <token>`**. Verification follows [Clerk’s Next.js MCP guide](https://clerk.com/docs/nextjs/guides/ai/mcp/build-mcp-server) first, with a **session JWT fallback** for clients that reuse the same bearer style as the REST API.
+
+1. **OAuth access token (recommended for MCP clients)** — `auth({ acceptsToken: "oauth_token" })` plus **`verifyClerkToken`** from **`@clerk/mcp-tools`**. This is what Clerk documents for MCP; deck limits use **`has({ feature: "unlimited_decks" })`** in that OAuth context when the token is recognized as an OAuth token.
+2. **Session JWT (compatibility)** — If OAuth verification does not yield a user id, the server falls back to **`createClerkClient`**.**`authenticateRequest`** with **`acceptsToken: "session_token"`** (same shape as [REST](./rest-api) bearer sessions). Billing for that path uses **`has({ feature: "unlimited_decks" })`** on the signed-in session auth object.
+
+After verification, MCP tools receive **`userId`** and **`hasUnlimitedDecks`** in **`AuthInfo.extra`** (Flashycardy’s internal contract).
+
+### OAuth discovery (MCP authorization spec)
+
+Aligned with Clerk’s MCP helpers (**`@clerk/mcp-tools/next`**):
+
+| Route | Purpose |
+|-------|---------|
+| **`GET` `/.well-known/oauth-protected-resource/mcp`** | Protected Resource Metadata (RFC 9728) for MCP — **`protectedResourceHandlerClerk`**. |
+| **`GET` `/.well-known/oauth-authorization-server`** | Authorization Server Metadata — **`authServerMetadataHandlerClerk`** (helps older MCP clients discover Clerk). |
+
+Both routes support **`OPTIONS`** via **`metadataCorsOptionsRequestHandler`**. You do **not** need a manual **`CLERK_OAUTH_ISSUER`** for these metadata responses; Clerk’s handlers derive configuration from your Clerk keys.
+
+**Clerk Dashboard:** For OAuth-based MCP clients, enable **dynamic client registration** on your Clerk **OAuth application** when the client requires it (per Clerk’s MCP deployment guidance).
+
+## Endpoint
+
+| Item | Value |
+|------|--------|
+| Streamable HTTP URL | `https://<your-deployment>/api/mcp` |
+| Protected resource metadata | `GET /.well-known/oauth-protected-resource/mcp` |
+| Authorization server metadata (optional client support) | `GET /.well-known/oauth-authorization-server` |
+
+Local dev (default Next port): `http://localhost:3000/api/mcp`.
+
+## Tools (names)
+
+Each tool returns **JSON text** in MCP `content[0].text` using the same **`{ "data": …, "meta": … }`** shapes as REST where applicable. Errors use MCP **`isError: true`** and a plain-text message (aligned with REST error strings).
+
+| Tool name | Maps to |
+|-----------|---------|
+| `list_decks` | `GET /api/decks` |
+| `get_deck_count` | `GET /api/decks/count` |
+| `create_deck` | `POST /api/decks` |
+| `get_deck` | `GET /api/decks/[deckUuid]` |
+| `replace_deck` | `PUT /api/decks/[deckUuid]` |
+| `patch_deck` | `PATCH /api/decks/[deckUuid]` |
+| `delete_deck` | `DELETE /api/decks/[deckUuid]` |
+| `list_cards` | `GET /api/decks/[deckUuid]/cards` |
+| `create_card` | `POST /api/decks/[deckUuid]/cards` |
+| `get_card` | `GET /api/decks/[deckUuid]/cards/[cardUuid]` |
+| `replace_card` | `PUT /api/decks/[deckUuid]/cards/[cardUuid]` |
+| `patch_card` | `PATCH /api/decks/[deckUuid]/cards/[cardUuid]` |
+| `delete_card` | `DELETE /api/decks/[deckUuid]/cards/[cardUuid]` |
+| `list_ratings` | `GET /api/decks/[deckUuid]/ratings` |
+| `list_study_sessions` | `GET /api/study-sessions` |
+| `create_study_session` | `POST /api/study-sessions` |
+| `list_study_session_counts` | `GET /api/study-sessions/counts` |
+
+### Pagination arguments
+
+List-style tools accept optional **`page`** (integer ≥ 1) and **`pageSize`** (1–100), matching REST defaults (`page` = 1, `pageSize` = 20).
+
+## Runtime configuration
+
+- **`export const maxDuration = 60`** on `apps/web/src/app/api/mcp/route.ts` — adjust for your Vercel plan if sessions run longer.
+- **`REDIS_URL`** or **`KV_URL`** — optional; passed to `mcp-handler` for SSE / resumability when enabled. **Streamable HTTP** works without Redis; enable Redis only if you turn on SSE-style features that need it.
+
+## Client examples
+
+### Cursor (Streamable HTTP)
+
+In `~/.cursor/mcp.json` (or project `.cursor/mcp.json`), point at your deployment and pass a **Clerk OAuth access token** (preferred) or, for testing, a **session JWT** if your client obtains one the same way as REST:
+
+```json
+{
+  "mcpServers": {
+    "flashycardy": {
+      "url": "https://<your-deployment>/api/mcp",
+      "headers": {
+        "Authorization": "Bearer <Clerk_OAuth_access_token_or_session_JWT>"
+      }
+    }
+  }
+}
+```
+
+Use Clerk’s documented OAuth / MCP client setup so the token matches **`verifyClerkToken`**. Session JWTs are supported as a compatibility path but are not the primary flow in Clerk’s MCP guide.
+
+### stdio-only hosts
+
+Use **`mcp-remote`** (see [Vercel MCP docs](https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel)) to bridge to the Streamable HTTP URL.
+
+## Related
+
+- [MCP architecture & dependencies](./mcp-architecture) — file dependency tree and third-party OAuth + tool-call flow diagrams.
+- [HTTP API (REST)](./rest-api) — canonical field validation and response envelopes; REST uses session/cookie or bearer **session** semantics, while MCP prefers **OAuth** per Clerk.
+- [Deploy MCP on Vercel](../how-to/vercel-mcp-production) — firewall, Redis, and environment checklist.

@@ -1,0 +1,55 @@
+---
+title: Deploy MCP on Vercel (production)
+---
+
+# Deploy MCP on Vercel (production)
+
+Task-oriented checklist for the Streamable HTTP MCP server shipped with `apps/web` (see [Model Context Protocol (MCP)](../reference/mcp)).
+
+## 1. Environment variables
+
+Set in the Vercel project (**Settings → Environment Variables**) for **Production** (and Preview if you test there):
+
+| Variable | Purpose |
+|----------|---------|
+| `CLERK_SECRET_KEY` | Already required for the app; used by MCP bearer verification (OAuth path and session fallback). |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Required for Clerk backend client configuration used in MCP verification. |
+| `REDIS_URL` or `KV_URL` | **Optional** — only if you rely on MCP handler features that need Redis (e.g. SSE resumability). Streamable HTTP works without it. |
+| `NEXT_PUBLIC_APP_URL` | Recommended stable public origin for links and metadata (if you use server-side URL building elsewhere). |
+
+OAuth **protected resource** and **authorization server** metadata are served from **`/.well-known/oauth-protected-resource/mcp`** and **`/.well-known/oauth-authorization-server`** using **`@clerk/mcp-tools`** — you do **not** need a separate issuer env var for those routes.
+
+## 2. Clerk Dashboard (OAuth MCP clients)
+
+1. Configure an **OAuth application** in the Clerk Dashboard as described in [Clerk’s MCP guide](https://clerk.com/docs/nextjs/guides/ai/mcp/build-mcp-server).
+2. When your MCP client requires it, enable **dynamic client registration** for that OAuth application so clients can register against Clerk at runtime.
+
+## 3. Vercel Firewall (WAF)
+
+1. Open your project on Vercel → **Settings → Firewall** (see [Vercel Firewall / WAF](https://vercel.com/docs/vercel-firewall/vercel-waf)).
+2. Turn on protection appropriate for a **public API + MCP** surface: managed rules, rate limits, and suspicious-traffic challenges as needed.
+3. **Do not** blanket IP-allowlist `/api/mcp` unless every client comes from a fixed IP range — MCP users typically connect from residential networks. Prefer auth (Clerk) + rate limiting over IP allowlists for user traffic.
+4. If you need strict IP restriction for an **internal** integration, confirm allowlist support for your Vercel plan in the current [rule configuration](https://vercel.com/docs/vercel-firewall/vercel-waf/rule-configuration) docs (blocking is widely documented; allowlisting may be Enterprise-specific).
+
+## 4. Redis (optional)
+
+- Default deployment uses **Streamable HTTP** only; **no Redis is required** for normal operation.
+- If you enable SSE / resumability per `mcp-handler` and your version expects a backing store:
+  1. Create a Redis-compatible store (e.g. **Vercel Redis** / Upstash) in the Vercel dashboard.
+  2. Link it to the project so **`REDIS_URL`** (or **`KV_URL`**, depending on provider) is injected at runtime.
+  3. Redeploy so `apps/web/src/app/api/mcp/route.ts` picks up the env var passed into `createMcpHandler`.
+
+## 5. Function duration
+
+- MCP routes export **`maxDuration = 60`** (seconds). Raise it in code if your Vercel plan allows longer serverless execution and your clients hold long streams.
+
+## 6. Smoke test after deploy
+
+1. Confirm **`GET https://<host>/.well-known/oauth-protected-resource/mcp`** returns **200** and JSON (Clerk protected-resource metadata).
+2. Optionally confirm **`GET https://<host>/.well-known/oauth-authorization-server`** returns **200** (authorization server metadata for clients that need it).
+3. Use the [MCP Inspector](https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel) with **Streamable HTTP** and URL `https://<host>/api/mcp`, using a valid **OAuth access token** (or a **session JWT** for compatibility), in **`Authorization: Bearer`**.
+4. Call **`list_decks`** and confirm data is scoped to that user.
+
+## Related
+
+- [Model Context Protocol (MCP)](../reference/mcp) — tools, auth, and client config.

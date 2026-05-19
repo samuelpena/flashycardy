@@ -7,9 +7,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { StudyClient } from "./study-client";
 
-export default async function StudyPage(
-  props: PageProps<"/decks/[deckUuid]/study">,
-) {
+export default async function StudyPage(props: { params: Promise<{ deckUuid: string }> }) {
   const t = await getTranslations("StudyPage");
 
   const { deckUuid } = await props.params;
