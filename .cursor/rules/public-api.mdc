@@ -8,6 +8,8 @@ alwaysApply: false
 
 This project exposes a public REST API under `src/app/api/` consumed by the Next.js web app, a future mobile app, and any third-party client. All public routes must follow these conventions.
 
+> New or changed public routes also need a matching MCP tool — **`mcp-route-handlers.mdc`**.
+
 ## Consistent Response Shape
 
 Every route must return a uniform JSON envelope so clients can handle responses generically.

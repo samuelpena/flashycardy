@@ -10,6 +10,8 @@ This project uses **App Router Route Handlers** — not Pages Router API routes.
 
 > These routes are the primary integration point for MCP servers and other 3rd-party systems. The Pages Router (`pages/api/`) is not used.
 
+> **MCP:** When you add or change a public REST handler, add the matching MCP tool — see **`mcp-route-handlers.mdc`**.
+
 ## File Structure
 
 ```

@@ -1,0 +1,88 @@
+---
+description: MCP server (Streamable HTTP), Clerk OAuth metadata, tool registration, and REST API parity
+globs: apps/web/src/lib/mcp/**/*.ts,apps/web/src/app/api/mcp/**/*.ts,apps/web/src/app/.well-known/**/*.ts
+alwaysApply: false
+---
+
+# MCP Route Handlers & Tools
+
+Flashycardy exposes **Streamable HTTP MCP** at **`/api/mcp`** (Clerk OAuth + session JWT fallback). Every **public REST** operation under `src/app/api/` (except `mcp/`) must have a **matching MCP tool**.
+
+REST conventions: **`api-route-handlers.mdc`**, **`public-api.mdc`**. Docs: `apps/docs/content/reference/mcp.mdx`, `mcp-architecture.mdx`.
+
+## Layout
+
+```
+src/app/.well-known/
+  oauth-protected-resource/mcp/route.ts   # protectedResourceHandlerClerk
+  oauth-authorization-server/route.ts     # authServerMetadataHandlerClerk
+
+src/app/api/mcp/route.ts                  # createMcpHandler + withMcpAuth(verifyMcpToken)
+
+src/lib/mcp/
+  verify-mcp-token.ts    # OAuth verifyClerkToken → session fallback → AuthInfo.extra
+  register-tools.ts      # server.registerTool for each REST operation
+  tools/<verb>-<resource>.ts
+  extra.ts, tool-context.ts, tool-result.ts, pagination-args.ts, constants.ts
+```
+
+- **Local client URL:** `http://localhost:3000/api/mcp` (`http://`, not `https://`, unless local TLS).
+- **Do not** add `withAuth`, CORS, or `OPTIONS` on `api/mcp/route.ts`.
+- **Clerk Dashboard:** OAuth app + dynamic client registration when clients require it.
+
+## Auth (`verify-mcp-token.ts`)
+
+1. **OAuth (preferred):** `auth({ acceptsToken: "oauth_token" })` + `verifyClerkToken` from `@clerk/mcp-tools/next`.
+2. **Fallback:** `authenticateRequest(req, { acceptsToken: "session_token" })`.
+
+Populates **`AuthInfo.extra`:** `{ userId, hasUnlimitedDecks }` for tools. Billing must match REST (`unlimited_decks` feature).
+
+## `api/mcp/route.ts`
+
+- `withMcpAuth(mcpCore, verifyMcpToken, { required: true, resourceMetadataPath: "/.well-known/oauth-protected-resource/mcp" })`
+- Export **GET**, **POST**, **DELETE**; `disableSse: true`; `maxDuration = 60`
+
+## REST ↔ MCP parity (required)
+
+| REST | MCP tool |
+|------|----------|
+| `GET` collection | `list_<resource>` |
+| `GET` one / count | `get_<resource>` / `get_<resource>_count` |
+| `POST` | `create_<resource>` |
+| `PUT` | `replace_<resource>` |
+| `PATCH` | `patch_<resource>` |
+| `DELETE` | `delete_<resource>` |
+
+When adding or changing **`src/app/api/**/route.ts`**:
+
+1. **`src/lib/mcp/tools/<verb>-<resource>.ts`** — export Zod `*InputSchema` + `run*(ctx: McpToolContext, input)` using **`@/db/queries/*`** (same as REST).
+2. **`register-tools.ts`** — `server.registerTool("name", { title, description, inputSchema }, handler)`; description cites REST path.
+3. **Handler:** `parseMcpAuthExtra(extra.authInfo)` → `mcpToolError("Unauthorized")` if null → `run*(ctx, args)`.
+4. **Pagination lists:** `pageFieldsSchema`, `parsePageArgs`, `paginationMeta` (`pagination-args.ts`).
+5. **Plan limits:** `ctx.hasUnlimitedDecks` + `FREE_DECK_LIMIT` (`constants.ts`).
+6. **Tests:** `tools/<name>.test.ts` (mock queries). **Docs:** `mcp.mdx` + `rest-api.mdx`.
+
+```typescript
+// ✅ GOOD — tool mirrors REST validation and queries
+export async function runCreateDeck(ctx: McpToolContext, input: CreateDeckInput) {
+  if (!ctx.hasUnlimitedDecks && (await getDeckCountByUser(ctx.userId)) >= FREE_DECK_LIMIT) {
+    return mcpToolError("Deck limit reached for the free plan");
+  }
+  return mcpJsonContent({ data: deck });
+}
+
+// ❌ BAD — new REST route with no register-tools entry
+// ❌ BAD — inline Drizzle in MCP tool or different Zod limits than REST
+```
+
+## MCP responses
+
+- Success: **`mcpJsonContent({ data, meta? })`** — JSON in `content[0].text`.
+- Error: **`mcpToolError("message")`** (`isError: true`) — reuse REST error strings when possible.
+
+## Rules
+
+- One MCP tool per public REST method; keep parity table in docs updated.
+- Tools use **`McpToolContext`**, not `auth()` directly.
+- Business logic only in **`src/db/queries/*`** — shared with REST routes.
+- Metadata only via **`@clerk/mcp-tools`** on `.well-known` — no manual `CLERK_OAUTH_ISSUER` routes unless Clerk requires it.
