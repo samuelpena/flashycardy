@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { authenticateSessionBearer } from "@/lib/api/authenticate-session-bearer";
 import { jsonError } from "@/lib/api/responses";
 
 type RouteContext<P extends Record<string, string> = Record<string, string>> = {
@@ -16,6 +17,8 @@ type AuthedHandler<P extends Record<string, string> = Record<string, string>> =
 
 /**
  * Wraps a Route Handler with Clerk authentication.
+ * Accepts session cookies (`auth()`) or `Authorization: Bearer` session JWTs
+ * (Chrome extension and other non-cookie clients).
  * Injects `userId` into the handler context and returns a 401 when the
  * request is unauthenticated, so individual handlers never repeat the check.
  *
@@ -32,12 +35,16 @@ export function withAuth<P extends Record<string, string> = Record<string, strin
     req: NextRequest,
     ctx: RouteContext<P> = { params: Promise.resolve({} as P) }
   ): Promise<NextResponse> => {
-    const { userId, has } = await auth();
-
-    if (!userId) {
-      return jsonError("Unauthorized", 401);
+    const cookieAuth = await auth();
+    if (cookieAuth.userId) {
+      return handler(req, { ...ctx, userId: cookieAuth.userId, has: cookieAuth.has });
     }
 
-    return handler(req, { ...ctx, userId, has });
+    const bearerAuth = await authenticateSessionBearer(req);
+    if (bearerAuth) {
+      return handler(req, { ...ctx, userId: bearerAuth.userId, has: bearerAuth.has });
+    }
+
+    return jsonError("Unauthorized", 401);
   };
 }

@@ -7,7 +7,7 @@ todos:
     status: pending
   - id: api-bearer-auth
     content: "PR-1: Extend withAuth for Bearer session JWT + integration test on GET /api/decks"
-    status: pending
+    status: completed
   - id: monorepo-wiring
     content: "PR-2: pnpm workspace, turbo pipelines, root dev/build/lint:extension scripts"
     status: pending

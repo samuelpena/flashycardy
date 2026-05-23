@@ -1,21 +1,7 @@
-import { createClerkClient } from "@clerk/backend";
 import { auth } from "@clerk/nextjs/server";
 import { verifyClerkToken } from "@clerk/mcp-tools/next";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-
-function getClerkBackend() {
-  const secretKey = process.env.CLERK_SECRET_KEY;
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  if (!secretKey || !publishableKey) {
-    throw new Error("Missing CLERK_SECRET_KEY or NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY");
-  }
-  return createClerkClient({ secretKey, publishableKey });
-}
-
-type SessionAuthShape = {
-  userId: string | null;
-  has: (args: { feature?: string; plan?: string }) => boolean;
-};
+import { authenticateSessionBearer } from "@/lib/api/authenticate-session-bearer";
 
 /**
  * Verifies MCP `Authorization: Bearer` using Clerk’s OAuth flow first (`verifyClerkToken`),
@@ -48,14 +34,8 @@ export async function verifyMcpToken(
     };
   }
 
-  const clerk = getClerkBackend();
-  const state = await clerk.authenticateRequest(req, {
-    acceptsToken: "session_token",
-  });
-  if (state.status !== "signed-in") return undefined;
-
-  const sessionAuth = (state.toAuth as unknown as () => SessionAuthShape)();
-  if (!sessionAuth.userId) return undefined;
+  const sessionAuth = await authenticateSessionBearer(req);
+  if (!sessionAuth) return undefined;
 
   return {
     token: bearerToken,
