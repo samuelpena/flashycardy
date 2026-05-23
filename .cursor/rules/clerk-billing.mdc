@@ -12,7 +12,7 @@ This app uses **Clerk Billing** (B2C) for all subscription and payment logic. Ne
 | Plan | Features |
 |------|----------|
 | `free_user` | `3_deck_limit` |
-| `pro` | `unlimited_decks`, `ai_flashcard_generation` |
+| `pro` | `unlimited_decks`, `ai_flashcard_generation`, `document_deck_generation` |
 
 ## Gating Access — Server Side (`has()`)
 
