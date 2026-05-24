@@ -2,6 +2,11 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Monorepo: utilities in @flashycardy/ui and @flashycardy/features are not under apps/web */
+@source "../**/*.{ts,tsx}";
+@source "../../../../apps/web/src/**/*.{ts,tsx}";
+@source "../../../features/src/**/*.{ts,tsx}";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
