@@ -6,7 +6,7 @@ vi.mock("@/db/queries/decks", () => ({
   getDeckCountByUser: vi.fn(),
 }));
 
-const ctx = { userId: "user_test", hasUnlimitedDecks: true };
+const ctx = { userId: "user_test", hasUnlimitedDecks: true, hasAiFlashcardGeneration: true, hasDocumentDeckGeneration: true };
 
 afterEach(() => {
   vi.clearAllMocks();

@@ -1,0 +1,10 @@
+{
+  "name": "@flashycardy/extension",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('@flashycardy/extension: scaffold in PR-5')\"",
+    "build": "node -e \"console.log('@flashycardy/extension: scaffold in PR-5')\"",
+    "lint": "node -e \"console.log('@flashycardy/extension: scaffold in PR-5')\""
+  }
+}

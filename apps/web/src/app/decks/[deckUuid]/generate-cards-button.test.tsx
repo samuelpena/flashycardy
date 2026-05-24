@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@flashycardy/ui/tooltip";
 import { NextIntlClientProvider } from "next-intl";
 import { enMessages } from "@/test/render-with-intl";
 import { GenerateCardsButton } from "./generate-cards-button";

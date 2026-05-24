@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@flashycardy/ui/select";
 
 export type CardSortOption = "updated" | "az" | "za";
 

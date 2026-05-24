@@ -1,6 +1,6 @@
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
-import en from "../../messages/en.json";
+import { enMessages as en } from "@flashycardy/i18n";
 
 /**
  * Minimal message interpolation for tests (`{key}` placeholders only).

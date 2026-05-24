@@ -2,7 +2,7 @@
 
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+import { Button } from "@flashycardy/ui/button";
 
 export function AuthButtons() {
   const t = useTranslations("Auth");

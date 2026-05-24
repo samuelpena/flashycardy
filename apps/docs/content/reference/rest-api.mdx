@@ -129,6 +129,34 @@ Deletes the deck.
 - **Success**: `{ "data": Deck }` (deleted row)
 - **Errors**: `400` invalid UUID; `404` not found
 
+### `POST /api/decks/[deckUuid]/generate-cards`
+
+AI-generates **20** flashcards from the deck’s title and description (Pro feature **`ai_flashcard_generation`**).
+
+- **Auth**: required  
+- **Body**: none  
+- **Success**: `{ "data": { "success": true } }` with status **`200`**  
+- **Errors**: `400` invalid UUID or deck missing description; **`403`** Pro feature required; `404` deck not found; `500` AI failure
+
+### `POST /api/decks/from-document`
+
+Creates a deck with **20** AI-generated cards from an uploaded document (Pro feature **`document_deck_generation`**). Free-plan users are subject to the **3-deck** limit unless they have **`unlimited_decks`**.
+
+- **Auth**: required  
+- **Body** (JSON):
+
+```json
+{
+  "fileBase64": "string (required, base64-encoded file)",
+  "fileName": "string (required, 1–255 chars, e.g. notes.pdf)"
+}
+```
+
+Supported extensions: `.pdf`, `.docx`, `.pptx` (max **10 MB** decoded).
+
+- **Success**: `{ "data": { "deckUuid": "uuid" } }` with status **`201`**  
+- **Errors**: `400` invalid body or file; **`403`** Pro feature or deck limit; `500` AI or save failure
+
 ---
 
 ## Cards (scoped to a deck)
@@ -247,6 +275,8 @@ Paginated **session counts grouped by deck** for the current user (one row per d
 | `PUT` | `/api/decks/[deckUuid]` |
 | `PATCH` | `/api/decks/[deckUuid]` |
 | `DELETE` | `/api/decks/[deckUuid]` |
+| `POST` | `/api/decks/[deckUuid]/generate-cards` |
+| `POST` | `/api/decks/from-document` |
 | `GET` | `/api/decks/[deckUuid]/cards` |
 | `POST` | `/api/decks/[deckUuid]/cards` |
 | `GET` | `/api/decks/[deckUuid]/cards/[cardUuid]` |

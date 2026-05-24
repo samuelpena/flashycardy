@@ -4,16 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useUser } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@flashycardy/ui/button";
+import { Label } from "@flashycardy/ui/label";
+import { Separator } from "@flashycardy/ui/separator";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@flashycardy/ui/select";
 import { updateUserLanguageAction } from "@/actions/locale";
 import { normalizeLocale, type AppLocale } from "@/i18n/config";
 

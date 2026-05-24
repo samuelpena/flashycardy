@@ -9,9 +9,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "@flashycardy/ui/table";
+import { Badge } from "@flashycardy/ui/badge";
+import { Button } from "@flashycardy/ui/button";
 import { ArrowLeftIcon, BarChart2Icon } from "lucide-react";
 import Link from "next/link";
 

@@ -28,7 +28,7 @@ describe("runCreateDeck", () => {
     vi.mocked(decks.insertDeck).mockResolvedValue([deckRow] as Awaited<ReturnType<typeof decks.insertDeck>>);
 
     const out = await runCreateDeck(
-      { userId: "user_test", hasUnlimitedDecks: false },
+      { userId: "user_test", hasUnlimitedDecks: false, hasAiFlashcardGeneration: false, hasDocumentDeckGeneration: false },
       { name: "My deck" }
     );
     expect(out.isError).toBeUndefined();
@@ -39,7 +39,7 @@ describe("runCreateDeck", () => {
   test("blocks free users at deck limit", async () => {
     vi.mocked(decks.getDeckCountByUser).mockResolvedValue(3);
     const out = await runCreateDeck(
-      { userId: "user_test", hasUnlimitedDecks: false },
+      { userId: "user_test", hasUnlimitedDecks: false, hasAiFlashcardGeneration: false, hasDocumentDeckGeneration: false },
       { name: "X" }
     );
     expect(out.isError).toBe(true);
@@ -49,7 +49,7 @@ describe("runCreateDeck", () => {
   test("skips deck count gate when user has unlimited decks feature", async () => {
     vi.mocked(decks.insertDeck).mockResolvedValue([deckRow] as Awaited<ReturnType<typeof decks.insertDeck>>);
     const out = await runCreateDeck(
-      { userId: "user_test", hasUnlimitedDecks: true },
+      { userId: "user_test", hasUnlimitedDecks: true, hasAiFlashcardGeneration: true, hasDocumentDeckGeneration: true },
       { name: "Pro" }
     );
     expect(out.isError).toBeUndefined();

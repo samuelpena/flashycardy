@@ -5,7 +5,7 @@ import { ui } from "@clerk/ui";
 import { dark } from "@clerk/ui/themes";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@flashycardy/ui";
 import "./globals.css";
 
 const poppins = Poppins({

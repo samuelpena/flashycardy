@@ -4,6 +4,8 @@ import { z } from "zod";
 const mcpAuthExtraSchema = z.object({
   userId: z.string(),
   hasUnlimitedDecks: z.boolean(),
+  hasAiFlashcardGeneration: z.boolean(),
+  hasDocumentDeckGeneration: z.boolean(),
 });
 
 export type McpAuthExtra = z.infer<typeof mcpAuthExtraSchema>;

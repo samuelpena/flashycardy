@@ -7,13 +7,17 @@
       ],
       "outputs": [
         ".next/**",
-        "!.next/cache/**"
+        "!.next/cache/**",
+        "dist/**"
       ]
     },
     "lint": {
       "outputs": []
     },
     "test:unit": {
+      "dependsOn": [
+        "^build"
+      ],
       "outputs": []
     },
     "test:e2e": {

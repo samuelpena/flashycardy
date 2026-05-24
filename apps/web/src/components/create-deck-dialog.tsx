@@ -2,11 +2,11 @@
 
 import { useRef, useState, useTransition } from "react";
 import { PlusIcon, UploadIcon } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@flashycardy/ui/card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+import { Button } from "@flashycardy/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,11 +15,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+} from "@flashycardy/ui/dialog";
+import { Input } from "@flashycardy/ui/input";
+import { Label } from "@flashycardy/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@flashycardy/ui/tabs";
+import { Textarea } from "@flashycardy/ui/textarea";
 import { createDeckAction, createDeckFromDocumentAction } from "@/actions/decks";
 import { cn } from "@/lib/utils";
 

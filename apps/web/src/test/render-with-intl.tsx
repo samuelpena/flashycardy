@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { render } from "@testing-library/react";
-import en from "../../messages/en.json";
+import { enMessages as en } from "@flashycardy/i18n";
 
 /** English messages for tests that need the raw catalog. */
 export const enMessages = en;

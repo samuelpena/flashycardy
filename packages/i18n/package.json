@@ -1,0 +1,27 @@
+{
+  "name": "@flashycardy/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./src/config.ts",
+    "./provider": "./src/provider.tsx",
+    "./messages/en.json": "./messages/en.json",
+    "./messages/es.json": "./messages/es.json"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "next-intl": "^4.0.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "next-intl": "^4.11.0",
+    "react": "19.2.4",
+    "typescript": "^5"
+  }
+}

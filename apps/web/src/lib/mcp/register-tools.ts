@@ -23,6 +23,11 @@ import { patchCardInputSchema, runPatchCard } from "@/lib/mcp/tools/patch-card";
 import { patchDeckInputSchema, runPatchDeck } from "@/lib/mcp/tools/patch-deck";
 import { replaceCardInputSchema, runReplaceCard } from "@/lib/mcp/tools/replace-card";
 import { replaceDeckInputSchema, runReplaceDeck } from "@/lib/mcp/tools/replace-deck";
+import {
+  createDeckFromDocumentInputSchema,
+  runCreateDeckFromDocument,
+} from "@/lib/mcp/tools/create-deck-from-document";
+import { generateCardsInputSchema, runGenerateCards } from "@/lib/mcp/tools/generate-cards";
 
 type ToolHandlerExtra = { authInfo?: AuthInfo };
 
@@ -83,6 +88,36 @@ export async function registerFlashycardyMcpTools(server: McpServer): Promise<vo
       const ctx = requireToolContext(extra);
       if (!ctx) return mcpToolError("Unauthorized");
       return runCreateDeck(ctx, args);
+    }
+  );
+
+  server.registerTool(
+    "create_deck_from_document",
+    {
+      title: "Create deck from document",
+      description:
+        "Creates a deck with 20 AI-generated cards from a base64 document (POST /api/decks/from-document).",
+      inputSchema: createDeckFromDocumentInputSchema,
+    },
+    async (args, extra) => {
+      const ctx = requireToolContext(extra);
+      if (!ctx) return mcpToolError("Unauthorized");
+      return runCreateDeckFromDocument(ctx, args);
+    }
+  );
+
+  server.registerTool(
+    "generate_cards",
+    {
+      title: "Generate cards for deck",
+      description:
+        "AI-generates 20 flashcards for a deck from its description (POST /api/decks/[deckUuid]/generate-cards).",
+      inputSchema: generateCardsInputSchema,
+    },
+    async (args, extra) => {
+      const ctx = requireToolContext(extra);
+      if (!ctx) return mcpToolError("Unauthorized");
+      return runGenerateCards(ctx, args);
     }
   );
 

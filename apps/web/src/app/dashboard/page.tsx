@@ -8,8 +8,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "@flashycardy/ui/card";
+import { Badge } from "@flashycardy/ui/badge";
 import {
   Pagination,
   PaginationContent,
@@ -18,10 +18,10 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from "@flashycardy/ui/pagination";
 import { LayersIcon, BookOpenIcon, BarChart2Icon } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@flashycardy/ui/button";
 import { CreateDeckDialog } from "@/components/create-deck-dialog";
 import { DashboardTour } from "@/components/dashboard-tour";
 import { DeckSortSelect, type DeckSortOption } from "./deck-sort-select";

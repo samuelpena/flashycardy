@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@flashycardy/ui/button";
+import { Badge } from "@flashycardy/ui/badge";
 import {
   RotateCcwIcon,
   ShuffleIcon,

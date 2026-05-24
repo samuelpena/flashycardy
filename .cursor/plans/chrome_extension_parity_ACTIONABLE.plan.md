@@ -10,19 +10,19 @@ todos:
     status: completed
   - id: monorepo-wiring
     content: "PR-2: pnpm workspace, turbo pipelines, root dev/build/lint:extension scripts"
-    status: pending
+    status: completed
   - id: package-api-client
     content: "PR-2: @flashycardy/api-client — factory, envelope, pagination, all rest-api.mdx routes"
-    status: pending
+    status: completed
   - id: package-i18n
     content: "PR-2: @flashycardy/i18n — messages, IntlProvider, Extension.* + Actions page keys (en/es)"
-    status: pending
+    status: completed
   - id: package-ui
     content: "PR-2: @flashycardy/ui — move shadcn components, globals.css, Tailwind preset"
-    status: pending
+    status: completed
   - id: rest-gap-routes
     content: "PR-2: POST generate-cards + POST decks/from-document + MCP tools + rest-api.mdx + tests"
-    status: pending
+    status: completed
   - id: deck-from-page-service
     content: "PR-3: Shared generate-deck-from-content service (GPT pipeline, same schema as document action)"
     status: pending

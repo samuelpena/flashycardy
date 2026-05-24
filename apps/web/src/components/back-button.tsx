@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+import { Button } from "@flashycardy/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 export function BackButton() {

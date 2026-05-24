@@ -4,15 +4,15 @@ import { redirect, notFound } from "next/navigation";
 import { z } from "zod";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getDeckByUuidAndUser } from "@/db/queries/decks";
-import { Button } from "@/components/ui/button";
+import { Button } from "@flashycardy/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "@flashycardy/ui/card";
+import { Badge } from "@flashycardy/ui/badge";
 import {
   Pagination,
   PaginationContent,
@@ -21,7 +21,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from "@flashycardy/ui/pagination";
 import {
   ArrowLeftIcon,
   PlusIcon,

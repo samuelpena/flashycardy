@@ -4,4 +4,6 @@
 export type McpToolContext = {
   userId: string;
   hasUnlimitedDecks: boolean;
+  hasAiFlashcardGeneration: boolean;
+  hasDocumentDeckGeneration: boolean;
 };

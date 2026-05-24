@@ -30,6 +30,14 @@ export async function verifyMcpToken(
       extra: {
         userId,
         hasUnlimitedDecks,
+        hasAiFlashcardGeneration:
+          oauthAuth.isAuthenticated &&
+          oauthAuth.tokenType === "oauth_token" &&
+          oauthAuth.has({ feature: "ai_flashcard_generation" }),
+        hasDocumentDeckGeneration:
+          oauthAuth.isAuthenticated &&
+          oauthAuth.tokenType === "oauth_token" &&
+          oauthAuth.has({ feature: "document_deck_generation" }),
       },
     };
   }
@@ -44,6 +52,8 @@ export async function verifyMcpToken(
     extra: {
       userId: sessionAuth.userId,
       hasUnlimitedDecks: sessionAuth.has({ feature: "unlimited_decks" }),
+      hasAiFlashcardGeneration: sessionAuth.has({ feature: "ai_flashcard_generation" }),
+      hasDocumentDeckGeneration: sessionAuth.has({ feature: "document_deck_generation" }),
     },
   };
 }

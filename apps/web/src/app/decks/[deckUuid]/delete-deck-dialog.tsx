@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Trash2Icon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@flashycardy/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +14,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@flashycardy/ui/alert-dialog";
 import { deleteDeckAction } from "@/actions/decks";
 
 interface DeleteDeckDialogProps {

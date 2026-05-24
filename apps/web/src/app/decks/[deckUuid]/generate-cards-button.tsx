@@ -3,12 +3,12 @@
 import { useState, useTransition } from "react";
 import { SparklesIcon, LoaderIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+import { Button } from "@flashycardy/ui/button";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@/components/ui/tooltip";
+} from "@flashycardy/ui/tooltip";
 import { generateCardsAction } from "@/actions/cards";
 
 interface GenerateCardsButtonProps {

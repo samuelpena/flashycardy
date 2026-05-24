@@ -7,7 +7,7 @@ vi.mock("@/db/queries/cards", () => ({
   getCardCountByDeckUuidAndUser: vi.fn(),
 }));
 
-const ctx = { userId: "user_test", hasUnlimitedDecks: false };
+const ctx = { userId: "user_test", hasUnlimitedDecks: false, hasAiFlashcardGeneration: false, hasDocumentDeckGeneration: false };
 const deckUuid = "550e8400-e29b-41d4-a716-446655440000";
 
 afterEach(() => {

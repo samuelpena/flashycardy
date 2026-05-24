@@ -48,6 +48,8 @@ describe("verifyMcpToken", () => {
     expect(out?.extra).toMatchObject({
       userId: "user_oauth",
       hasUnlimitedDecks: true,
+      hasAiFlashcardGeneration: expect.any(Boolean),
+      hasDocumentDeckGeneration: expect.any(Boolean),
     });
     expect(createClerkClient).not.toHaveBeenCalled();
   });
@@ -74,6 +76,8 @@ describe("verifyMcpToken", () => {
     expect(out?.extra).toMatchObject({
       userId: "user_sess",
       hasUnlimitedDecks: false,
+      hasAiFlashcardGeneration: false,
+      hasDocumentDeckGeneration: false,
     });
     expect(toAuth).toHaveBeenCalled();
   });

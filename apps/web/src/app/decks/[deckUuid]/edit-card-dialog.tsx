@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { PencilIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+import { Button } from "@flashycardy/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@flashycardy/ui/dialog";
+import { Input } from "@flashycardy/ui/input";
+import { Label } from "@flashycardy/ui/label";
 import { updateCardAction } from "@/actions/cards";
 
 interface EditCardDialogProps {
