@@ -78,7 +78,6 @@ export type CreateDeckFromDocumentInput = {
   fileName: string;
 };
 
-/** PR-3: POST /api/decks/from-page */
 export type CreateDeckFromPageInput = {
   pageText: string;
   pageUrl?: string;

@@ -157,6 +157,24 @@ Supported extensions: `.pdf`, `.docx`, `.pptx` (max **10 MB** decoded).
 - **Success**: `{ "data": { "deckUuid": "uuid" } }` with status **`201`**  
 - **Errors**: `400` invalid body or file; **`403`** Pro feature or deck limit; `500` AI or save failure
 
+### `POST /api/decks/from-page`
+
+Creates a deck with **20** AI-generated cards from web page plain text (Pro feature **`document_deck_generation`**). Same plan limits as document upload.
+
+- **Auth**: required  
+- **Body** (JSON):
+
+```json
+{
+  "pageText": "string (required, 100–50000 chars)",
+  "pageUrl": "optional valid URL",
+  "pageTitle": "optional string, max 255 chars"
+}
+```
+
+- **Success**: `{ "data": { "deckUuid": "uuid" } }` with status **`201`**  
+- **Errors**: `400` invalid body or page text too short; **`403`** Pro feature or deck limit; `500` AI or save failure
+
 ---
 
 ## Cards (scoped to a deck)
@@ -277,6 +295,7 @@ Paginated **session counts grouped by deck** for the current user (one row per d
 | `DELETE` | `/api/decks/[deckUuid]` |
 | `POST` | `/api/decks/[deckUuid]/generate-cards` |
 | `POST` | `/api/decks/from-document` |
+| `POST` | `/api/decks/from-page` |
 | `GET` | `/api/decks/[deckUuid]/cards` |
 | `POST` | `/api/decks/[deckUuid]/cards` |
 | `GET` | `/api/decks/[deckUuid]/cards/[cardUuid]` |

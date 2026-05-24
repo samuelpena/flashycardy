@@ -67,7 +67,6 @@ export function createDecksApi(client: FlashycardyClient) {
       });
     },
 
-    /** PR-3 — POST /api/decks/from-page */
     createFromPage(input: CreateDeckFromPageInput) {
       return client.requestData<{ deckUuid: string }>("/api/decks/from-page", {
         method: "POST",

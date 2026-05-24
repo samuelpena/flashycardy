@@ -25,10 +25,10 @@ todos:
     status: completed
   - id: deck-from-page-service
     content: "PR-3: Shared generate-deck-from-content service (GPT pipeline, same schema as document action)"
-    status: pending
+    status: completed
   - id: rest-page-content-route
     content: "PR-3: POST /api/decks/from-page + generate_deck_from_page_content MCP + docs + tests"
-    status: pending
+    status: completed
   - id: package-features-extract
     content: "PR-4: @flashycardy/features — StudySession, dialogs, AddCardForm(prefillFront); migrate apps/web"
     status: pending

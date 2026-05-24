@@ -28,6 +28,10 @@ import {
   runCreateDeckFromDocument,
 } from "@/lib/mcp/tools/create-deck-from-document";
 import { generateCardsInputSchema, runGenerateCards } from "@/lib/mcp/tools/generate-cards";
+import {
+  generateDeckFromPageContentInputSchema,
+  runGenerateDeckFromPageContent,
+} from "@/lib/mcp/tools/generate-deck-from-page-content";
 
 type ToolHandlerExtra = { authInfo?: AuthInfo };
 
@@ -118,6 +122,21 @@ export async function registerFlashycardyMcpTools(server: McpServer): Promise<vo
       const ctx = requireToolContext(extra);
       if (!ctx) return mcpToolError("Unauthorized");
       return runGenerateCards(ctx, args);
+    }
+  );
+
+  server.registerTool(
+    "generate_deck_from_page_content",
+    {
+      title: "Generate deck from page content",
+      description:
+        "Creates a deck with 20 AI-generated cards from web page text (POST /api/decks/from-page).",
+      inputSchema: generateDeckFromPageContentInputSchema,
+    },
+    async (args, extra) => {
+      const ctx = requireToolContext(extra);
+      if (!ctx) return mcpToolError("Unauthorized");
+      return runGenerateDeckFromPageContent(ctx, args);
     }
   );
 
