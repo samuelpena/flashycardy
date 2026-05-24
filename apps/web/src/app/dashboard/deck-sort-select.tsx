@@ -1,36 +1,22 @@
 "use client";
 
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@flashycardy/ui/select";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { DeckSortSelect as DeckSortSelectBase, type DeckSortOption } from "@flashycardy/features";
 
-export type DeckSortOption = "updated" | "az" | "za";
+export type { DeckSortOption };
 
-interface DeckSortSelectProps {
+type DeckSortSelectProps = {
   currentSort: DeckSortOption;
-}
+};
 
 export function DeckSortSelect({ currentSort }: DeckSortSelectProps) {
-  const t = useTranslations("DeckSort");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const labels: Record<DeckSortOption, string> = {
-    updated: t("updated"),
-    az: t("az"),
-    za: t("za"),
-  };
-
-  function handleChange(value: DeckSortOption | null) {
+  function handleSortChange(value: DeckSortOption) {
     const params = new URLSearchParams(searchParams.toString());
-    if (!value || value === "updated") {
+    if (value === "updated") {
       params.delete("sort");
     } else {
       params.set("sort", value);
@@ -40,18 +26,5 @@ export function DeckSortSelect({ currentSort }: DeckSortSelectProps) {
     router.push(query ? `${pathname}?${query}` : pathname);
   }
 
-  return (
-    <Select value={currentSort} onValueChange={handleChange}>
-      <SelectTrigger className="w-[140px]">
-        <SelectValue>{labels[currentSort]}</SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {(Object.keys(labels) as DeckSortOption[]).map((key) => (
-          <SelectItem key={key} value={key}>
-            {labels[key]}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
+  return <DeckSortSelectBase currentSort={currentSort} onSortChange={handleSortChange} />;
 }

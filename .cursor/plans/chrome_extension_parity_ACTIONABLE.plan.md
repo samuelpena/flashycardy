@@ -31,7 +31,7 @@ todos:
     status: completed
   - id: package-features-extract
     content: "PR-4: @flashycardy/features — StudySession, dialogs, AddCardForm(prefillFront); migrate apps/web"
-    status: pending
+    status: completed
   - id: extension-scaffold
     content: "PR-5: apps/extension WXT+Vite MV3 — manifest, background, React Router stubs, env"
     status: pending

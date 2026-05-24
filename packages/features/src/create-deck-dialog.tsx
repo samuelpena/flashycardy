@@ -1,0 +1,387 @@
+"use client";
+
+import { useRef, useState, useTransition } from "react";
+import { PlusIcon, UploadIcon } from "lucide-react";
+import { Card, CardContent } from "@flashycardy/ui/card";
+import { useTranslations } from "next-intl";
+import { Button } from "@flashycardy/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@flashycardy/ui/dialog";
+import { Input } from "@flashycardy/ui/input";
+import { Label } from "@flashycardy/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@flashycardy/ui/tabs";
+import { Textarea } from "@flashycardy/ui/textarea";
+import { cn } from "@flashycardy/ui/lib/utils";
+import { fileToBase64, getActionErrorMessage, type ActionError } from "./types";
+
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+export type CreateDeckInput = { name: string; description?: string };
+
+export type CreateDeckFromDocumentInput = {
+  fileBase64: string;
+  fileName: string;
+};
+
+interface CreateDeckDialogProps {
+  /** Raw label for the trigger (e.g. unit tests). Otherwise translated. */
+  triggerLabel?: string;
+  /** When true, uses the “create first deck” translation for the trigger. */
+  emptyStateTrigger?: boolean;
+  limitReached?: boolean;
+  triggerId?: string;
+  /** Pro feature `document_deck_generation` — enables document tab and templates */
+  canGenerateDeckFromDocument?: boolean;
+  pricingHref?: string;
+  onCreate: (input: CreateDeckInput) => Promise<{ error?: ActionError } | void>;
+  onCreateFromDocument?: (
+    input: CreateDeckFromDocumentInput,
+  ) => Promise<{ error?: ActionError; deckUuid?: string } | void>;
+  onDeckCreated?: (deckUuid: string) => void;
+}
+
+export function CreateDeckDialog({
+  triggerLabel,
+  emptyStateTrigger = false,
+  limitReached = false,
+  triggerId,
+  canGenerateDeckFromDocument = false,
+  pricingHref = "/pricing",
+  onCreate,
+  onCreateFromDocument,
+  onDeckCreated,
+}: CreateDeckDialogProps) {
+  const t = useTranslations("CreateDeck");
+  const tCommon = useTranslations("Common");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const resolvedTriggerLabel =
+    triggerLabel ??
+    (emptyStateTrigger ? t("createFirstDeck") : t("triggerDefault"));
+
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      setName("");
+      setDescription("");
+      setDocFile(null);
+      setError(null);
+      setIsDragOver(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+    setOpen(next);
+  }
+
+  function handleSubmitManual(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    startTransition(async () => {
+      const result = await onCreate({
+        name,
+        description: description || undefined,
+      });
+
+      if (result?.error) {
+        setError(getActionErrorMessage(result.error, tCommon("somethingWentWrong")));
+        return;
+      }
+
+      setOpen(false);
+      setName("");
+      setDescription("");
+    });
+  }
+
+  function applyDocumentFile(file: File | undefined, source: "input" | "drop") {
+    setError(null);
+    if (!file) {
+      setDocFile(null);
+      if (source === "input" && fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    const lower = file.name.toLowerCase();
+    const ok =
+      lower.endsWith(".pdf") || lower.endsWith(".docx") || lower.endsWith(".pptx");
+    if (!ok) {
+      setError(t("errorWrongType"));
+      setDocFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError(
+        t("errorFileSize", { maxMb: MAX_UPLOAD_BYTES / (1024 * 1024) }),
+      );
+      setDocFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    setDocFile(file);
+    if (source === "drop" && fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function handleDocFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    applyDocumentFile(e.target.files?.[0], "input");
+  }
+
+  function hasFilePayload(e: React.DragEvent) {
+    return Array.from(e.dataTransfer.types).includes("Files");
+  }
+
+  function handleDragEnter(e: React.DragEvent) {
+    if (!hasFilePayload(e) || isPending) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const from = e.relatedTarget as Node | null;
+    if (from && e.currentTarget.contains(from)) return;
+    setIsDragOver(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    if (!hasFilePayload(e) || isPending) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const to = e.relatedTarget as Node | null;
+    if (to && e.currentTarget.contains(to)) return;
+    setIsDragOver(false);
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    if (!hasFilePayload(e) || isPending) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "copy";
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    if (isPending) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    applyDocumentFile(e.dataTransfer.files?.[0], "drop");
+  }
+
+  function handleSubmitDocument(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (!docFile) {
+      setError(t("errorSelectDoc"));
+      return;
+    }
+
+    startTransition(async () => {
+      let fileBase64: string;
+      try {
+        fileBase64 = await fileToBase64(docFile);
+      } catch {
+        setError(t("errorReadFile"));
+        return;
+      }
+
+      if (!onCreateFromDocument) return;
+
+      const result = await onCreateFromDocument({
+        fileBase64,
+        fileName: docFile.name,
+      });
+
+      if (result?.error) {
+        setError(getActionErrorMessage(result.error, tCommon("somethingWentWrong")));
+        return;
+      }
+
+      setOpen(false);
+      setDocFile(null);
+      setName("");
+      setDescription("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (result?.deckUuid) {
+        onDeckCreated?.(result.deckUuid);
+      }
+    });
+  }
+
+  const maxMb = MAX_UPLOAD_BYTES / (1024 * 1024);
+
+  const manualForm = (
+    <form onSubmit={handleSubmitManual} className="flex flex-col gap-4 pt-2">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="deck-name">{t("nameLabel")}</Label>
+        <Input
+          id="deck-name"
+          placeholder={t("namePlaceholder")}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          maxLength={255}
+          disabled={isPending}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="deck-description">
+          {t("descriptionLabel")}{" "}
+          <span className="text-muted-foreground font-normal">
+            {t("descriptionOptional")}
+          </span>
+        </Label>
+        <Textarea
+          id="deck-description"
+          placeholder={t("descriptionPlaceholder")}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          maxLength={1000}
+          rows={3}
+          disabled={isPending}
+        />
+      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <DialogFooter showCloseButton>
+        <Button type="submit" disabled={isPending || !name.trim()}>
+          {isPending ? t("creating") : t("createDeck")}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+
+  const documentForm = (
+    <form onSubmit={handleSubmitDocument} className="flex flex-col gap-4 pt-2">
+      <p className="text-sm text-muted-foreground">{t("docIntro")}</p>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="deck-document">{t("documentLabel")}</Label>
+        <input
+          ref={fileInputRef}
+          id="deck-document"
+          type="file"
+          accept=".pdf,.docx,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+          className="sr-only"
+          onChange={handleDocFileChange}
+          disabled={isPending}
+        />
+        <Card
+          size="sm"
+          role="button"
+          tabIndex={0}
+          aria-describedby="deck-document-hint"
+          aria-label={t("ariaUpload")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              if (!isPending) fileInputRef.current?.click();
+            }
+          }}
+          onClick={() => {
+            if (!isPending) fileInputRef.current?.click();
+          }}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          className={cn(
+            "cursor-pointer py-0 ring-0 transition-colors border-2 border-dashed outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+            isDragOver
+              ? "border-primary bg-primary/5"
+              : "border-border bg-muted/20 hover:bg-muted/40",
+          )}
+        >
+          <CardContent className="flex flex-col items-center justify-center gap-3 py-8 text-center pointer-events-none">
+            <UploadIcon className="size-8 text-muted-foreground" aria-hidden />
+            <div className="space-y-1 px-2">
+              <p className="text-sm text-foreground">
+                {t("dragDropLine1")}{" "}
+                <span className="text-primary underline decoration-primary underline-offset-4">
+                  {t("chooseFile")}
+                </span>
+              </p>
+              <p id="deck-document-hint" className="text-xs text-muted-foreground">
+                {t("docHint", { maxMb })}
+              </p>
+            </div>
+            {docFile ? (
+              <p className="text-xs text-muted-foreground truncate max-w-full px-2">
+                {t("selected")}{" "}
+                <span className="font-medium text-foreground">{docFile.name}</span>
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">{t("noFileSelected")}</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <DialogFooter showCloseButton>
+        <Button type="submit" disabled={isPending || !docFile}>
+          {isPending ? t("generating") : t("generateDeck")}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger render={<Button id={triggerId} />}>
+        <PlusIcon className="size-4" />
+        {resolvedTriggerLabel}
+      </DialogTrigger>
+      <DialogContent>
+        {limitReached ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>{t("limitTitle")}</DialogTitle>
+              <DialogDescription>{t("limitDescription")}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter showCloseButton>
+              <Button nativeButton={false} render={<a href={pricingHref} />}>
+                {t("viewPlans")}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : canGenerateDeckFromDocument ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>{t("dialogTitle")}</DialogTitle>
+              <DialogDescription>{t("dialogDescriptionTabs")}</DialogDescription>
+            </DialogHeader>
+            <Tabs
+              defaultValue="manual"
+              className="gap-4"
+              onValueChange={() => setError(null)}
+            >
+              <TabsList>
+                <TabsTrigger value="manual">{t("tabManual")}</TabsTrigger>
+                <TabsTrigger value="document">{t("tabDocument")}</TabsTrigger>
+              </TabsList>
+              <TabsContent value="manual" className="flex flex-col gap-0">
+                {manualForm}
+              </TabsContent>
+              <TabsContent value="document" className="flex flex-col gap-0">
+                {documentForm}
+              </TabsContent>
+            </Tabs>
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>{t("dialogTitle")}</DialogTitle>
+              <DialogDescription>{t("dialogDescriptionSimple")}</DialogDescription>
+            </DialogHeader>
+            {manualForm}
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

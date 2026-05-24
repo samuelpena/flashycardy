@@ -1,110 +1,24 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Trash2Icon } from "lucide-react";
-import { Button } from "@flashycardy/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@flashycardy/ui/alert-dialog";
+import { DeleteDeckDialog as DeleteDeckDialogBase } from "@flashycardy/features";
 import { deleteDeckAction } from "@/actions/decks";
 
-interface DeleteDeckDialogProps {
+type DeleteDeckDialogProps = {
   deckUuid: string;
   deckName: string;
   cardCount: number;
-}
+};
 
-export function DeleteDeckDialog({
-  deckUuid,
-  deckName,
-  cardCount,
-}: DeleteDeckDialogProps) {
-  const t = useTranslations("DeleteDeck");
-  const tCommon = useTranslations("Common");
+export function DeleteDeckDialog(props: DeleteDeckDialogProps) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-
-  function handleOpenChange(next: boolean) {
-    if (!next) setError(null);
-    setOpen(next);
-  }
-
-  function handleConfirm() {
-    setError(null);
-    startTransition(async () => {
-      const result = await deleteDeckAction({ deckUuid });
-      if (result?.error) {
-        setError(
-          typeof result.error === "string"
-            ? result.error
-            : tCommon("tryAgain"),
-        );
-        return;
-      }
-      setOpen(false);
-      router.push("/dashboard");
-    });
-  }
-
-  const cardsPhrase =
-    cardCount === 0
-      ? t("cardsNone")
-      : cardCount === 1
-        ? t("cardsOne")
-        : t("cardsMany", { count: cardCount });
 
   return (
-    <>
-      <Button
-        variant="outline"
-        className="text-destructive hover:text-destructive"
-        onClick={() => handleOpenChange(true)}
-      >
-        <Trash2Icon className="size-4" />
-        {t("buttonDeleteDeck")}
-      </Button>
-
-      <AlertDialog open={open} onOpenChange={handleOpenChange}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("title", { name: deckName })}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("description", { cards: cardsPhrase })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {error && (
-            <p className="text-center text-sm font-medium text-destructive sm:text-left">
-              {error}
-            </p>
-          )}
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>
-              {tCommon("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                handleConfirm();
-              }}
-              disabled={isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isPending ? t("deleting") : t("deleteDeck")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <DeleteDeckDialogBase
+      {...props}
+      triggerVariant="outline"
+      onDelete={(input) => deleteDeckAction(input)}
+      onDeleted={() => router.push("/dashboard")}
+    />
   );
 }
