@@ -5,6 +5,8 @@
 /* Monorepo: utilities in @flashycardy/ui and @flashycardy/features are not under apps/web */
 @source "../**/*.{ts,tsx}";
 @source "../../../../apps/web/src/**/*.{ts,tsx}";
+@source "../../../../apps/extension/src/**/*.{ts,tsx}";
+@source "../../../../apps/extension/src/entrypoints/**/*.{ts,tsx}";
 @source "../../../features/src/**/*.{ts,tsx}";
 
 @custom-variant dark (&:is(.dark *));

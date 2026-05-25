@@ -9,7 +9,8 @@
   },
   "Auth": {
     "signIn": "Sign in",
-    "signUp": "Sign up"
+    "signUp": "Sign up",
+    "signOut": "Sign out"
   },
   "Common": {
     "appName": "FlashyCardy",
@@ -244,6 +245,13 @@
     "pageGenFailed": "Could not generate a deck from this page. Try again."
   },
   "Extension": {
+    "loading": "Loading…",
+    "authHint": "Sign in with your FlashyCardy account. If you are already signed in on the web app, your session may sync automatically.",
+    "dashboardPlaceholder": "Deck list and actions ship in the next release.",
+    "deckPlaceholder": "Deck detail ships in the next release.",
+    "studyPlaceholder": "Study mode ships in the next release.",
+    "analyticsPlaceholder": "Analytics ships in the next release.",
+    "settingsPlaceholder": "Language and account settings ship in the next release.",
     "generateFromPage": "Generate from this page",
     "generatingFromPage": "Generating deck from page…",
     "originUnsupported": "Cannot generate from this type of page",

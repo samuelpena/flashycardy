@@ -34,10 +34,10 @@ todos:
     status: completed
   - id: extension-scaffold
     content: "PR-5: apps/extension WXT+Vite MV3 — manifest, background, React Router stubs, env"
-    status: pending
+    status: completed
   - id: extension-auth-screens
     content: "PR-5: Clerk OAuth sign-in/up, auth-callback, syncHost fast-path, token refresh in SW"
-    status: pending
+    status: completed
   - id: extension-screens
     content: "PR-6: Dashboard, deck detail, study, analytics, settings — api-client + features + parity QA"
     status: pending

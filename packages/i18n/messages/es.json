@@ -9,7 +9,8 @@
   },
   "Auth": {
     "signIn": "Iniciar sesión",
-    "signUp": "Registrarse"
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesión"
   },
   "Common": {
     "appName": "FlashyCardy",
@@ -244,6 +245,13 @@
     "pageGenFailed": "No se pudo generar un mazo desde esta página. Inténtalo de nuevo."
   },
   "Extension": {
+    "loading": "Cargando…",
+    "authHint": "Inicia sesión con tu cuenta de FlashyCardy. Si ya iniciaste sesión en la web, la sesión puede sincronizarse automáticamente.",
+    "dashboardPlaceholder": "El listado de mazos y las acciones llegarán en la próxima versión.",
+    "deckPlaceholder": "El detalle del mazo llegará en la próxima versión.",
+    "studyPlaceholder": "El modo estudio llegará en la próxima versión.",
+    "analyticsPlaceholder": "Las analíticas llegarán en la próxima versión.",
+    "settingsPlaceholder": "Idioma y ajustes de cuenta llegarán en la próxima versión.",
     "generateFromPage": "Generar desde esta página",
     "generatingFromPage": "Generando mazo desde la página…",
     "originUnsupported": "No se puede generar desde este tipo de página",

@@ -2,9 +2,32 @@
   "name": "@flashycardy/extension",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "node -e \"console.log('@flashycardy/extension: scaffold in PR-5')\"",
-    "build": "node -e \"console.log('@flashycardy/extension: scaffold in PR-5')\"",
-    "lint": "node -e \"console.log('@flashycardy/extension: scaffold in PR-5')\""
+    "dev": "wxt",
+    "build": "wxt build",
+    "lint": "tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "@clerk/chrome-extension": "^2.9.16",
+    "@flashycardy/api-client": "workspace:*",
+    "@flashycardy/features": "workspace:*",
+    "@flashycardy/i18n": "workspace:*",
+    "@flashycardy/ui": "workspace:*",
+    "next-intl": "^4.11.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-router-dom": "^7.6.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.8",
+    "@types/chrome": "^0.0.323",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@wxt-dev/module-react": "^1.1.3",
+    "tailwindcss": "^4.1.8",
+    "typescript": "^5",
+    "wxt": "^0.20.7"
   }
 }
