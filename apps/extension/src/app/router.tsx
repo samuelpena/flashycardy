@@ -1,18 +1,21 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ExtensionHeader } from "@/components/extension-header";
-import { AnalyticsStubScreen } from "@/screens/analytics-stub";
+import { RequireAuth } from "@/components/require-auth";
+import { AnalyticsScreen } from "@/screens/analytics-screen";
 import { AuthGateScreen } from "@/screens/auth-gate";
-import { DashboardStubScreen } from "@/screens/dashboard-stub";
-import { DeckDetailStubScreen } from "@/screens/deck-detail-stub";
-import { SettingsStubScreen } from "@/screens/settings-stub";
-import { StudyStubScreen } from "@/screens/study-stub";
+import { DashboardScreen } from "@/screens/dashboard-screen";
+import { DeckDetailScreen } from "@/screens/deck-detail-screen";
+import { SettingsScreen } from "@/screens/settings-screen";
+import { StudyScreen } from "@/screens/study-screen";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-full flex-col">
-      <ExtensionHeader />
-      <main className="flex-1 overflow-auto p-4">{children}</main>
-    </div>
+    <RequireAuth>
+      <div className="flex min-h-full flex-col">
+        <ExtensionHeader />
+        <main className="flex-1 overflow-auto p-4">{children}</main>
+      </div>
+    </RequireAuth>
   );
 }
 
@@ -24,7 +27,7 @@ export function ExtensionRouter() {
         path="/dashboard"
         element={
           <AppLayout>
-            <DashboardStubScreen />
+            <DashboardScreen />
           </AppLayout>
         }
       />
@@ -32,7 +35,7 @@ export function ExtensionRouter() {
         path="/decks/:deckUuid"
         element={
           <AppLayout>
-            <DeckDetailStubScreen />
+            <DeckDetailScreen />
           </AppLayout>
         }
       />
@@ -40,7 +43,7 @@ export function ExtensionRouter() {
         path="/decks/:deckUuid/study"
         element={
           <AppLayout>
-            <StudyStubScreen />
+            <StudyScreen />
           </AppLayout>
         }
       />
@@ -48,7 +51,7 @@ export function ExtensionRouter() {
         path="/analytics"
         element={
           <AppLayout>
-            <AnalyticsStubScreen />
+            <AnalyticsScreen />
           </AppLayout>
         }
       />
@@ -56,7 +59,7 @@ export function ExtensionRouter() {
         path="/settings"
         element={
           <AppLayout>
-            <SettingsStubScreen />
+            <SettingsScreen />
           </AppLayout>
         }
       />

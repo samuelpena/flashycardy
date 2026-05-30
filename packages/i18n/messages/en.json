@@ -245,6 +245,7 @@
     "pageGenFailed": "Could not generate a deck from this page. Try again."
   },
   "Extension": {
+    "goPro": "Go Pro",
     "loading": "Loading…",
     "authHint": "Sign in with your FlashyCardy account. If you are already signed in on the web app, your session may sync automatically.",
     "dashboardPlaceholder": "Deck list and actions ship in the next release.",

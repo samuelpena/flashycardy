@@ -41,13 +41,13 @@ Production output: `apps/extension/.output/chrome-mv3`.
 
 ## Routes (HashRouter)
 
-| Path | Purpose |
-|------|---------|
+| Path | Screen |
+|------|--------|
 | `/` | Auth gate |
-| `/dashboard` | Stub (PR-6) |
-| `/decks/:deckUuid` | Stub |
-| `/decks/:deckUuid/study` | Stub |
-| `/analytics` | Stub |
-| `/settings` | Stub + sign out |
+| `/dashboard` | Deck list, create/edit/delete, sort, pagination |
+| `/decks/:deckUuid` | Deck detail, cards, AI generate (Pro) |
+| `/decks/:deckUuid/study` | Study session |
+| `/analytics` | Study session history |
+| `/settings` | Language preference (Clerk metadata) |
 
-Auth completes at `auth-callback.html`, then redirects to the side panel.
+Data layer: `@flashycardy/api-client` with Clerk Bearer tokens. UI: `@flashycardy/features` + `@flashycardy/ui`. Pro gates via Clerk `<Protect>`.

@@ -40,7 +40,7 @@ todos:
     status: completed
   - id: extension-screens
     content: "PR-6: Dashboard, deck detail, study, analytics, settings — api-client + features + parity QA"
-    status: pending
+    status: completed
   - id: extension-generate-from-page
     content: "PR-7: Generate from this page — origin guard, scripting extract, POST from-page, navigate to deck"
     status: pending
