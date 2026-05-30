@@ -1,0 +1,65 @@
+---
+description: Chrome extension (MV3) — WXT, Clerk OAuth, REST via api-client, shared packages
+globs: apps/extension/**
+alwaysApply: false
+---
+
+# Chrome Extension (`apps/extension`)
+
+MV3 side-panel extension built with **WXT + Vite + React 19**. Data layer is **REST only** via `@flashycardy/api-client` with Clerk Bearer tokens — never Drizzle, Server Actions, or inline `fetch` to undocumented routes.
+
+## Stack
+
+| Concern | Use |
+|---------|-----|
+| UI | `@flashycardy/ui` (shadcn) — no hand-rolled primitives |
+| Features | `@flashycardy/features` — props-driven; inject `onSubmit` / API via extension adapters |
+| i18n | `@flashycardy/i18n` + `next-intl` (`Extension.*`, shared message keys) |
+| Auth | `@clerk/chrome-extension` — OAuth redirect primary; `syncHost` additive |
+| Routing | React Router `HashRouter` in side panel |
+
+## Auth
+
+- **`ClerkProvider`**: `publishableKey`, `syncHost`, redirect URLs via `chrome.runtime.getURL` (never hardcode extension ID).
+- **Sign in/up**: `clerk.openSignIn()` / `clerk.openSignUp()` → `auth-callback.html` → side panel.
+- **Background**: `createClerkClient({ background: true })` for token refresh in service worker.
+- **Pro gates**: Clerk `<Protect feature="...">` — same slugs as web (`document_deck_generation`, `ai_flashcard_generation`, etc.).
+
+## Storage
+
+| API | Purpose |
+|-----|---------|
+| `chrome.storage.local` | Clerk session (managed by SDK) |
+| `chrome.storage.session` | Transient prefill (`prefill-front`, `pending-route`) — always clear after read |
+
+## Permissions & scripting
+
+- Declare permissions in `wxt.config.ts` manifest hook up front.
+- **`activeTab` / `scripting`**: only on explicit user gesture (e.g. “Generate from this page” button click).
+- Origin guard before `executeScript`: block `chrome://`, `chrome-extension://`, `file://`, `about:*`.
+
+## API & env
+
+- **`VITE_API_BASE_URL`** / **`VITE_SYNC_HOST`**: web app origin (e.g. `http://localhost:3000` in dev).
+- **`ApiProvider`**: `createFlashycardyApi({ baseUrl, getToken })` with Clerk `getToken()`.
+- Map errors with shared i18n keys (`Actions.*`) — see `mapApiErrorToMessage`.
+
+## New REST routes
+
+When adding backend routes used by the extension: implement in `apps/web`, add to `@flashycardy/api-client`, register MCP tool, update `rest-api.mdx` (see `mcp-route-handlers.mdc`).
+
+## Build & CI
+
+```bash
+pnpm dev:extension          # WXT dev, load .output/chrome-mv3-dev
+pnpm build:extension        # production .output/chrome-mv3
+pnpm package:extension      # dist/extension.zip
+pnpm test:extension:unit    # Vitest (origin guard, page content)
+pnpm test:extension:e2e     # Playwright --load-extension smoke
+```
+
+## Do not
+
+- Embed `<PricingTable />` — open web pricing tab via `syncHost + '/pricing'`.
+- Fetch data in effects without api-client; mutate via api-client only.
+- Use Next.js APIs (`next/navigation`, Server Components) in extension code.

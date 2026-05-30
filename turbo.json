@@ -23,10 +23,19 @@
     },
     "test:e2e": {
       "dependsOn": [
+        "^build",
         "build"
       ],
       "cache": false,
       "outputs": []
+    },
+    "package:zip": {
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": [
+        "../../dist/extension.zip"
+      ]
     },
     "dev": {
       "cache": false,

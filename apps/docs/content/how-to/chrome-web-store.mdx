@@ -1,0 +1,50 @@
+---
+title: Chrome Web Store Checklist
+---
+
+# Chrome Web Store Checklist
+
+Use this checklist before submitting the FlashyCardy extension to the [Chrome Web Store](https://chrome.google.com/webstore/devconsole).
+
+## Build & identity
+
+- [ ] Production build: `pnpm build:extension` with **`apps/extension/.env.production`** (live Clerk keys + production web origin).
+- [ ] Stable extension ID via manifest `key` / CRX keypair (same ID in Clerk production `allowed_origins`).
+- [ ] Package artifact: `pnpm package:extension` → `dist/extension.zip`.
+- [ ] Verify `host_permissions` in the built manifest match production API and Clerk Frontend API URLs.
+
+## Clerk (production instance)
+
+- [ ] Native API enabled on the **Production** Clerk instance.
+- [ ] `allowed_origins` includes `chrome-extension://<STORE_EXTENSION_ID>` (PATCH with `sk_live_...`).
+- [ ] Live publishable key in extension env — **never** ship `pk_test_` in store builds.
+- [ ] Billing feature slugs unchanged: `3_deck_limit`, `unlimited_decks`, `ai_flashcard_generation`, `document_deck_generation`.
+
+## Store listing
+
+- [ ] **Privacy policy** URL (required — describe Clerk auth, API calls to your web app, no sale of user data).
+- [ ] **Single purpose** description: flashcard study from any page; side panel for decks, study, and save-selection.
+- [ ] **Screenshots**: side panel dashboard, deck detail, study mode, context-menu save (1280×800 or 640×400).
+- [ ] **Permissions justification** in listing notes:
+  - `storage` / `cookies` — Clerk session
+  - `sidePanel` — primary UI
+  - `activeTab` + `scripting` — “Generate from this page” on user click only
+  - `contextMenus` — “Save selection to FlashyCardy”
+  - Host permissions — REST API + Clerk hosted auth
+
+## QA before submit
+
+- [ ] Sign up, sign in, sign out (OAuth redirect + `auth-callback.html`).
+- [ ] syncHost: signed-in web session visible in extension after reopening panel.
+- [ ] Free user: 3-deck limit; Pro: AI generate, document/page deck generation.
+- [ ] Context menu → prefill → card saved.
+- [ ] Pricing opens web tab (`/pricing`), not embedded checkout.
+
+## Dev vs prod IDs
+
+| Environment | Clerk keys | Extension ID |
+|-------------|------------|--------------|
+| Local unpacked (dev) | `pk_test_` | Dev CRX ID in `allowed_origins` with `sk_test_` |
+| Web Store (prod) | `pk_live_` | Store CRX ID in `allowed_origins` with `sk_live_` |
+
+Do not mix test keys with production extension IDs or vice versa.

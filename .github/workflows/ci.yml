@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_ci_build_only' }}
+      VITE_SYNC_HOST: http://localhost:3000
+      VITE_API_BASE_URL: http://localhost:3000
+      VITE_CLERK_FRONTEND_API: ${{ secrets.VITE_CLERK_FRONTEND_API || 'https://placeholder.clerk.accounts.dev' }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      E2E_CLERK_USER_EMAIL: ${{ secrets.E2E_CLERK_USER_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint and unit test
+        run: >
+          turbo run lint test:unit
+          --filter=@flashycardy/web
+          --filter=@flashycardy/extension
+          --filter=@flashycardy/api-client
+          --filter=@flashycardy/features
+          --filter=@flashycardy/ui
+          --filter=@flashycardy/i18n
+
+      - name: Build web app
+        run: pnpm build
+
+      - name: Build extension
+        run: pnpm build:extension
+
+      - name: Package extension zip
+        run: bash scripts/package-extension.sh
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension
+          path: dist/extension.zip
+          if-no-files-found: error
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @flashycardy/web exec playwright install --with-deps chromium
+
+      - name: Extension smoke tests
+        run: pnpm --filter @flashycardy/extension test:e2e
+
+      - name: Web E2E tests
+        run: pnpm test:e2e

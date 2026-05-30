@@ -32,8 +32,9 @@ This repository is a **pnpm + Turborepo monorepo**. Each deployable surface live
 flashycardy/
 ├── apps/
 │   ├── web/          # @flashycardy/web — Next.js 16 app (primary product, Vercel)
-│   └── docs/         # @flashycardy/docs — Nextra 4 documentation site (separate Vercel project)
-├── packages/         # Shared packages (added on demand; empty for now)
+│   ├── docs/         # @flashycardy/docs — Nextra 4 documentation site (separate Vercel project)
+│   └── extension/    # @flashycardy/extension — Chrome MV3 side panel (WXT)
+├── packages/         # @flashycardy/ui, i18n, api-client, features
 ├── package.json      # Workspace root (Turborepo entrypoints)
 ├── turbo.json        # Pipeline definitions
 └── pnpm-workspace.yaml
@@ -176,6 +177,11 @@ If you previously set an **Ignored Build Step** in the Vercel dashboard for eith
 | `pnpm lint:all` | Run ESLint across all apps |
 | `pnpm test:unit` | Run Vitest unit tests for `apps/web` |
 | `pnpm test:e2e` | Run Playwright E2E tests for `apps/web` |
+| `pnpm dev:extension` | Start WXT extension dev server |
+| `pnpm build:extension` | Production build for `apps/extension` |
+| `pnpm package:extension` | Zip extension to `dist/extension.zip` |
+| `pnpm test:extension:unit` | Vitest for `apps/extension` |
+| `pnpm test:extension:e2e` | Playwright extension smoke tests |
 | `pnpm --filter @flashycardy/web start` | Start the web production server |
 | `pnpm --filter @flashycardy/web db:generate:dev` | Generate dev Drizzle migrations |
 | `pnpm --filter @flashycardy/web db:migrate:dev:programmatic` | Apply dev migrations programmatically |

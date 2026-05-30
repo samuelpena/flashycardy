@@ -31,7 +31,11 @@ function IntlFromClerkUser({ children }: { children: ReactNode }) {
   const messages = locale === "es" ? esMessages : enMessages;
 
   if (!isLoaded) {
-    return null;
+    return (
+      <FlashycardyIntlProvider locale={defaultLocale} messages={enMessages}>
+        {children}
+      </FlashycardyIntlProvider>
+    );
   }
 
   return (

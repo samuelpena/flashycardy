@@ -19,7 +19,10 @@
     "test:e2e:report": "pnpm --filter @flashycardy/web run test:e2e:report",
     "dev:extension": "turbo run dev --filter=@flashycardy/extension",
     "build:extension": "turbo run build --filter=@flashycardy/extension",
-    "lint:extension": "turbo run lint --filter=@flashycardy/extension"
+    "lint:extension": "turbo run lint --filter=@flashycardy/extension",
+    "test:extension:unit": "turbo run test:unit --filter=@flashycardy/extension",
+    "test:extension:e2e": "turbo run test:e2e --filter=@flashycardy/extension",
+    "package:extension": "bash scripts/package-extension.sh"
   },
   "devDependencies": {
     "turbo": "^2.5.4"

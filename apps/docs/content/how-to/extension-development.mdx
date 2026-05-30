@@ -1,0 +1,80 @@
+---
+title: Chrome Extension Development
+---
+
+# Chrome Extension Development
+
+The FlashyCardy Chrome extension lives in `apps/extension` (`@flashycardy/extension`). It is an MV3 **side-panel** app built with [WXT](https://wxt.dev/), React 19, Tailwind 4, and shared monorepo packages.
+
+## Prerequisites
+
+- Same Clerk **development** instance as `apps/web` (Native API enabled).
+- Extension ID registered in Clerk `allowed_origins` (`chrome-extension://<id>`).
+- Local web app running on `http://localhost:3000` for `syncHost` and REST API.
+
+See the repository plan `.cursor/plans/chrome_extension_parity_ACTIONABLE.plan.md` (Prerequisites → Clerk Chrome Extension setup) for dashboard steps.
+
+## Environment
+
+Copy the template and fill Clerk + web origin values:
+
+```bash
+cp apps/extension/.env.development.example apps/extension/.env.development
+```
+
+| Variable | Purpose |
+|----------|---------|
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (Chrome Extension quick copy) |
+| `VITE_CLERK_FRONTEND_API` | Clerk Frontend API URL |
+| `VITE_SYNC_HOST` | Web origin for session sync (e.g. `http://localhost:3000`) |
+| `VITE_API_BASE_URL` | REST API base (usually same as sync host) |
+
+Root `.env` still supplies `CLERK_SECRET_KEY` and `DATABASE_URL` for the web app — the extension talks to the web API over HTTP with Bearer tokens.
+
+## Develop
+
+From the monorepo root:
+
+```bash
+pnpm dev              # web on :3000 (required for API + syncHost)
+pnpm dev:extension    # WXT on :3001
+```
+
+Load the unpacked extension in Chrome:
+
+1. Open `chrome://extensions` → **Developer mode** → **Load unpacked**.
+2. Select `apps/extension/.output/chrome-mv3-dev`.
+
+Sign in via the side panel, or sign in on the web app first and reopen the panel to pick up the session via `syncHost`.
+
+## Build & package
+
+```bash
+pnpm build:extension     # apps/extension/.output/chrome-mv3
+pnpm package:extension   # dist/extension.zip (Web Store / CI artifact)
+```
+
+CI builds the extension on every push/PR and uploads `dist/extension.zip` as a workflow artifact.
+
+## Tests
+
+```bash
+pnpm test:extension:unit   # Vitest — origin guard, page extract helpers
+pnpm test:extension:e2e    # Playwright with --load-extension
+```
+
+E2E smoke tests always cover the unauthenticated auth gate and context-menu storage routing. Authenticated flows (syncHost, CRUD, study, prefill) run when these env vars are set:
+
+- `E2E_CLERK_USER_EMAIL`
+- `CLERK_SECRET_KEY`
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+
+The web production server must be reachable at `http://localhost:3000` (Playwright starts it automatically).
+
+## Architecture notes
+
+- **Data:** `@flashycardy/api-client` only — no Server Actions or direct DB access.
+- **UI:** `@flashycardy/ui` + `@flashycardy/features`.
+- **Routing:** HashRouter (`#/dashboard`, `#/decks/:uuid`, etc.).
+- **Generate from page:** `chrome.scripting.executeScript` on user click → `POST /api/decks/from-page` (Pro).
+- **Context menu:** selection → `chrome.storage.session` → side panel `/decks/new-card`.

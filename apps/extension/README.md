@@ -39,6 +39,17 @@ pnpm build:extension
 
 Production output: `apps/extension/.output/chrome-mv3`.
 
+Package for Web Store / CI: `pnpm package:extension` → `dist/extension.zip`.
+
+## Tests
+
+```bash
+pnpm test:extension:unit   # Vitest
+pnpm test:extension:e2e    # Playwright (--load-extension); requires Chrome
+```
+
+See [extension development docs](../../apps/docs/content/how-to/extension-development.mdx) for E2E env vars.
+
 ## Routes (HashRouter)
 
 | Path | Screen |

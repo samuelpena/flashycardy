@@ -49,10 +49,10 @@ todos:
     status: completed
   - id: extension-e2e-smoke
     content: "PR-8: Playwright extension smoke — auth, CRUD, study, page gen, context menu"
-    status: pending
+    status: completed
   - id: ci-store
     content: "PR-8: turbo/CI extension.zip artifact, chrome-extension.mdc rule, dev + store docs"
-    status: pending
+    status: completed
 isProject: true
 ---
 

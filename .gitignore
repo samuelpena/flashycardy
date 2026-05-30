@@ -21,6 +21,7 @@ node_modules
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -48,6 +49,8 @@ next-env.d.ts
 # monorepo (Next app)
 apps/web/playwright-report/
 apps/web/test-results/
+apps/extension/playwright-report/
+apps/extension/test-results/
 
 # nextra pagefind index (generated each build)
 apps/docs/public/_pagefind/

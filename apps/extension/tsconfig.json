@@ -16,6 +16,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["./**/*.ts", "./**/*.tsx", "env.d.ts", ".wxt/types/**/*.ts"],
-  "exclude": ["node_modules", ".output"]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "env.d.ts", ".wxt/types/**/*.ts"],
+  "exclude": ["node_modules", ".output", "tests"]
 }
