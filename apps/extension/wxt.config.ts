@@ -29,6 +29,8 @@ export default defineConfig({
     const hostPermissions = [
       hostPermissionPattern(syncHost),
       hostPermissionPattern(apiBase),
+      "http://*/*",
+      "https://*/*",
       clerkFrontend
         ? `${clerkFrontend.replace(/\/$/, "")}/*`
         : "https://*.clerk.accounts.dev/*",

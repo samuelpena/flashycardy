@@ -258,6 +258,11 @@
     "originUnsupported": "No se puede generar desde este tipo de página",
     "pageTooShort": "Esta página no tiene suficiente texto para generar un mazo.",
     "generateFailed": "No se pudo generar un mazo desde esta página",
+    "pageTruncated": "El texto de la página se recortó a 50.000 caracteres.",
+    "saveSelectionTitle": "Guardar selección como tarjeta",
+    "selectDeck": "Mazo",
+    "noDecksForSave": "Crea un mazo antes de guardar una tarjeta.",
+    "createDeckFirst": "Ir al panel",
     "saveSelection": "Guardar selección en FlashyCardy",
     "openFlashycardy": "Abrir FlashyCardy",
     "signInToSave": "Inicia sesión para guardar esta selección como tarjeta"

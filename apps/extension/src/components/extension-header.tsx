@@ -7,6 +7,7 @@ import { Badge } from "@flashycardy/ui/badge";
 import { buttonVariants } from "@flashycardy/ui";
 import { cn } from "@flashycardy/ui/lib/utils";
 import { openPricingTab } from "@/lib/open-pricing";
+import { GenerateFromPageButton } from "@/components/generate-from-page-button";
 
 export function ExtensionHeader() {
   const t = useTranslations("Common");
@@ -38,6 +39,7 @@ export function ExtensionHeader() {
         </nav>
       </div>
       <div className="flex items-center gap-2">
+        <GenerateFromPageButton />
         <Protect feature="unlimited_decks" fallback={
           <Badge
             variant="secondary"

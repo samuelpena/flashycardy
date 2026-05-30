@@ -258,6 +258,11 @@
     "originUnsupported": "Cannot generate from this type of page",
     "pageTooShort": "This page does not have enough text to generate a deck.",
     "generateFailed": "Could not generate a deck from this page",
+    "pageTruncated": "Page text was trimmed to 50,000 characters.",
+    "saveSelectionTitle": "Save selection as flashcard",
+    "selectDeck": "Deck",
+    "noDecksForSave": "Create a deck before saving a flashcard.",
+    "createDeckFirst": "Go to dashboard",
     "saveSelection": "Save selection to FlashyCardy",
     "openFlashycardy": "Open FlashyCardy",
     "signInToSave": "Sign in to save this selection as a flashcard"

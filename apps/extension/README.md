@@ -49,5 +49,10 @@ Production output: `apps/extension/.output/chrome-mv3`.
 | `/decks/:deckUuid/study` | Study session |
 | `/analytics` | Study session history |
 | `/settings` | Language preference (Clerk metadata) |
+| `/decks/new-card` | Save page selection as a card (context menu) |
 
 Data layer: `@flashycardy/api-client` with Clerk Bearer tokens. UI: `@flashycardy/features` + `@flashycardy/ui`. Pro gates via Clerk `<Protect>`.
+
+**Generate from this page** (header, Pro): extracts `document.body.innerText` from the active tab, POSTs to `/api/decks/from-page`.
+
+**Context menu**: select text → “Save selection to FlashyCardy” → opens side panel on `/decks/new-card` with front pre-filled.

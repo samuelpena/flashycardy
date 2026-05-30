@@ -22,6 +22,8 @@ export function mapApiErrorToMessage(
       "Failed to save the deck": tActions("saveDeckFailed"),
       "Add a description to your deck before generating cards": tActions("addDescriptionFirst"),
       "Failed to generate cards. Please try again": tActions("generateCardsFailed"),
+      "Could not generate a deck from this page. Try again": tActions("pageGenFailed"),
+      "This page does not have enough text to generate a deck": tActions("pageTooShort"),
       "Deck not found": tActions("deckNotFound"),
       Unauthorized: tActions("unauthorized"),
     };
@@ -29,5 +31,5 @@ export function mapApiErrorToMessage(
   }
 
   if (error instanceof Error) return error.message;
-  return tActions("genericError");
+  return tActions("deckGenFailed");
 }

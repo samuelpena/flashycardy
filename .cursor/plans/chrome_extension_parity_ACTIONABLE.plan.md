@@ -43,10 +43,10 @@ todos:
     status: completed
   - id: extension-generate-from-page
     content: "PR-7: Generate from this page — origin guard, scripting extract, POST from-page, navigate to deck"
-    status: pending
+    status: completed
   - id: extension-context-menu
     content: "PR-7: Context menu Save to FlashyCardy — storage.session prefill, /decks/new-card, AddCardForm"
-    status: pending
+    status: completed
   - id: extension-e2e-smoke
     content: "PR-8: Playwright extension smoke — auth, CRUD, study, page gen, context menu"
     status: pending

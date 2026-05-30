@@ -106,6 +106,12 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+      vite-tsconfig-paths:
+        specifier: ^5.1.4
+        version: 5.1.4(typescript@5.9.3)(vite@8.0.8(@types/node@22.19.15)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      vitest:
+        specifier: ^4.1.4
+        version: 4.1.4(@opentelemetry/api@1.9.0)(@types/node@22.19.15)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.12.14(@types/node@22.19.15)(typescript@5.9.3))(vite@8.0.8(@types/node@22.19.15)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       wxt:
         specifier: ^0.20.7
         version: 0.20.26(@types/node@22.19.15)(eslint@9.39.4(jiti@2.6.1))(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
@@ -341,7 +347,7 @@ importers:
         version: 19.2.4(react@19.2.4)
       shadcn:
         specifier: ^4.1.0
-        version: 4.1.0(babel-plugin-macros@3.1.0)(typescript@5.9.3)
+        version: 4.1.0(@types/node@20.19.37)(babel-plugin-macros@3.1.0)(typescript@5.9.3)
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
@@ -5418,6 +5424,9 @@ packages:
     resolution: {integrity: sha512-DpLKbNU4WylpxJykQujfCcwYWiV/Jhm50Goo0wrVILAv5jOr9d+H+UR3PhSCD2rCCEIg0uc+G+muBTwD54JhDQ==}
     engines: {node: '>= 0.4'}
 
+  globrex@0.1.2:
+    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
+
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
@@ -8220,6 +8229,16 @@ packages:
   ts-morph@27.0.2:
     resolution: {integrity: sha512-fhUhgeljcrdZ+9DZND1De1029PrE+cMkIP7ooqkLRTrRLTqcki2AstsyJm0vRNbTbVCNJ0idGlbBrfqc7/nA8w==}
 
+  tsconfck@3.1.6:
+    resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+    peerDependencies:
+      typescript: ^5.0.0
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
 
@@ -8480,6 +8499,14 @@ packages:
     resolution: {integrity: sha512-oj4PVrT+pDh6GYf5wfUXkcZyekYS8kKPfLPXVl8qe324Ec6l4K2DUKNadRbZ3LQl0qGcDz+PyOo7ZAh00Y+JjQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
+
+  vite-tsconfig-paths@5.1.4:
+    resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
+    peerDependencies:
+      vite: '*'
+    peerDependenciesMeta:
+      vite:
+        optional: true
 
   vite@8.0.8:
     resolution: {integrity: sha512-dbU7/iLVa8KZALJyLOBOQ88nOXtNG8vxKuOT4I2mD+Ya70KPceF4IAmDsmU0h1Qsn5bPrvsY9HJstCRh3hG6Uw==}
@@ -10143,6 +10170,7 @@ snapshots:
       '@inquirer/type': 3.0.10(@types/node@22.19.15)
     optionalDependencies:
       '@types/node': 22.19.15
+    optional: true
 
   '@inquirer/core@10.3.2(@types/node@20.19.37)':
     dependencies:
@@ -10169,6 +10197,7 @@ snapshots:
       yoctocolors-cjs: 2.1.3
     optionalDependencies:
       '@types/node': 22.19.15
+    optional: true
 
   '@inquirer/figures@1.0.15': {}
 
@@ -10179,6 +10208,7 @@ snapshots:
   '@inquirer/type@3.0.10(@types/node@22.19.15)':
     optionalDependencies:
       '@types/node': 22.19.15
+    optional: true
 
   '@internationalized/date@3.12.1':
     dependencies:
@@ -14088,6 +14118,8 @@ snapshots:
       define-properties: 1.2.1
       gopd: 1.2.0
 
+  globrex@0.1.2: {}
+
   gopd@1.2.0: {}
 
   graceful-fs@4.2.10: {}
@@ -15905,6 +15937,7 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@types/node'
+    optional: true
 
   multimatch@6.0.0:
     dependencies:
@@ -17327,49 +17360,6 @@ snapshots:
       - supports-color
       - typescript
 
-  shadcn@4.1.0(babel-plugin-macros@3.1.0)(typescript@5.9.3):
-    dependencies:
-      '@babel/core': 7.29.0
-      '@babel/parser': 7.29.2
-      '@babel/plugin-transform-typescript': 7.28.6(@babel/core@7.29.0)
-      '@babel/preset-typescript': 7.28.5(@babel/core@7.29.0)
-      '@dotenvx/dotenvx': 1.57.1
-      '@modelcontextprotocol/sdk': 1.29.0(zod@3.25.76)
-      '@types/validate-npm-package-name': 4.0.2
-      browserslist: 4.28.1
-      commander: 14.0.3
-      cosmiconfig: 9.0.1(typescript@5.9.3)
-      dedent: 1.7.2(babel-plugin-macros@3.1.0)
-      deepmerge: 4.3.1
-      diff: 8.0.3
-      execa: 9.6.1
-      fast-glob: 3.3.3
-      fs-extra: 11.3.4
-      fuzzysort: 3.1.0
-      https-proxy-agent: 7.0.6
-      kleur: 4.1.5
-      msw: 2.12.14(@types/node@22.19.15)(typescript@5.9.3)
-      node-fetch: 3.3.2
-      open: 11.0.0
-      ora: 8.2.0
-      postcss: 8.5.8
-      postcss-selector-parser: 7.1.1
-      prompts: 2.4.2
-      recast: 0.23.11
-      stringify-object: 5.0.0
-      tailwind-merge: 3.5.0
-      ts-morph: 26.0.0
-      tsconfig-paths: 4.2.0
-      validate-npm-package-name: 7.0.2
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.1(zod@3.25.76)
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - '@types/node'
-      - babel-plugin-macros
-      - supports-color
-      - typescript
-
   sharp@0.34.5:
     dependencies:
       '@img/colour': 1.1.0
@@ -17848,6 +17838,10 @@ snapshots:
       '@ts-morph/common': 0.28.1
       code-block-writer: 13.0.3
 
+  tsconfck@3.1.6(typescript@5.9.3):
+    optionalDependencies:
+      typescript: 5.9.3
+
   tsconfig-paths@3.15.0:
     dependencies:
       '@types/json5': 0.0.29
@@ -18206,6 +18200,17 @@ snapshots:
       - terser
       - tsx
       - yaml
+
+  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@8.0.8(@types/node@22.19.15)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)):
+    dependencies:
+      debug: 4.4.3
+      globrex: 0.1.2
+      tsconfck: 3.1.6(typescript@5.9.3)
+    optionalDependencies:
+      vite: 8.0.8(@types/node@22.19.15)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
 
   vite@8.0.8(@types/node@20.19.37)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
