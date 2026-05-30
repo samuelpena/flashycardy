@@ -11,6 +11,13 @@ export default defineConfig({
   modules: ["@wxt-dev/module-react"],
   srcDir: "src",
   outDir: ".output",
+  dev: {
+    server: {
+      port: 3001,
+      origin: "http://localhost:3001",
+      strictPort: true, // optional: fail loudly if 3001 is taken
+    },
+  },
   vite: () => ({
     plugins: [tailwindcss()],
   }),
@@ -32,6 +39,7 @@ export default defineConfig({
       description: "Study flashcards from any page.",
       permissions: [
         "storage",
+        "cookies",
         "sidePanel",
         "activeTab",
         "scripting",
