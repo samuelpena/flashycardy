@@ -10,7 +10,7 @@ todos:
     status: completed
   - id: swift-api-client
     content: "PR-2: Swift APIClient + services mirroring packages/api-client; XCTest for envelope/pagination"
-    status: pending
+    status: completed
   - id: dashboard-decks
     content: "PR-3: DashboardView — deck list, sort, pagination, create/edit/delete, deck limit banner"
     status: pending

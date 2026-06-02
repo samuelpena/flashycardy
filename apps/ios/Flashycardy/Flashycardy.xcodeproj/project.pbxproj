@@ -11,8 +11,19 @@
 		908DA0312FCE44580079C254 /* ClerkKitUI in Frameworks */ = {isa = PBXBuildFile; productRef = 908DA0302FCE44580079C254 /* ClerkKitUI */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		908DA0562FCE60060079C254 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 908DA0172FCE43350079C254 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 908DA01E2FCE43350079C254;
+			remoteInfo = Flashycardy;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		908DA01F2FCE43350079C254 /* Flashycardy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flashycardy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		908DA0502FCE60000079C254 /* FlashycardyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashycardyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		908DA0422FCE50000079C254 /* ../Config/Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ../Config/Debug.xcconfig; sourceTree = "<group>"; };
 		908DA0432FCE50010079C254 /* ../Config/Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ../Config/Release.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -36,6 +47,11 @@
 			path = Flashycardy;
 			sourceTree = "<group>";
 		};
+		908DA0512FCE60010079C254 /* FlashycardyTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlashycardyTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +64,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		908DA0542FCE60040079C254 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -55,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				908DA0212FCE43350079C254 /* Flashycardy */,
+				908DA0512FCE60010079C254 /* FlashycardyTests */,
 				908DA0422FCE50000079C254 /* ../Config/Debug.xcconfig */,
 				908DA0432FCE50010079C254 /* ../Config/Release.xcconfig */,
 				908DA0202FCE43350079C254 /* Products */,
@@ -65,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				908DA01F2FCE43350079C254 /* Flashycardy.app */,
+				908DA0502FCE60000079C254 /* FlashycardyTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -96,7 +121,35 @@
 			productReference = 908DA01F2FCE43350079C254 /* Flashycardy.app */;
 			productType = "com.apple.product-type.application";
 		};
+		908DA0522FCE60020079C254 /* FlashycardyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 908DA0572FCE60070079C254 /* Build configuration list for PBXNativeTarget "FlashycardyTests" */;
+			buildPhases = (
+				908DA0532FCE60030079C254 /* Sources */,
+				908DA0542FCE60040079C254 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				908DA0552FCE60050079C254 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				908DA0512FCE60010079C254 /* FlashycardyTests */,
+			);
+			name = FlashycardyTests;
+			productName = FlashycardyTests;
+			productReference = 908DA0502FCE60000079C254 /* FlashycardyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXTargetDependency section */
+		908DA0552FCE60050079C254 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 908DA01E2FCE43350079C254 /* Flashycardy */;
+			targetProxy = 908DA0562FCE60060079C254 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		908DA0172FCE43350079C254 /* Project object */ = {
@@ -108,6 +161,10 @@
 				TargetAttributes = {
 					908DA01E2FCE43350079C254 = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					908DA0522FCE60020079C254 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 908DA01E2FCE43350079C254;
 					};
 				};
 			};
@@ -129,6 +186,7 @@
 			projectRoot = "";
 			targets = (
 				908DA01E2FCE43350079C254 /* Flashycardy */,
+				908DA0522FCE60020079C254 /* FlashycardyTests */,
 			);
 		};
 /* End PBXProject section */
@@ -145,6 +203,13 @@
 
 /* Begin PBXSourcesBuildPhase section */
 		908DA01B2FCE43350079C254 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		908DA0532FCE60030079C254 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -292,12 +357,12 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Flashycardy/Info.plist;
-				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_PREPROCESS = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -329,12 +394,12 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Flashycardy/Info.plist;
-				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_PREPROCESS = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -350,6 +415,54 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		908DA0582FCE60080079C254 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 908DA0422FCE50000079C254 /* ../Config/Debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9K638S8SS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = local.FlashycardyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flashycardy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Flashycardy";
+			};
+			name = Debug;
+		};
+		908DA0592FCE60090079C254 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 908DA0432FCE50010079C254 /* ../Config/Release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9K638S8SS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = local.FlashycardyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flashycardy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Flashycardy";
 			};
 			name = Release;
 		};
@@ -370,6 +483,15 @@
 			buildConfigurations = (
 				908DA02B2FCE43360079C254 /* Debug */,
 				908DA02C2FCE43360079C254 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		908DA0572FCE60070079C254 /* Build configuration list for PBXNativeTarget "FlashycardyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				908DA0582FCE60080079C254 /* Debug */,
+				908DA0592FCE60090079C254 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

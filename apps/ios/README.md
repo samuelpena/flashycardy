@@ -69,12 +69,35 @@ apps/ios/
 ├── Config/                 # xcconfig (Secrets.xcconfig is gitignored)
 ├── Flashycardy/
 │   ├── Flashycardy.xcodeproj
-│   └── Flashycardy/
-│       ├── App/            # Entry + routing
-│       ├── Config/         # AppConfig
-│       └── Features/       # Auth, Home, …
+│   ├── Flashycardy/
+│   │   ├── App/            # Entry + routing
+│   │   ├── Config/         # AppConfig
+│   │   ├── Models/         # Codable API types
+│   │   ├── Services/       # APIClient, Decks/Cards/StudySessions services
+│   │   └── Features/       # Auth, Home, …
+│   └── FlashycardyTests/   # XCTest (envelope + pagination)
 └── README.md
 ```
+
+## REST API client (PR-2)
+
+Mirrors [`packages/api-client`](../../packages/api-client):
+
+- `APIClient` — Bearer auth, `{ data }` / paginated envelopes, `ApiError`
+- `DecksService`, `CardsService`, `StudySessionsService`
+- `FlashycardyAPI` — factory combining all services
+- `APIProvider` — SwiftUI environment (`@InjectAPI`) with Clerk `getToken()`
+
+Signed-in views are wrapped in `APIProvider` from `RootView`.
+
+### Unit tests
+
+```bash
+cd apps/ios/Flashycardy
+xcodebuild -scheme Flashycardy -destination 'platform=iOS Simulator,name=iPhone 17' test
+```
+
+Or **Product → Test** (⌘U) in Xcode.
 
 ## Related docs
 

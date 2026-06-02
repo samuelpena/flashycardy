@@ -12,7 +12,9 @@ struct RootView: View {
             if !clerk.isLoaded {
                 LoadingView()
             } else if clerk.user != nil {
-                MainShellView()
+                APIProvider {
+                    MainShellView()
+                }
             } else {
                 AuthGateView(
                     onSignIn: { authSheetPresented = true },

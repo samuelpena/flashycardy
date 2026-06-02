@@ -23,7 +23,8 @@
     "test:extension:unit": "turbo run test:unit --filter=@flashycardy/extension",
     "test:extension:e2e": "turbo run test:e2e --filter=@flashycardy/extension",
     "package:extension": "bash scripts/package-extension.sh",
-    "dev:ios": "open apps/ios/Flashycardy/Flashycardy.xcodeproj"
+    "dev:ios": "open apps/ios/Flashycardy/Flashycardy.xcodeproj",
+    "test:ios": "cd apps/ios/Flashycardy && xcodebuild -scheme Flashycardy -destination 'platform=iOS Simulator,name=iPhone 17' test"
   },
   "devDependencies": {
     "turbo": "^2.5.4"
