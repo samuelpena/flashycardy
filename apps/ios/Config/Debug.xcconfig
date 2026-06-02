@@ -1,0 +1,2 @@
+// Local overrides: copy Secrets.xcconfig.example → Secrets.xcconfig (gitignored).
+#include? "Secrets.xcconfig"

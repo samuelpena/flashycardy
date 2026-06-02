@@ -57,3 +57,8 @@ apps/docs/public/_pagefind/
 
 # turborepo
 .turbo
+
+# ios
+apps/ios/Config/Secrets.xcconfig
+apps/ios/**/xcuserdata/
+apps/ios/**/*.xcuserstate

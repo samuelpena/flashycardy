@@ -22,7 +22,8 @@
     "lint:extension": "turbo run lint --filter=@flashycardy/extension",
     "test:extension:unit": "turbo run test:unit --filter=@flashycardy/extension",
     "test:extension:e2e": "turbo run test:e2e --filter=@flashycardy/extension",
-    "package:extension": "bash scripts/package-extension.sh"
+    "package:extension": "bash scripts/package-extension.sh",
+    "dev:ios": "open apps/ios/Flashycardy/Flashycardy.xcodeproj"
   },
   "devDependencies": {
     "turbo": "^2.5.4"
