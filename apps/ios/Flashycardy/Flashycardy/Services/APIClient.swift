@@ -83,9 +83,10 @@ actor APIClient {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
 
-        if let token = try await getToken() {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let token = try await getToken(), !token.isEmpty else {
+            throw ApiError(statusCode: 401, message: "Unauthorized")
         }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         let (data, response) = try await session.data(for: request)
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0

@@ -23,9 +23,9 @@
 
 /* Begin PBXFileReference section */
 		908DA01F2FCE43350079C254 /* Flashycardy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flashycardy.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		908DA0502FCE60000079C254 /* FlashycardyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashycardyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		908DA0422FCE50000079C254 /* ../Config/Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ../Config/Debug.xcconfig; sourceTree = "<group>"; };
 		908DA0432FCE50010079C254 /* ../Config/Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ../Config/Release.xcconfig; sourceTree = "<group>"; };
+		908DA0502FCE60000079C254 /* FlashycardyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashycardyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -143,14 +143,6 @@
 		};
 /* End PBXNativeTarget section */
 
-/* Begin PBXTargetDependency section */
-		908DA0552FCE60050079C254 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 908DA01E2FCE43350079C254 /* Flashycardy */;
-			targetProxy = 908DA0562FCE60060079C254 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin PBXProject section */
 		908DA0172FCE43350079C254 /* Project object */ = {
 			isa = PBXProject;
@@ -217,6 +209,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		908DA0552FCE60050079C254 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 908DA01E2FCE43350079C254 /* Flashycardy */;
+			targetProxy = 908DA0562FCE60060079C254 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		908DA0282FCE43360079C254 /* Debug */ = {

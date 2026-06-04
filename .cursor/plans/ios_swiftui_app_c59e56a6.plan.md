@@ -13,7 +13,7 @@ todos:
     status: completed
   - id: dashboard-decks
     content: "PR-3: DashboardView — deck list, sort, pagination, create/edit/delete, deck limit banner"
-    status: pending
+    status: completed
   - id: deck-detail-cards
     content: "PR-4: DeckDetailView — card CRUD, ratings, sort/pagination, study navigation"
     status: pending

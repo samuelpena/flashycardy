@@ -19,18 +19,30 @@ final class APIClientTests: XCTestCase {
         XCTAssertEqual(envelope.data?.count, 3)
     }
 
-    func testDecodesPaginatedEnvelope() throws {
+    func testDecodesPaginatedDeckListEnvelope() throws {
         let json = """
         {
-          "data":[{"uuid":"d1","id":1,"clerkUserId":"u","name":"Deck","description":null,"createdAt":"2024-01-01","updatedAt":"2024-01-01"}],
+          "data":[{"uuid":"d1","name":"Deck","description":null,"createdAt":"2024-01-01T00:00:00.000Z","updatedAt":"2024-01-02T00:00:00.000Z","cardCount":3}],
           "meta":{"total_items":1,"per_page":20,"total_pages":1,"current_page":1},
           "links":{"next":null,"prev":null,"first":"http://localhost/api/decks?page=1","last":"http://localhost/api/decks?page=1"}
         }
         """
         let envelope = try JSONDecoder().decode(DeckListEnvelope.self, from: Data(json.utf8))
         XCTAssertEqual(envelope.data?.count, 1)
+        XCTAssertEqual(envelope.data?.first?.cardCount, 3)
         XCTAssertEqual(envelope.meta?.totalItems, 1)
         XCTAssertTrue(envelope.links?.first.contains("/api/decks") == true)
+    }
+
+    func testDecodesFullDeckEnvelope() throws {
+        let json = """
+        {
+          "data":[{"uuid":"d1","id":1,"clerkUserId":"u","name":"Deck","description":null,"createdAt":"2024-01-01","updatedAt":"2024-01-01"}]
+        }
+        """
+        let envelope = try JSONDecoder().decode(FullDeckEnvelope.self, from: Data(json.utf8))
+        XCTAssertEqual(envelope.data?.first?.id, 1)
+        XCTAssertEqual(envelope.data?.first?.clerkUserId, "u")
     }
 
     func testDecodesErrorEnvelope() throws {
@@ -51,9 +63,13 @@ private struct DeckCountEnvelope: Decodable {
 }
 
 private struct DeckListEnvelope: Decodable {
-    let data: [Deck]?
+    let data: [DeckListItem]?
     let meta: PaginationMeta?
     let links: PaginationLinks?
+}
+
+private struct FullDeckEnvelope: Decodable {
+    let data: [Deck]?
 }
 
 private struct ErrorOnlyEnvelope: Decodable {

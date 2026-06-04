@@ -7,7 +7,7 @@ struct DecksService {
         self.client = client
     }
 
-    func list(pagination: PaginationParams? = nil) async throws -> PaginatedResponse<Deck> {
+    func list(pagination: PaginationParams? = nil) async throws -> PaginatedResponse<DeckListItem> {
         try await client.requestPaginated("/api/decks", pagination: pagination)
     }
 

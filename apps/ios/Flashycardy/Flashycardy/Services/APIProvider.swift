@@ -15,6 +15,7 @@ extension EnvironmentValues {
 /// Injects a `FlashycardyAPI` using Clerk session tokens (mirrors extension `ApiProvider`).
 struct APIProvider<Content: View>: View {
     @Environment(Clerk.self) private var clerk
+    @State private var api: FlashycardyAPI?
     let content: Content
 
     init(@ViewBuilder content: () -> Content) {
@@ -23,12 +24,27 @@ struct APIProvider<Content: View>: View {
 
     var body: some View {
         Group {
-            if clerk.isLoaded {
+            if clerk.isLoaded, clerk.session != nil, let api {
                 content
-                    .environment(\.flashycardyAPI, makeAPI())
+                    .environment(\.flashycardyAPI, api)
+            } else if clerk.isLoaded, clerk.user != nil {
+                VStack(spacing: 12) {
+                    ProgressView()
+                    Text("Preparing your session…")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ProgressView()
             }
+        }
+        .task(id: clerk.session?.id) {
+            guard clerk.session != nil else {
+                api = nil
+                return
+            }
+            api = makeAPI()
         }
     }
 
@@ -37,7 +53,7 @@ struct APIProvider<Content: View>: View {
             configuration: APIClientConfiguration(
                 baseURL: AppConfig.apiBaseURL,
                 getToken: {
-                    try await clerk.auth.getToken()
+                    try await ClerkSessionToken.bearerToken(clerk: clerk)
                 }
             )
         )

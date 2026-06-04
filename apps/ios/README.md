@@ -90,6 +90,19 @@ Mirrors [`packages/api-client`](../../packages/api-client):
 
 Signed-in views are wrapped in `APIProvider` from `RootView`.
 
+## Dashboard (PR-3)
+
+After sign-in, the app shows **Your Decks**:
+
+- Paginated grid (9 decks per page), sort by last updated / A–Z / Z–A
+- Pull to refresh
+- Deck limit banner when you have 3+ decks (free tier)
+- **New Deck** sheet (name + description); 403 opens `/pricing` in Safari
+- Long-press a deck for **Edit** / **Delete**
+- Tap a deck to open deck detail (placeholder until PR-4)
+
+Requires `pnpm dev:web` running at `API_BASE_URL` for live data.
+
 ### Unit tests
 
 ```bash
