@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct EditDeckSheet: View {
-    let deck: DeckListItem
+    let deck: DeckReference
     let onUpdated: () async -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -13,7 +13,7 @@ struct EditDeckSheet: View {
 
     @InjectAPI private var api
 
-    init(deck: DeckListItem, onUpdated: @escaping () async -> Void) {
+    init(deck: DeckReference, onUpdated: @escaping () async -> Void) {
         self.deck = deck
         self.onUpdated = onUpdated
         _name = State(initialValue: deck.name)

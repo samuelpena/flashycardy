@@ -40,14 +40,14 @@ struct DashboardView: View {
         }
         .sheet(item: $deckToEdit) { deck in
             if let viewModel {
-                EditDeckSheet(deck: deck) {
+                EditDeckSheet(deck: DeckReference(deck)) {
                     await viewModel.reload()
                 }
             }
         }
         .sheet(item: $deckToDelete) { deck in
             if let viewModel {
-                DeleteDeckSheet(deck: deck) {
+                DeleteDeckSheet(deck: DeckReference(deck)) {
                     await viewModel.reload()
                 }
             }
@@ -83,7 +83,7 @@ struct DashboardView: View {
         .navigationDestination(for: DashboardRoute.self) { route in
             switch route {
             case .deckDetail(let uuid):
-                DeckDetailPlaceholderView(deckUuid: uuid)
+                DeckDetailView(deckUuid: uuid)
             }
         }
     }

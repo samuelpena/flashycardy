@@ -1,7 +1,8 @@
 import SwiftUI
 
-struct DeleteDeckSheet: View {
-    let deck: DeckReference
+struct DeleteCardSheet: View {
+    let deckUuid: String
+    let card: Card
     let onDeleted: () async -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -14,7 +15,7 @@ struct DeleteDeckSheet: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                Text(L10n.DeleteDeck.description(cardCount: deck.cardCount))
+                Text(L10n.DeleteCard.description)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -27,16 +28,16 @@ struct DeleteDeckSheet: View {
                 Spacer()
 
                 Button(role: .destructive) {
-                    Task { await deleteDeck() }
+                    Task { await deleteCard() }
                 } label: {
-                    Text(isDeleting ? L10n.DeleteDeck.deleting : L10n.DeleteDeck.deleteDeck)
+                    Text(isDeleting ? L10n.DeleteCard.deleting : L10n.DeleteCard.deleteCard)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(isDeleting)
             }
             .padding(20)
-            .navigationTitle(L10n.DeleteDeck.title(deck.name))
+            .navigationTitle(L10n.DeleteCard.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -48,12 +49,12 @@ struct DeleteDeckSheet: View {
         .presentationDetents([.medium])
     }
 
-    private func deleteDeck() async {
+    private func deleteCard() async {
         isDeleting = true
         errorMessage = nil
 
         do {
-            _ = try await api.decks.delete(deckUuid: deck.uuid)
+            _ = try await api.cards.delete(deckUuid: deckUuid, cardUuid: card.uuid)
             dismiss()
             await onDeleted()
         } catch {

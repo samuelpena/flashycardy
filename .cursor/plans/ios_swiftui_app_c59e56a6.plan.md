@@ -16,10 +16,10 @@ todos:
     status: completed
   - id: deck-detail-cards
     content: "PR-4: DeckDetailView — card CRUD, ratings, sort/pagination, study navigation"
-    status: pending
+    status: completed
   - id: study-analytics
     content: "PR-5: StudyView (flip/shuffle/rate/save) + AnalyticsView (session history)"
-    status: pending
+    status: completed
   - id: pro-settings-i18n
     content: "PR-6: Document upload, AI generate, PreferencesView language, Localizable.xcstrings en/es, Safari /pricing"
     status: pending

@@ -13,6 +13,8 @@ enum ApiErrorMessage {
             return L10n.Actions.saveDeckFailed
         case "Deck not found":
             return L10n.Actions.deckNotFound
+        case "Card not found":
+            return L10n.Actions.cardNotFound
         case "Unauthorized":
             return L10n.Actions.unauthorized
         default:

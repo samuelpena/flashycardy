@@ -1,5 +1,10 @@
 import Foundation
 
+struct StudySessionDeck: Codable, Equatable, Sendable {
+    let uuid: String
+    let name: String
+}
+
 struct StudySession: Codable, Equatable, Identifiable, Sendable {
     let id: Int
     let uuid: String
@@ -9,7 +14,7 @@ struct StudySession: Codable, Equatable, Identifiable, Sendable {
     let correctCount: Int
     let incorrectCount: Int
     let completedAt: String
-    let deck: Deck?
+    let deck: StudySessionDeck?
 }
 
 struct StudySessionCountByDeck: Codable, Equatable, Sendable {

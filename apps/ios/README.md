@@ -99,9 +99,43 @@ After sign-in, the app shows **Your Decks**:
 - Deck limit banner when you have 3+ decks (free tier)
 - **New Deck** sheet (name + description); 403 opens `/pricing` in Safari
 - Long-press a deck for **Edit** / **Delete**
-- Tap a deck to open deck detail (placeholder until PR-4)
+- Tap a deck to open **deck detail** (cards, study navigation — see PR-4)
 
 Requires `pnpm dev:web` running at `API_BASE_URL` for live data.
+
+## Deck detail (PR-4)
+
+Tap a deck on the dashboard to open **DeckDetailView**:
+
+- Loads all cards (paginated API fetch) and per-card study ratings
+- Sort cards by last updated / A–Z / Z→A; display pagination (9 cards per page)
+- **Add Card**, **Edit**, and **Delete** for each card
+- **Edit deck** / **Delete deck** from the action bar (delete pops back to dashboard)
+- **Study** opens full study mode (see PR-5)
+- Pull to refresh
+
+AI card generation and document upload remain **PR-6**.
+
+## Study + Analytics (PR-5)
+
+### Study (`StudyView`)
+
+From deck detail, tap **Study**:
+
+- Flip cards (tap), prev/next navigation
+- Rate with thumbs up / thumbs down after revealing the back
+- Shuffle and restart mid-session
+- Completion summary: correct/incorrect counts, score %, skipped notice
+- Auto-saves via `POST /api/study-sessions` when the session completes
+
+### Analytics (`AnalyticsView`)
+
+Second tab in the signed-in shell:
+
+- Lists all study sessions (paginated API fetch)
+- Score badges: green ≥80%, neutral ≥50%, red below 50%
+- Tap a row to open that deck’s detail
+- Pull to refresh; empty state when no sessions yet
 
 ### Unit tests
 

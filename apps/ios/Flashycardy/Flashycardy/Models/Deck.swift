@@ -1,5 +1,35 @@
 import Foundation
 
+struct DeckReference: Equatable, Identifiable, Sendable {
+    let uuid: String
+    let name: String
+    let description: String?
+    let cardCount: Int
+
+    var id: String { uuid }
+
+    init(uuid: String, name: String, description: String?, cardCount: Int) {
+        self.uuid = uuid
+        self.name = name
+        self.description = description
+        self.cardCount = cardCount
+    }
+
+    init(_ item: DeckListItem) {
+        uuid = item.uuid
+        name = item.name
+        description = item.description
+        cardCount = item.cardCount
+    }
+
+    init(metadata: DeckWithCards, cardCount: Int) {
+        uuid = metadata.uuid
+        name = metadata.name
+        description = metadata.description
+        self.cardCount = cardCount
+    }
+}
+
 /// Row returned by `GET /api/decks` (includes aggregated `cardCount`, omits `id` / `clerkUserId`).
 struct DeckListItem: Codable, Equatable, Identifiable, Sendable {
     let uuid: String
