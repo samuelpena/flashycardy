@@ -69,3 +69,32 @@ jobs:
 
       - name: Web E2E tests
         run: pnpm test:e2e
+
+  ios:
+    runs-on: macos-15
+    env:
+      CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_ci_build_only' }}
+      CLERK_FRONTEND_API: ${{ secrets.VITE_CLERK_FRONTEND_API || 'https://placeholder.clerk.accounts.dev' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write iOS Secrets.xcconfig
+        run: bash scripts/write-ios-secrets-xcconfig.sh
+
+      - name: Build and test iOS app
+        run: |
+          cd apps/ios/Flashycardy
+          DEST="$(xcodebuild -scheme Flashycardy -showdestinations 2>/dev/null \
+            | grep 'platform:iOS Simulator' \
+            | grep 'name:iPhone 17,' \
+            | head -1 \
+            | sed -n 's/.*id:\([^,]*\).*/\1/p')"
+          if [ -z "$DEST" ]; then
+            echo "No iPhone 17 simulator destination found"
+            xcodebuild -scheme Flashycardy -showdestinations
+            exit 1
+          fi
+          xcodebuild -scheme Flashycardy \
+            -destination "platform=iOS Simulator,id=$DEST" \
+            -configuration Debug \
+            test

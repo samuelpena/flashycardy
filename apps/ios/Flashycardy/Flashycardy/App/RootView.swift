@@ -10,26 +10,26 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if !clerk.isLoaded {
+            switch rootPhase {
+            case .loading:
                 LoadingView()
-            } else if clerk.user != nil {
+            case .signedIn:
                 APIProvider {
                     MainShellView()
                 }
-            } else {
-                AuthGateView(
-                    onSignIn: { authSheetPresented = true },
-                    onSignUp: { authSheetPresented = true }
-                )
+            case .signedOut:
+                authGate
             }
         }
         .environment(localeManager)
         .environment(\.locale, localeManager.locale)
         .onAppear {
             LocaleManagerBridge.shared = localeManager
+            guard !isUITestingAuthGate else { return }
             localeManager.sync(from: clerk)
         }
         .onChange(of: clerk.user?.id) { _, _ in
+            guard !isUITestingAuthGate else { return }
             localeManager.sync(from: clerk)
         }
         .onChange(of: localeManager.appLocale) { _, _ in
@@ -39,6 +39,40 @@ struct RootView: View {
             AuthView()
         }
     }
+
+    private var authGate: some View {
+        AuthGateView(
+            onSignIn: { authSheetPresented = true },
+            onSignUp: { authSheetPresented = true }
+        )
+    }
+
+    private var isUITestingAuthGate: Bool {
+        #if DEBUG
+        UITestingLaunchSupport.forceAuthGate
+        #else
+        false
+        #endif
+    }
+
+    private var rootPhase: RootPhase {
+        if isUITestingAuthGate {
+            return .signedOut
+        }
+        if !clerk.isLoaded {
+            return .loading
+        }
+        if clerk.user != nil {
+            return .signedIn
+        }
+        return .signedOut
+    }
+}
+
+private enum RootPhase {
+    case loading
+    case signedIn
+    case signedOut
 }
 
 private struct LoadingView: View {

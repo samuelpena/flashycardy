@@ -1,0 +1,89 @@
+---
+title: iOS App Development
+---
+
+# iOS App Development
+
+The native FlashyCardy iOS app lives in `apps/ios` (`Flashycardy` Xcode project). It is a **SwiftUI** app that uses the same Clerk instance and **REST API** as [`apps/web`](/apps/web) and the [Chrome extension](./extension-development), with **Bearer session tokens** — not Server Actions or direct database access.
+
+## Prerequisites
+
+- **Xcode 16+** with iOS 17+ SDK
+- Same Clerk **development** instance as the web app (**Native API** enabled)
+- [`apps/web`](/apps/web) running locally when exercising live API flows (`pnpm dev:web`)
+
+See the iOS plan `.cursor/plans/ios_swiftui_app_c59e56a6.plan.md` in the repo root for Clerk Dashboard steps (Associated Domains, bundle ID, billing feature slugs).
+
+## Environment
+
+Copy secrets into xcconfig (gitignored):
+
+```bash
+cp apps/ios/Config/Secrets.xcconfig.example apps/ios/Config/Secrets.xcconfig
+```
+
+| Key | Purpose |
+|-----|---------|
+| `CLERK_PUBLISHABLE_KEY` | Same as `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` in root `.env` |
+| `API_BASE_URL` | Web/API origin — `http://127.0.0.1:3000` for Simulator |
+| `CLERK_FRONTEND_API_HOST` | Clerk Frontend API hostname (e.g. `your-instance.clerk.accounts.dev`) |
+
+Values are injected into the app via `Info.plist` preprocessing. After changing xcconfig, clean build if launch fails with a missing key.
+
+**Physical device:** use your Mac’s LAN IP instead of `127.0.0.1` for `API_BASE_URL`.
+
+## Develop
+
+From the monorepo root:
+
+```bash
+pnpm dev:web          # API on :3000 (required for signed-in flows)
+pnpm dev:ios          # opens Flashycardy.xcodeproj
+```
+
+Run the **Flashycardy** scheme on a simulator (⌘R). Use a real Run — not only SwiftUI canvas previews — for Clerk auth and API calls.
+
+### Auth flow
+
+- **Signed out:** landing with Sign in / Sign up → Clerk `AuthView` sheet
+- **Signed in:** TabView — Dashboard, Analytics, Settings
+- **OAuth callback:** URL scheme `local.Flashycardy://callback` (see `Info.plist`)
+
+## Build & test
+
+```bash
+pnpm test:ios
+```
+
+Or from `apps/ios/Flashycardy`:
+
+```bash
+xcodebuild -scheme Flashycardy \
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -configuration Debug test
+```
+
+| Target | Scope |
+|--------|--------|
+| `FlashycardyTests` | API envelope decoding, billing entitlements, L10n |
+| `FlashycardyUITests` | Launch smoke — auth gate (`-UITestingForceAuthGate` bypasses Clerk load in Debug) |
+
+List available simulators: `xcodebuild -scheme Flashycardy -showdestinations`.
+
+## Architecture notes
+
+- **Data:** `APIClient` actor + service types under `Flashycardy/Services/` — mirrors [`packages/api-client`](../../packages/api-client)
+- **Auth:** Clerk iOS SDK (`ClerkKit`, `ClerkKitUI`); `APIProvider` injects Bearer tokens
+- **UI:** SwiftUI, dark mode by default (`.preferredColorScheme(.dark)`)
+- **i18n:** `Localizable.xcstrings` (en/es), synced from `packages/i18n/messages/`
+- **Pro / billing:** server returns **403** on gated features; app opens `/pricing` in Safari (no in-app IAP in v1)
+
+## CI
+
+GitHub Actions runs `xcodebuild test` on `macos-15` (see `.github/workflows/ci.yml` job `ios`). CI writes `Secrets.xcconfig` via `scripts/write-ios-secrets-xcconfig.sh` using repository secrets.
+
+## Related docs
+
+- [HTTP API (REST)](../reference/rest-api) — Bearer-token clients (web cookie, extension, iOS)
+- [Chrome extension development](./extension-development) — similar Clerk + REST pattern
+- [`apps/ios/README.md`](../../ios/README.md) — quick setup reference

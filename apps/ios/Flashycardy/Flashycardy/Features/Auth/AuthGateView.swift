@@ -13,6 +13,7 @@ struct AuthGateView: View {
                 Text(L10n.Common.appName)
                     .font(.largeTitle.bold())
                     .foregroundStyle(.primary)
+                    .accessibilityIdentifier(AccessibilityID.Auth.appName)
 
                 Text(loc("HomePage.tagline"))
                     .font(.subheadline)
@@ -34,6 +35,7 @@ struct AuthGateView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
+                .accessibilityIdentifier(AccessibilityID.Auth.signIn)
 
                 Button(action: onSignUp) {
                     Text(L10n.Auth.signUp)
@@ -41,6 +43,7 @@ struct AuthGateView: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
+                .accessibilityIdentifier(AccessibilityID.Auth.signUp)
             }
             .padding(.horizontal, 32)
 
@@ -48,6 +51,8 @@ struct AuthGateView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("auth.gate")
     }
 
     private func loc(_ key: String) -> String {

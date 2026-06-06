@@ -25,7 +25,7 @@ todos:
     status: completed
   - id: polish-ci-docs
     content: "PR-7: Dark mode QA, XCUITest smoke, GitHub Actions macOS job, apps/docs how-to/ios-development.mdx"
-    status: pending
+    status: completed
 isProject: false
 ---
 

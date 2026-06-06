@@ -161,8 +161,25 @@ xcodebuild -scheme Flashycardy -destination 'platform=iOS Simulator,name=iPhone 
 
 Or **Product → Test** (⌘U) in Xcode.
 
+## Polish, CI, and docs (PR-7)
+
+- **Dark mode:** forced via `.preferredColorScheme(.dark)` in `FlashycardyApp`
+- **Loading / error / pull-to-refresh:** dashboard, deck detail, analytics, study
+- **Accessibility IDs:** `AccessibilityID` enum for XCUITest (`auth.signIn`, `dashboard.title`, …)
+- **UI tests:** `FlashycardyUITests` — launch smoke (sets `UITestingForceAuthGate` to show the auth gate without waiting for Clerk). Requires a valid `CLERK_PUBLISHABLE_KEY` in `Secrets.xcconfig` (CI uses `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` from GitHub secrets).
+- **CI:** GitHub Actions `ios` job on `macos-15` runs `xcodebuild test` (see `.github/workflows/ci.yml`)
+- **Docs:** [iOS development how-to](../docs/content/how-to/ios-development.mdx)
+
+### Test targets
+
+| Target | Command filter |
+|--------|----------------|
+| Unit (`FlashycardyTests`) | `-only-testing:FlashycardyTests` |
+| UI (`FlashycardyUITests`) | `-only-testing:FlashycardyUITests` |
+
 ## Related docs
 
 - REST API: [`apps/docs/content/reference/rest-api.mdx`](../docs/content/reference/rest-api.mdx)
+- iOS how-to: [`apps/docs/content/how-to/ios-development.mdx`](../docs/content/how-to/ios-development.mdx)
 - Chrome extension setup (similar Clerk + Bearer pattern): [`apps/extension/README.md`](../extension/README.md)
 - iOS plan: [`.cursor/plans/ios_swiftui_app_c59e56a6.plan.md`](../../.cursor/plans/ios_swiftui_app_c59e56a6.plan.md)

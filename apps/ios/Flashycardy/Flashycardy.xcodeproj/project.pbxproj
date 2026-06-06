@@ -19,6 +19,13 @@
 			remoteGlobalIDString = 908DA01E2FCE43350079C254;
 			remoteInfo = Flashycardy;
 		};
+		908DA0752FCE70000079C254 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 908DA0172FCE43350079C254 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 908DA01E2FCE43350079C254;
+			remoteInfo = Flashycardy;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +33,7 @@
 		908DA0422FCE50000079C254 /* ../Config/Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ../Config/Debug.xcconfig; sourceTree = "<group>"; };
 		908DA0432FCE50010079C254 /* ../Config/Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ../Config/Release.xcconfig; sourceTree = "<group>"; };
 		908DA0502FCE60000079C254 /* FlashycardyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashycardyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		908DA0702FCE70000079C254 /* FlashycardyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashycardyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -52,6 +60,11 @@
 			path = FlashycardyTests;
 			sourceTree = "<group>";
 		};
+		908DA0712FCE70010079C254 /* FlashycardyUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlashycardyUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +84,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		908DA0742FCE70040079C254 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -79,6 +99,7 @@
 			children = (
 				908DA0212FCE43350079C254 /* Flashycardy */,
 				908DA0512FCE60010079C254 /* FlashycardyTests */,
+				908DA0712FCE70010079C254 /* FlashycardyUITests */,
 				908DA0422FCE50000079C254 /* ../Config/Debug.xcconfig */,
 				908DA0432FCE50010079C254 /* ../Config/Release.xcconfig */,
 				908DA0202FCE43350079C254 /* Products */,
@@ -90,6 +111,7 @@
 			children = (
 				908DA01F2FCE43350079C254 /* Flashycardy.app */,
 				908DA0502FCE60000079C254 /* FlashycardyTests.xctest */,
+				908DA0702FCE70000079C254 /* FlashycardyUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -141,6 +163,26 @@
 			productReference = 908DA0502FCE60000079C254 /* FlashycardyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		908DA0722FCE70020079C254 /* FlashycardyUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 908DA0792FCE70070079C254 /* Build configuration list for PBXNativeTarget "FlashycardyUITests" */;
+			buildPhases = (
+				908DA0732FCE70030079C254 /* Sources */,
+				908DA0742FCE70040079C254 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				908DA0762FCE70050079C254 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				908DA0712FCE70010079C254 /* FlashycardyUITests */,
+			);
+			name = FlashycardyUITests;
+			productName = FlashycardyUITests;
+			productReference = 908DA0702FCE70000079C254 /* FlashycardyUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -155,6 +197,10 @@
 						CreatedOnToolsVersion = 26.5;
 					};
 					908DA0522FCE60020079C254 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 908DA01E2FCE43350079C254;
+					};
+					908DA0722FCE70020079C254 = {
 						CreatedOnToolsVersion = 26.5;
 						TestTargetID = 908DA01E2FCE43350079C254;
 					};
@@ -179,6 +225,7 @@
 			targets = (
 				908DA01E2FCE43350079C254 /* Flashycardy */,
 				908DA0522FCE60020079C254 /* FlashycardyTests */,
+				908DA0722FCE70020079C254 /* FlashycardyUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -208,6 +255,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		908DA0732FCE70030079C254 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -215,6 +269,11 @@
 			isa = PBXTargetDependency;
 			target = 908DA01E2FCE43350079C254 /* Flashycardy */;
 			targetProxy = 908DA0562FCE60060079C254 /* PBXContainerItemProxy */;
+		};
+		908DA0762FCE70050079C254 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 908DA01E2FCE43350079C254 /* Flashycardy */;
+			targetProxy = 908DA0752FCE70000079C254 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -466,6 +525,42 @@
 			};
 			name = Release;
 		};
+		908DA0772FCE70080079C254 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 908DA0422FCE50000079C254 /* ../Config/Debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9K638S8SS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = local.FlashycardyUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Flashycardy;
+			};
+			name = Debug;
+		};
+		908DA0782FCE70090079C254 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 908DA0432FCE50010079C254 /* ../Config/Release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9K638S8SS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = local.FlashycardyUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Flashycardy;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -492,6 +587,15 @@
 			buildConfigurations = (
 				908DA0582FCE60080079C254 /* Debug */,
 				908DA0592FCE60090079C254 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		908DA0792FCE70070079C254 /* Build configuration list for PBXNativeTarget "FlashycardyUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				908DA0772FCE70080079C254 /* Debug */,
+				908DA0782FCE70090079C254 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

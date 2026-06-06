@@ -33,6 +33,7 @@ struct DashboardView: View {
                 ToolbarItem(placement: .principal) {
                     Text(L10n.Common.appName)
                         .font(.headline)
+                        .accessibilityIdentifier(AccessibilityID.Dashboard.title)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     ProfileToolbarButton(authSheetPresented: $authSheetPresented)
