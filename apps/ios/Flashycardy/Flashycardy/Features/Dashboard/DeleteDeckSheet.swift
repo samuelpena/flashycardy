@@ -54,8 +54,9 @@ struct DeleteDeckSheet: View {
 
         do {
             _ = try await api.decks.delete(deckUuid: deck.uuid)
-            dismiss()
+            NotificationCenter.default.post(name: .deckDidDelete, object: deck.uuid)
             await onDeleted()
+            dismiss()
         } catch {
             errorMessage = ApiErrorMessage.message(for: error)
         }

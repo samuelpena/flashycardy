@@ -91,6 +91,14 @@ final class DeckDetailViewModel {
         await load()
     }
 
+    func markDeleted() {
+        deck = nil
+        allCards = []
+        ratings = [:]
+        isLoading = false
+        errorMessage = nil
+    }
+
     func setSort(_ option: CardSortOption) {
         sort = option
         currentPage = 1

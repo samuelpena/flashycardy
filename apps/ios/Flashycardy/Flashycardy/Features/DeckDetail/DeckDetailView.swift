@@ -64,6 +64,7 @@ struct DeckDetailView: View {
         .sheet(isPresented: $showDeleteDeck) {
             if let viewModel, let deckRef = viewModel.deckReference {
                 DeleteDeckSheet(deck: deckRef) {
+                    viewModel.markDeleted()
                     dismiss()
                 }
             }

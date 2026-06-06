@@ -61,6 +61,11 @@ struct DashboardView: View {
             viewModel = model
             await model.load()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .deckDidDelete)) { _ in
+            Task {
+                await viewModel?.reload()
+            }
+        }
         .sheet(isPresented: $showCreateDeck) {
             if let viewModel {
                 CreateDeckSheet(
@@ -82,11 +87,7 @@ struct DashboardView: View {
             }
         }
         .sheet(item: $deckToDelete) { deck in
-            if let viewModel {
-                DeleteDeckSheet(deck: DeckReference(deck)) {
-                    await viewModel.reload()
-                }
-            }
+            DeleteDeckSheet(deck: DeckReference(deck)) { }
         }
     }
 
