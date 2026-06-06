@@ -34,8 +34,7 @@ final class DeckDetailViewModel {
             case .za:
                 lhs.front.localizedCompare(rhs.front) == .orderedDescending
             case .updated:
-                (ISO8601DateParser.parse(rhs.updatedAt) ?? .distantPast)
-                    > (ISO8601DateParser.parse(lhs.updatedAt) ?? .distantPast)
+                SortByUpdatedAt.isDescending(lhs: lhs.updatedAt, rhs: rhs.updatedAt)
             }
         }
     }

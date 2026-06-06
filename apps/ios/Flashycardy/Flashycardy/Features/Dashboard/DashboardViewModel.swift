@@ -32,8 +32,7 @@ final class DashboardViewModel {
             case .za:
                 lhs.name.localizedCompare(rhs.name) == .orderedDescending
             case .updated:
-                (ISO8601DateParser.parse(rhs.updatedAt) ?? .distantPast)
-                    > (ISO8601DateParser.parse(lhs.updatedAt) ?? .distantPast)
+                SortByUpdatedAt.isDescending(lhs: lhs.updatedAt, rhs: rhs.updatedAt)
             }
         }
     }
