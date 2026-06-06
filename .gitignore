@@ -62,3 +62,4 @@ apps/docs/public/_pagefind/
 apps/ios/Config/Secrets.xcconfig
 apps/ios/**/xcuserdata/
 apps/ios/**/*.xcuserstate
+.github/workflows/ci.yml
