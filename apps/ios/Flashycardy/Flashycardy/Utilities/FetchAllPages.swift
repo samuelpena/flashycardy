@@ -12,7 +12,8 @@ enum FetchAllPages {
         while true {
             let response = try await fetchPage(PaginationParams(page: page, pageSize: pageSize))
             items.append(contentsOf: response.data)
-            if page >= response.meta.totalPages { break }
+            if response.data.isEmpty { break }
+            if response.links.next == nil { break }
             page += 1
         }
 
@@ -42,7 +43,8 @@ enum FetchAllPages {
                 )
             }
             allCards.append(contentsOf: response.data.cards)
-            if page >= response.meta.totalPages { break }
+            if response.data.cards.isEmpty { break }
+            if response.links.next == nil { break }
             page += 1
         }
 

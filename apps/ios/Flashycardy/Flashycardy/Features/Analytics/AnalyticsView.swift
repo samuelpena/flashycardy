@@ -5,28 +5,39 @@ private enum AnalyticsRoute: Hashable {
 }
 
 struct AnalyticsView: View {
+    let refreshToken: Int
+    let isActive: Bool
+
     @Environment(LocaleManager.self) private var localeManager
     @InjectAPI private var api
     @State private var viewModel: AnalyticsViewModel?
+
+    init(refreshToken: Int = 0, isActive: Bool = true) {
+        self.refreshToken = refreshToken
+        self.isActive = isActive
+    }
 
     var body: some View {
         let _ = localeManager.appLocale
         Group {
             if let viewModel {
                 analyticsContent(viewModel: viewModel)
-            } else {
+            } else if isActive {
                 ProgressView(L10n.Extension.loading)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                Color.clear
             }
         }
         .navigationTitle(L10n.Analytics.title)
         .navigationBarTitleDisplayMode(.large)
-        .task {
+        .task(id: isActive ? refreshToken : nil) {
+            guard isActive else { return }
+            let model = viewModel ?? AnalyticsViewModel(api: api)
             if viewModel == nil {
-                let model = AnalyticsViewModel(api: api)
                 viewModel = model
-                await model.load()
             }
+            await model.load()
         }
         .navigationDestination(for: AnalyticsRoute.self) { route in
             switch route {

@@ -20,13 +20,20 @@ final class StudyViewModel {
     let deckUuid: String
     private let sourceCards: [Card]
     private let api: FlashycardyAPI
+    private let onSessionSaved: () -> Void
     private var didSave = false
 
-    init(deckUuid: String, cards: [Card], api: FlashycardyAPI) {
+    init(
+        deckUuid: String,
+        cards: [Card],
+        api: FlashycardyAPI,
+        onSessionSaved: @escaping () -> Void = {}
+    ) {
         self.deckUuid = deckUuid
         self.sourceCards = cards
         self.deckOrder = cards
         self.api = api
+        self.onSessionSaved = onSessionSaved
     }
 
     var total: Int { deckOrder.count }
@@ -130,6 +137,7 @@ final class StudyViewModel {
             _ = try await api.studySessions.create(
                 CreateStudySessionInput(deckUuid: deckUuid, cardResults: cardResults)
             )
+            onSessionSaved()
         } catch {
             saveError = ApiErrorMessage.message(for: error)
         }

@@ -23,7 +23,14 @@ struct StudyView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             if viewModel == nil {
-                viewModel = StudyViewModel(deckUuid: deckUuid, cards: cards, api: api)
+                viewModel = StudyViewModel(
+                    deckUuid: deckUuid,
+                    cards: cards,
+                    api: api,
+                    onSessionSaved: {
+                        NotificationCenter.default.post(name: .studySessionDidSave, object: nil)
+                    }
+                )
             }
         }
     }
