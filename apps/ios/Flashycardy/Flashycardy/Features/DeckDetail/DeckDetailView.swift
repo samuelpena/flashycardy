@@ -144,6 +144,13 @@ struct DeckDetailView: View {
                     }
                     .buttonStyle(.borderedProminent)
 
+                    GenerateCardsButton(
+                        deckUuid: deckUuid,
+                        hasDescription: !(deck.description ?? "").isEmpty
+                    ) {
+                        await viewModel.reload()
+                    }
+
                     Button {
                         showAddCard = true
                     } label: {
@@ -230,7 +237,7 @@ struct DeckDetailView: View {
 
                 Spacer()
 
-                Text(String(format: L10n.Dashboard.pageOf, viewModel.safePage, viewModel.totalPages))
+                Text(L10n.Dashboard.pageOf(viewModel.safePage, viewModel.totalPages))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 

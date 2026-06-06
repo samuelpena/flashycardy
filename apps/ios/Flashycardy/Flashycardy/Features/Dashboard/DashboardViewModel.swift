@@ -13,13 +13,15 @@ final class DashboardViewModel {
     var currentPage = 1
 
     private let api: FlashycardyAPI
+    let hasUnlimitedDecks: Bool?
 
-    init(api: FlashycardyAPI) {
+    init(api: FlashycardyAPI, hasUnlimitedDecks: Bool?) {
         self.api = api
+        self.hasUnlimitedDecks = hasUnlimitedDecks
     }
 
     var showDeckLimitBanner: Bool {
-        decks.count >= AppConstants.freeDeckLimit
+        hasUnlimitedDecks == false && decks.count >= AppConstants.freeDeckLimit
     }
 
     var sortedDecks: [DeckListItem] {

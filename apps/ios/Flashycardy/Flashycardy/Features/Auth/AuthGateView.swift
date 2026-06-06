@@ -10,16 +10,16 @@ struct AuthGateView: View {
             Spacer()
 
             VStack(spacing: 8) {
-                Text("Flashycardy")
+                Text(L10n.Common.appName)
                     .font(.largeTitle.bold())
                     .foregroundStyle(.primary)
 
-                Text("Your personal flashcard platform")
+                Text(loc("HomePage.tagline"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
 
-                Text("Sign in with the same account you use on the web app.")
+                Text(loc("Extension.authHint"))
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)
@@ -29,14 +29,14 @@ struct AuthGateView: View {
 
             VStack(spacing: 12) {
                 Button(action: onSignIn) {
-                    Text("Sign in")
+                    Text(L10n.Auth.signIn)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
 
                 Button(action: onSignUp) {
-                    Text("Sign up")
+                    Text(L10n.Auth.signUp)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -48,6 +48,10 @@ struct AuthGateView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
+    }
+
+    private func loc(_ key: String) -> String {
+        String(localized: String.LocalizationValue(key), locale: LocaleManager.currentLocale)
     }
 }
 

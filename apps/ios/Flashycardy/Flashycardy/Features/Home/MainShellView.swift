@@ -2,57 +2,49 @@ import ClerkKit
 import ClerkKitUI
 import SwiftUI
 
-/// Signed-in shell: dashboard and analytics tabs plus profile menu.
+/// Signed-in shell: dashboard, analytics, and settings tabs.
 struct MainShellView: View {
-    @Environment(Clerk.self) private var clerk
     @State private var authSheetPresented = false
 
     var body: some View {
         TabView {
-            NavigationStack {
-                DashboardView()
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .principal) {
-                            Text("FlashyCardy")
-                                .font(.headline)
-                        }
-                        ToolbarItem(placement: .topBarTrailing) {
-                            userButton
-                        }
-                    }
-            }
-            .tabItem {
-                Label(L10n.Dashboard.title, systemImage: "rectangle.stack")
-            }
+            DashboardView()
+                .tabItem {
+                    Label(L10n.Dashboard.title, systemImage: "rectangle.stack")
+                }
 
             NavigationStack {
                 AnalyticsView()
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
-                            userButton
+                            ProfileToolbarButton(authSheetPresented: $authSheetPresented)
                         }
                     }
             }
             .tabItem {
                 Label(L10n.Analytics.title, systemImage: "chart.bar")
             }
+
+            NavigationStack {
+                PreferencesView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            ProfileToolbarButton(authSheetPresented: $authSheetPresented)
+                        }
+                    }
+            }
+            .tabItem {
+                Label(L10n.Settings.title, systemImage: "gearshape")
+            }
         }
         .sheet(isPresented: $authSheetPresented) {
             AuthView()
         }
-    }
-
-    private var userButton: some View {
-        UserButton(signedOutContent: {
-            Button("Sign in") {
-                authSheetPresented = true
-            }
-        })
     }
 }
 
 #Preview {
     MainShellView()
         .environment(Clerk.shared)
+        .environment(LocaleManager())
 }

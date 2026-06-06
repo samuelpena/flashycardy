@@ -6,6 +6,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(Clerk.self) private var clerk
     @State private var authSheetPresented = false
+    @State private var localeManager = LocaleManager()
 
     var body: some View {
         Group {
@@ -22,6 +23,18 @@ struct RootView: View {
                 )
             }
         }
+        .environment(localeManager)
+        .environment(\.locale, localeManager.locale)
+        .onAppear {
+            LocaleManagerBridge.shared = localeManager
+            localeManager.sync(from: clerk)
+        }
+        .onChange(of: clerk.user?.id) { _, _ in
+            localeManager.sync(from: clerk)
+        }
+        .onChange(of: localeManager.appLocale) { _, _ in
+            LocaleManagerBridge.shared = localeManager
+        }
         .sheet(isPresented: $authSheetPresented) {
             AuthView()
         }
@@ -32,7 +45,7 @@ private struct LoadingView: View {
     var body: some View {
         VStack(spacing: 12) {
             ProgressView()
-            Text("Loading…")
+            Text(L10n.Extension.loading)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }

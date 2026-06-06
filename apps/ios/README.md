@@ -97,7 +97,7 @@ After sign-in, the app shows **Your Decks**:
 - Paginated grid (9 decks per page), sort by last updated / A–Z / Z–A
 - Pull to refresh
 - Deck limit banner when you have 3+ decks (free tier)
-- **New Deck** sheet (name + description); 403 opens `/pricing` in Safari
+- **New Deck** sheet: manual name/description, or **From document** (Pro); 403 opens `/pricing` in Safari
 - Long-press a deck for **Edit** / **Delete**
 - Tap a deck to open **deck detail** (cards, study navigation — see PR-4)
 
@@ -136,6 +136,21 @@ Second tab in the signed-in shell:
 - Score badges: green ≥80%, neutral ≥50%, red below 50%
 - Tap a row to open that deck’s detail
 - Pull to refresh; empty state when no sessions yet
+
+## Pro features, settings, and i18n (PR-6)
+
+### Pro features
+
+- **Create deck from document** (Pro): **New Deck** sheet → **From document** tab → pick PDF/DOCX/PPTX (≤10 MB) → `POST /api/decks/from-document`. On 403, opens `/pricing` in Safari.
+- **Generate with AI** (Pro): deck detail action bar → `POST /api/decks/:uuid/generate-cards`. Disabled until the deck has a description. On 403, opens `/pricing` in Safari.
+
+### Settings
+
+Third tab **Settings** → language picker (English / Spanish). Saves to Clerk `unsafeMetadata.language` when signed in (same as web). UI strings reload immediately via `LocaleManager`.
+
+### String catalog
+
+UI copy lives in `Flashycardy/Resources/Localizable.xcstrings` (synced from `packages/i18n/messages/en.json` and `es.json`). When web i18n keys change, regenerate the catalog in the same PR.
 
 ### Unit tests
 

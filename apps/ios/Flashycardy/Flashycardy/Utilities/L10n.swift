@@ -1,181 +1,272 @@
 import Foundation
+import SwiftUI
 
-/// English UI strings (PR-6 will migrate to `Localizable.xcstrings`).
+/// UI strings backed by `Resources/Localizable.xcstrings` (en + es).
 enum L10n {
     enum Common {
-        static let cancel = "Cancel"
-        static let save = "Save changes"
-        static let saving = "Saving…"
-        static let edit = "Edit"
-        static let delete = "Delete"
-        static let front = "Front"
-        static let back = "Back"
-        static let tryAgain = "Something went wrong. Try again."
+        static var appName: String { loc("Common.appName") }
+        static var cancel: String { loc("Common.cancel") }
+        static var save: String { loc("Common.save") }
+        static var saving: String { loc("Common.saving") }
+        static var edit: String { loc("Common.edit") }
+        static var delete: String { loc("Common.delete") }
+        static var front: String { loc("Common.front") }
+        static var back: String { loc("Common.back") }
+        static var tryAgain: String { loc("Common.tryAgain") }
+
         static func deckLimitBanner(used: Int, limit: Int) -> String {
-            "\(used)/\(limit) decks used"
+            loc("Common.deckLimitBanner")
+                .replacingOccurrences(of: "{used}", with: "\(used)")
+                .replacingOccurrences(of: "{limit}", with: "\(limit)")
         }
+
         static func cardCount(_ count: Int) -> String {
-            count == 1 ? "1 card" : "\(count) cards"
+            count == 1 ? "1 \(cardWord)" : "\(count) \(cardsWord)"
         }
-        static func updatedLabel(_ date: String) -> String {
-            "Updated \(date)"
+
+        private static var cardWord: String {
+            LocaleManager.currentAppLocale == .es ? "tarjeta" : "card"
+        }
+
+        private static var cardsWord: String {
+            LocaleManager.currentAppLocale == .es ? "tarjetas" : "cards"
         }
     }
 
     enum Dashboard {
-        static let title = "Your Decks"
-        static let subtitle = "Manage and study your flashcard decks."
-        static let analytics = "Analytics"
-        static let emptyTitle = "No decks yet"
-        static let emptyDescription = "Create your first deck to start building and studying flashcards."
-        static let nameHeader = "Name"
-        static let descriptionHeader = "Description"
-        static let pageOf = "Page %d of %d"
+        static var title: String { loc("Dashboard.title") }
+        static var subtitle: String { loc("Dashboard.subtitle") }
+        static var analytics: String { loc("Dashboard.analytics") }
+        static var emptyTitle: String { loc("Dashboard.emptyTitle") }
+        static var emptyDescription: String { loc("Dashboard.emptyDescription") }
+        static var nameHeader: String { loc("Dashboard.nameHeader") }
+        static var descriptionHeader: String { loc("Dashboard.descriptionHeader") }
+
+        static func pageOf(_ current: Int, _ total: Int) -> String {
+            LocaleManager.currentAppLocale == .es
+                ? "Página \(current) de \(total)"
+                : "Page \(current) of \(total)"
+        }
     }
 
     enum DeckSort {
-        static let updated = "Last updated"
-        static let az = "A → Z"
-        static let za = "Z → A"
+        static var updated: String { loc("DeckSort.updated") }
+        static var az: String { loc("DeckSort.az") }
+        static var za: String { loc("DeckSort.za") }
     }
 
     enum CardSort {
-        static let updated = "Last updated"
-        static let az = "A → Z"
-        static let za = "Z → A"
+        static var updated: String { loc("CardSort.updated") }
+        static var az: String { loc("CardSort.az") }
+        static var za: String { loc("CardSort.za") }
     }
 
     enum DeckDetail {
-        static let backToDecks = "Back to decks"
-        static let study = "Study"
-        static let addCard = "Add Card"
-        static let emptyCardsTitle = "No cards yet"
-        static let emptyCardsDescription = "Add your first card to start studying this deck."
-        static let addFirstCard = "Add your first card"
-        static let fieldFront = "Front"
-        static let fieldBack = "Back"
+        static var backToDecks: String { loc("DeckDetail.backToDecks") }
+        static var study: String { loc("DeckDetail.study") }
+        static var generateWithAI: String { loc("DeckDetail.generateWithAI") }
+        static var addCard: String { loc("DeckDetail.addCard") }
+        static var emptyCardsTitle: String { loc("DeckDetail.emptyCardsTitle") }
+        static var emptyCardsDescription: String { loc("DeckDetail.emptyCardsDescription") }
+        static var addFirstCard: String { loc("DeckDetail.addFirstCard") }
+        static var fieldFront: String { loc("DeckDetail.fieldFront") }
+        static var fieldBack: String { loc("DeckDetail.fieldBack") }
+    }
+
+    enum GenerateCards {
+        static var tooltipNeedDescription: String { loc("GenerateCards.tooltipNeedDescription") }
+        static var generating: String { loc("GenerateCards.generating") }
+        static var failedGeneric: String { loc("GenerateCards.failedGeneric") }
     }
 
     enum AddCard {
-        static let title = "Add New Card"
-        static let description =
-            "Create a new flashcard for this deck. Add content for both the front and back of the card."
-        static let frontPlaceholder = "Front of the card"
-        static let backPlaceholder = "Back of the card"
-        static let creating = "Creating…"
-        static let createCard = "Create Card"
-        static let triggerDefault = "Add Card"
+        static var title: String { loc("AddCard.title") }
+        static var description: String { loc("AddCard.description") }
+        static var frontPlaceholder: String { loc("AddCard.frontPlaceholder") }
+        static var backPlaceholder: String { loc("AddCard.backPlaceholder") }
+        static var creating: String { loc("AddCard.creating") }
+        static var createCard: String { loc("AddCard.createCard") }
+        static var triggerDefault: String { loc("AddCard.triggerDefault") }
     }
 
     enum EditCard {
-        static let title = "Edit Card"
-        static let description = "Update the front and back of this flashcard."
-        static let frontPlaceholder = "Front of the card"
-        static let backPlaceholder = "Back of the card"
+        static var title: String { loc("EditCard.title") }
+        static var description: String { loc("EditCard.description") }
+        static var frontPlaceholder: String { loc("EditCard.frontPlaceholder") }
+        static var backPlaceholder: String { loc("EditCard.backPlaceholder") }
     }
 
     enum DeleteCard {
-        static let title = "Delete card?"
-        static let description = "This action cannot be undone. The card will be permanently deleted."
-        static let deleting = "Deleting…"
-        static let deleteCard = "Delete card"
+        static var title: String { loc("DeleteCard.title") }
+        static var description: String { loc("DeleteCard.description") }
+        static var deleting: String { loc("DeleteCard.deleting") }
+        static var deleteCard: String { loc("DeleteCard.deleteCard") }
     }
 
     enum StudyPage {
-        static func title(_ name: String) -> String { "Study: \(name)" }
-        static func backToDeck(_ name: String) -> String { "Back to \(name)" }
+        static func title(_ name: String) -> String {
+            loc("StudyPage.title").replacingOccurrences(of: "{name}", with: name)
+        }
+
+        static func backToDeck(_ name: String) -> String {
+            loc("StudyPage.backToDeck").replacingOccurrences(of: "{name}", with: name)
+        }
     }
 
     enum StudyClient {
-        static let emptyTitle = "No cards in this deck"
-        static let emptyDescription = "Add some cards to start studying."
-        static let sessionComplete = "Session complete!"
+        static var emptyTitle: String { loc("StudyClient.emptyTitle") }
+        static var emptyDescription: String { loc("StudyClient.emptyDescription") }
+        static var sessionComplete: String { loc("StudyClient.sessionComplete") }
+        static var correct: String { loc("StudyClient.correct") }
+        static var incorrect: String { loc("StudyClient.incorrect") }
+        static var score: String { loc("StudyClient.score") }
+        static var savingResults: String { loc("StudyClient.savingResults") }
+        static var saveFailed: String { loc("StudyClient.saveFailed") }
+        static var shuffleRestart: String { loc("StudyClient.shuffleRestart") }
+        static var restart: String { loc("StudyClient.restart") }
+        static var shuffle: String { loc("StudyClient.shuffle") }
+        static var flipHint: String { loc("StudyClient.flipHint") }
+        static var didYouGetIt: String { loc("StudyClient.didYouGetIt") }
+        static var previous: String { loc("StudyClient.previous") }
+        static var nope: String { loc("StudyClient.nope") }
+        static var gotIt: String { loc("StudyClient.gotIt") }
+        static var next: String { loc("StudyClient.next") }
+        static var revealFinish: String { loc("StudyClient.revealFinish") }
+        static var keyboardHints: String { loc("StudyClient.keyboardHints") }
+
         static func studiedAll(count: Int) -> String {
-            count == 1 ? "You studied 1 card." : "You studied all \(count) cards."
+            loc("StudyClient.studiedAll").replacingOccurrences(of: "{count}", with: "\(count)")
         }
-        static let correct = "Correct"
-        static let incorrect = "Incorrect"
-        static let score = "Score"
+
         static func skipped(count: Int) -> String {
-            count == 1
-                ? "1 card was skipped without a rating."
-                : "\(count) cards were skipped without a rating."
+            if count == 1 {
+                return loc("StudyClient.skippedOne")
+            }
+            return loc("StudyClient.skippedMany").replacingOccurrences(of: "{count}", with: "\(count)")
         }
-        static let savingResults = "Saving results…"
-        static let saveFailed = "Failed to save results."
-        static let shuffleRestart = "Shuffle & restart"
-        static let restart = "Restart"
-        static let shuffle = "Shuffle"
-        static let flipHint = "Tap to flip"
-        static let didYouGetIt = "Did you get it right?"
-        static let previous = "Previous"
-        static let nope = "Nope"
-        static let gotIt = "Got it"
-        static let next = "Next"
-        static let revealFinish = "Reveal & Finish"
-        static let keyboardHints = "Tap the card to flip"
     }
 
     enum Analytics {
-        static let title = "Analytics"
-        static let subtitle = "A record of all your study sessions."
-        static let emptyTitle = "No sessions yet"
-        static let emptyDescription = "Complete a study session to start tracking your progress here."
-        static let goStudy = "Go study a deck"
-        static let colDeck = "Deck"
-        static let colTotalCards = "Cards"
-        static let colCorrect = "✓"
-        static let colScore = "Score"
+        static var title: String { loc("Analytics.title") }
+        static var subtitle: String { loc("Analytics.subtitle") }
+        static var emptyTitle: String { loc("Analytics.emptyTitle") }
+        static var emptyDescription: String { loc("Analytics.emptyDescription") }
+        static var goStudy: String { loc("Analytics.goStudy") }
+        static var colDeck: String { loc("Analytics.colDeck") }
+        static var colTotalCards: String { loc("Analytics.colTotalCards") }
+        static var colCorrect: String { loc("Analytics.colCorrect") }
+        static var colScore: String { loc("Analytics.colScore") }
+    }
+
+    enum Settings {
+        static var title: String { loc("Settings.title") }
+        static var language: String { loc("Settings.language") }
+        static var helperSaving: String { loc("Settings.helperSaving") }
+        static var helperDefault: String { loc("Settings.helperDefault") }
+        static var save: String { loc("Settings.save") }
+        static var saved: String { loc("Settings.saved") }
+        static var saveError: String { loc("Settings.saveError") }
+
+        static func languageOption(_ locale: AppLocale) -> String {
+            switch locale {
+            case .en: loc("Settings.languageOption_en")
+            case .es: loc("Settings.languageOption_es")
+            }
+        }
     }
 
     enum CreateDeck {
-        static let triggerDefault = "New Deck"
-        static let createFirstDeck = "Create your first deck"
-        static let dialogTitle = "Create a new deck"
-        static let dialogDescription = "Give your deck a name and an optional description."
-        static let namePlaceholder = "e.g. Spanish Vocabulary"
-        static let descriptionPlaceholder = "What is this deck about?"
-        static let creating = "Creating…"
-        static let createDeck = "Create deck"
-        static let limitTitle = "Deck limit reached"
-        static let limitDescription =
-            "Free plans are limited to 3 decks. Upgrade to Pro for unlimited decks and more."
-        static let viewPlans = "View Plans"
+        static var triggerDefault: String { loc("CreateDeck.triggerDefault") }
+        static var createFirstDeck: String { loc("CreateDeck.createFirstDeck") }
+        static var dialogTitle: String { loc("CreateDeck.dialogTitle") }
+        static var dialogDescription: String { loc("CreateDeck.dialogDescriptionSimple") }
+        static var dialogDescriptionTabs: String { loc("CreateDeck.dialogDescriptionTabs") }
+        static var tabManual: String { loc("CreateDeck.tabManual") }
+        static var tabDocument: String { loc("CreateDeck.tabDocument") }
+        static var namePlaceholder: String { loc("CreateDeck.namePlaceholder") }
+        static var descriptionPlaceholder: String { loc("CreateDeck.descriptionPlaceholder") }
+        static var creating: String { loc("CreateDeck.creating") }
+        static var createDeck: String { loc("CreateDeck.createDeck") }
+        static var limitTitle: String { loc("CreateDeck.limitTitle") }
+        static var limitDescription: String { loc("CreateDeck.limitDescription") }
+        static var viewPlans: String { loc("CreateDeck.viewPlans") }
+        static var docIntro: String { loc("CreateDeck.docIntro") }
+        static var chooseFile: String { loc("CreateDeck.chooseFile") }
+        static var selected: String { loc("CreateDeck.selected") }
+        static var noFileSelected: String { loc("CreateDeck.noFileSelected") }
+        static var generating: String { loc("CreateDeck.generating") }
+        static var generateDeck: String { loc("CreateDeck.generateDeck") }
+
+        static func docHint(maxMb: Int) -> String {
+            loc("CreateDeck.docHint").replacingOccurrences(of: "{maxMb}", with: "\(maxMb)")
+        }
     }
 
     enum EditDeck {
-        static let title = "Edit Deck"
-        static let description = "Update the name and description of this deck."
-        static let namePlaceholder = "Deck name"
-        static let descriptionPlaceholder = "Optional description"
+        static var title: String { loc("EditDeck.title") }
+        static var description: String { loc("EditDeck.description") }
+        static var namePlaceholder: String { loc("EditDeck.namePlaceholder") }
+        static var descriptionPlaceholder: String { loc("EditDeck.descriptionPlaceholder") }
     }
 
     enum DeleteDeck {
-        static func title(_ name: String) -> String { "Delete «\(name)»?" }
-        static func description(cardCount: Int) -> String {
-            switch cardCount {
-            case 0:
-                return "This cannot be undone. The deck will be removed from your library. There are no cards in this deck."
-            case 1:
-                return "This cannot be undone. The deck will be removed from your library. The 1 card in this deck will be permanently deleted."
-            default:
-                return "This cannot be undone. The deck will be removed from your library. All \(cardCount) cards in this deck will be permanently deleted."
-            }
+        static func title(_ name: String) -> String {
+            loc("DeleteDeck.title").replacingOccurrences(of: "{name}", with: name)
         }
-        static let deleteDeck = "Delete deck"
-        static let deleting = "Deleting…"
+
+        static func description(cardCount: Int) -> String {
+            let cardsPart: String
+            switch cardCount {
+            case 0: cardsPart = loc("DeleteDeck.cardsNone")
+            case 1: cardsPart = loc("DeleteDeck.cardsOne")
+            default: cardsPart = loc("DeleteDeck.cardsMany").replacingOccurrences(of: "{count}", with: "\(cardCount)")
+            }
+            return loc("DeleteDeck.description").replacingOccurrences(of: "{cards}", with: cardsPart)
+        }
+
+        static var deleteDeck: String { loc("DeleteDeck.deleteDeck") }
+        static var deleting: String { loc("DeleteDeck.deleting") }
     }
 
     enum Actions {
-        static let deckLimitReached =
-            "You've reached the 3-deck limit on the free plan. Upgrade to Pro for unlimited decks."
-        static let saveDeckFailed = "Failed to save the deck. Please try again."
-        static let deckNotFound = "Deck not found"
-        static let cardNotFound = "Card not found"
-        static let unauthorized = "Unauthorized"
+        static var deckLimitReached: String { loc("Actions.deckLimitReached") }
+        static var documentDeckProRequired: String { loc("Actions.documentDeckProRequired") }
+        static var saveDeckFailed: String { loc("Actions.saveDeckFailed") }
+        static var deckNotFound: String { loc("Actions.deckNotFound") }
+        static var cardNotFound: String { loc("Actions.cardNotFound") }
+        static var unauthorized: String { loc("Actions.unauthorized") }
+        static var aiGenProRequired: String { loc("Actions.aiGenProRequired") }
+        static var addDescriptionFirst: String { loc("Actions.addDescriptionFirst") }
+        static var generateCardsFailed: String { loc("Actions.generateCardsFailed") }
+        static var unsupportedFileType: String { loc("Actions.unsupportedFileType") }
+        static var fileSizeExceeded: String { loc("Actions.fileSizeExceeded") }
     }
 
     enum Extension {
-        static let loading = "Loading…"
+        static var loading: String { loc("Extension.loading") }
+    }
+
+    enum Auth {
+        static var signIn: String { loc("Auth.signIn") }
+        static var signUp: String { loc("Auth.signUp") }
+    }
+
+    private static func loc(_ key: String) -> String {
+        String(localized: String.LocalizationValue(key), locale: LocaleManager.currentLocale)
+    }
+}
+
+@MainActor
+enum LocaleManagerBridge {
+    static weak var shared: LocaleManager?
+}
+
+extension LocaleManager {
+    static var currentLocale: Locale {
+        LocaleManagerBridge.shared?.locale ?? Locale(identifier: "en")
+    }
+
+    static var currentAppLocale: AppLocale {
+        LocaleManagerBridge.shared?.appLocale ?? .en
     }
 }

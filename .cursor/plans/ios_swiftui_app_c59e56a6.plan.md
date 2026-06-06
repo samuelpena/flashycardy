@@ -22,7 +22,7 @@ todos:
     status: completed
   - id: pro-settings-i18n
     content: "PR-6: Document upload, AI generate, PreferencesView language, Localizable.xcstrings en/es, Safari /pricing"
-    status: pending
+    status: completed
   - id: polish-ci-docs
     content: "PR-7: Dark mode QA, XCUITest smoke, GitHub Actions macOS job, apps/docs how-to/ios-development.mdx"
     status: pending

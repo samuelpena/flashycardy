@@ -1,4 +1,5 @@
 import ClerkKit
+import ClerkKitUI
 import SwiftUI
 
 enum DashboardRoute: Hashable {
@@ -8,33 +9,66 @@ enum DashboardRoute: Hashable {
 struct DashboardView: View {
     @Environment(Clerk.self) private var clerk
     @InjectAPI private var api
+    @State private var path = NavigationPath()
     @State private var viewModel: DashboardViewModel?
     @State private var showCreateDeck = false
     @State private var deckToEdit: DeckListItem?
     @State private var deckToDelete: DeckListItem?
+    @State private var authSheetPresented = false
 
     var body: some View {
-        Group {
-            if let viewModel {
-                dashboardContent(viewModel: viewModel)
-            } else {
-                ProgressView(L10n.Extension.loading)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+        NavigationStack(path: $path) {
+            Group {
+                if let viewModel {
+                    dashboardContent(viewModel: viewModel)
+                } else {
+                    ProgressView(L10n.Extension.loading)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
             }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(L10n.Common.appName)
+                        .font(.headline)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    ProfileToolbarButton(authSheetPresented: $authSheetPresented)
+                }
+            }
+            .navigationDestination(for: DashboardRoute.self) { route in
+                switch route {
+                case .deckDetail(let uuid):
+                    DeckDetailView(deckUuid: uuid)
+                }
+            }
+        }
+        .sheet(isPresented: $authSheetPresented) {
+            AuthView()
         }
         .task(id: clerk.session?.id) {
             guard clerk.session != nil else {
                 viewModel = nil
                 return
             }
-            let model = DashboardViewModel(api: api)
+            let entitlements = await ClerkBillingEntitlements.current(clerk: clerk)
+            let model = DashboardViewModel(
+                api: api,
+                hasUnlimitedDecks: entitlements.hasUnlimitedDecks
+            )
             viewModel = model
             await model.load()
         }
         .sheet(isPresented: $showCreateDeck) {
             if let viewModel {
-                CreateDeckSheet(deckCount: viewModel.decks.count) {
+                CreateDeckSheet(
+                    deckCount: viewModel.decks.count,
+                    hasUnlimitedDecks: viewModel.hasUnlimitedDecks
+                ) { deckUuid in
                     await viewModel.reload()
+                    if let deckUuid {
+                        path.append(DashboardRoute.deckDetail(deckUuid))
+                    }
                 }
             }
         }
@@ -79,12 +113,6 @@ struct DashboardView: View {
         }
         .refreshable {
             await viewModel.reload()
-        }
-        .navigationDestination(for: DashboardRoute.self) { route in
-            switch route {
-            case .deckDetail(let uuid):
-                DeckDetailView(deckUuid: uuid)
-            }
         }
     }
 
@@ -192,7 +220,7 @@ struct DashboardView: View {
 
                 Spacer()
 
-                Text(String(format: L10n.Dashboard.pageOf, viewModel.safePage, viewModel.totalPages))
+                Text(L10n.Dashboard.pageOf(viewModel.safePage, viewModel.totalPages))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
