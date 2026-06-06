@@ -15,15 +15,11 @@ actor APIClient {
     private let baseURL: URL
     private let getToken: @Sendable () async throws -> String?
     private let session: URLSession
-    private let encoder: JSONEncoder
-    private let decoder: JSONDecoder
 
     init(configuration: APIClientConfiguration, session: URLSession = .shared) {
         self.baseURL = configuration.baseURL
         self.getToken = configuration.getToken
         self.session = session
-        self.encoder = JSONEncoder()
-        self.decoder = JSONDecoder()
     }
 
     func requestData<T: Decodable>(
@@ -79,7 +75,7 @@ actor APIClient {
         request.httpMethod = method
 
         if let body {
-            request.httpBody = try encoder.encode(AnyEncodable(body))
+            request.httpBody = try await encodeJSON(AnyEncodable(body))
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
 
@@ -91,14 +87,26 @@ actor APIClient {
         let (data, response) = try await session.data(for: request)
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
 
-        if let apiError = try decodeApiError(data: data, statusCode: statusCode) {
+        if let apiError = try await decodeApiError(data: data, statusCode: statusCode) {
             throw apiError
         }
 
         do {
-            return try decoder.decode(Envelope.self, from: data)
+            return try await decodeJSON(Envelope.self, from: data)
         } catch {
             throw ApiError(statusCode: statusCode, message: "Failed to decode response")
+        }
+    }
+
+    private func decodeJSON<T: Decodable>(_ type: T.Type, from data: Data) async throws -> T {
+        try await MainActor.run {
+            try JSONDecoder().decode(type, from: data)
+        }
+    }
+
+    private func encodeJSON(_ value: some Encodable) async throws -> Data {
+        try await MainActor.run {
+            try JSONEncoder().encode(value)
         }
     }
 
@@ -129,16 +137,16 @@ actor APIClient {
         return url
     }
 
-    private func decodeApiError(data: Data, statusCode: Int) throws -> ApiError? {
+    private func decodeApiError(data: Data, statusCode: Int) async throws -> ApiError? {
         if (200 ..< 300).contains(statusCode) {
-            if let envelope = try? decoder.decode(ErrorEnvelope.self, from: data),
+            if let envelope = try? await decodeJSON(ErrorEnvelope.self, from: data),
                let message = envelope.error {
                 return ApiError(statusCode: statusCode, message: message)
             }
             return nil
         }
 
-        if let envelope = try? decoder.decode(ErrorEnvelope.self, from: data),
+        if let envelope = try? await decodeJSON(ErrorEnvelope.self, from: data),
            let message = envelope.error {
             return ApiError(statusCode: statusCode, message: message)
         }
