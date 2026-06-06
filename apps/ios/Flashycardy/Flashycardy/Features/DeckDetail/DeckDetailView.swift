@@ -137,57 +137,56 @@ struct DeckDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    NavigationLink(value: DeckDetailRoute.study) {
-                        Label(L10n.DeckDetail.study, systemImage: "book")
-                    }
-                    .buttonStyle(.borderedProminent)
+            FlowLayout(horizontalSpacing: 8, verticalSpacing: 8) {
+                NavigationLink(value: DeckDetailRoute.study) {
+                    Label(L10n.DeckDetail.study, systemImage: "book")
+                }
+                .buttonStyle(.borderedProminent)
 
-                    GenerateCardsButton(
-                        deckUuid: deckUuid,
-                        hasDescription: !(deck.description ?? "").isEmpty
-                    ) {
-                        await viewModel.reload()
-                    }
+                GenerateCardsButton(
+                    deckUuid: deckUuid,
+                    hasDescription: !(deck.description ?? "").isEmpty
+                ) {
+                    await viewModel.reload()
+                }
 
-                    Button {
-                        showAddCard = true
-                    } label: {
-                        Label(L10n.DeckDetail.addCard, systemImage: "plus")
-                    }
-                    .buttonStyle(.bordered)
+                Button {
+                    showAddCard = true
+                } label: {
+                    Label(L10n.DeckDetail.addCard, systemImage: "plus")
+                }
+                .buttonStyle(.bordered)
 
-                    Button {
-                        showEditDeck = true
-                    } label: {
-                        Label(L10n.Common.edit, systemImage: "pencil")
-                    }
-                    .buttonStyle(.bordered)
+                Button {
+                    showEditDeck = true
+                } label: {
+                    Label(L10n.Common.edit, systemImage: "pencil")
+                }
+                .buttonStyle(.bordered)
 
-                    Button(role: .destructive) {
-                        showDeleteDeck = true
-                    } label: {
-                        Label(L10n.Common.delete, systemImage: "trash")
-                    }
-                    .buttonStyle(.bordered)
+                Button(role: .destructive) {
+                    showDeleteDeck = true
+                } label: {
+                    Label(L10n.Common.delete, systemImage: "trash")
+                }
+                .buttonStyle(.bordered)
 
-                    if !viewModel.allCards.isEmpty {
-                        Menu {
-                            Picker("Sort", selection: Binding(
-                                get: { viewModel.sort },
-                                set: { viewModel.setSort($0) }
-                            )) {
-                                ForEach(CardSortOption.allCases) { option in
-                                    Text(option.label).tag(option)
-                                }
+                if !viewModel.allCards.isEmpty {
+                    Menu {
+                        Picker("Sort", selection: Binding(
+                            get: { viewModel.sort },
+                            set: { viewModel.setSort($0) }
+                        )) {
+                            ForEach(CardSortOption.allCases) { option in
+                                Text(option.label).tag(option)
                             }
-                        } label: {
-                            Label(viewModel.sort.label, systemImage: "arrow.up.arrow.down")
                         }
+                    } label: {
+                        Label(viewModel.sort.label, systemImage: "arrow.up.arrow.down")
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
