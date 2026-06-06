@@ -5,10 +5,12 @@ private enum AnalyticsRoute: Hashable {
 }
 
 struct AnalyticsView: View {
+    @Environment(LocaleManager.self) private var localeManager
     @InjectAPI private var api
     @State private var viewModel: AnalyticsViewModel?
 
     var body: some View {
+        let _ = localeManager.appLocale
         Group {
             if let viewModel {
                 analyticsContent(viewModel: viewModel)

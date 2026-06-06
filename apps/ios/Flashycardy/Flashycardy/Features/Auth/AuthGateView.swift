@@ -51,7 +51,12 @@ struct AuthGateView: View {
     }
 
     private func loc(_ key: String) -> String {
-        String(localized: String.LocalizationValue(key), locale: LocaleManager.currentLocale)
+        let locale = LocaleManager.currentLocale
+        let resource = LocalizedStringResource(
+            String.LocalizationValue(stringLiteral: key),
+            locale: locale
+        )
+        return String(localized: resource)
     }
 }
 

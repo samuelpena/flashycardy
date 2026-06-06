@@ -4,9 +4,11 @@ import SwiftUI
 
 /// Signed-in shell: dashboard, analytics, and settings tabs.
 struct MainShellView: View {
+    @Environment(LocaleManager.self) private var localeManager
     @State private var authSheetPresented = false
 
     var body: some View {
+        let _ = localeManager.appLocale
         TabView {
             DashboardView()
                 .tabItem {

@@ -8,6 +8,7 @@ enum DashboardRoute: Hashable {
 
 struct DashboardView: View {
     @Environment(Clerk.self) private var clerk
+    @Environment(LocaleManager.self) private var localeManager
     @InjectAPI private var api
     @State private var path = NavigationPath()
     @State private var viewModel: DashboardViewModel?
@@ -17,6 +18,7 @@ struct DashboardView: View {
     @State private var authSheetPresented = false
 
     var body: some View {
+        let _ = localeManager.appLocale
         NavigationStack(path: $path) {
             Group {
                 if let viewModel {

@@ -13,6 +13,7 @@ struct PreferencesView: View {
     private var isDirty: Bool { draftLocale != baselineLocale }
 
     var body: some View {
+        let _ = localeManager.appLocale
         Form {
             Section {
                 Picker(L10n.Settings.language, selection: $draftLocale) {
@@ -40,6 +41,7 @@ struct PreferencesView: View {
         .onChange(of: localeManager.appLocale) { _, newValue in
             draftLocale = newValue
             baselineLocale = newValue
+            saveMessage = nil
         }
     }
 
