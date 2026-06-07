@@ -4,21 +4,51 @@ title: Introduction
 
 # Developer guide
 
-Documentation for contributors, integrators, and platform developers working on Flashycardy.
+Documentation for contributors, integrators, and platform developers working on the Flashycardy monorepo.
+
+## What is Flashycardy?
+
+Flashycardy is a flashcard product with:
+
+- **`apps/web`** — Next.js 16 primary app (UI, REST API, MCP, Postgres)
+- **`apps/docs`** — Nextra documentation site (this site)
+- **`apps/extension`** — Chrome MV3 side-panel client (WXT + React)
+- **`apps/ios`** — SwiftUI native client
+- **`packages/*`** — Shared UI, features, API client, and i18n
 
 ## Start here
 
-- [Local development](/developers/local-development) — clone, install, and run apps locally
-- [Architecture](/developers/architecture) — monorepo layout and data flow
-- [HTTP API (REST)](/api/overview) — public JSON API reference
-- [Model Context Protocol (MCP)](/api/mcp/overview) — MCP server for AI clients
+| Goal | Page |
+|------|------|
+| Clone and run locally | [Local development](/developers/local-development) |
+| Understand the system | [Architecture](/developers/architecture) |
+| Navigate the repo | [Monorepo structure](/developers/monorepo-structure) |
+| Configure secrets | [Environment variables](/developers/environment-variables) |
+| Call the REST API | [API overview](/api/overview) |
+| Integrate MCP | [MCP architecture](/developers/mcp-architecture) |
 
-## Platforms
+## Platform guides
 
+- [Web app](/developers/platforms/web)
 - [Chrome extension](/developers/platforms/chrome-extension)
 - [iOS app](/developers/platforms/ios)
 - [Chrome Web Store checklist](/developers/platforms/chrome-web-store)
 
 ## Deployment
 
+- [Deployment overview](/developers/deployment)
+- [Deploy web app (Vercel)](/developers/deployment/web-vercel)
+- [Deploy docs (Vercel)](/developers/deployment/docs-vercel)
 - [Deploy MCP on Vercel](/developers/deployment/mcp-vercel)
+
+## Quality & process
+
+- [Testing](/developers/testing)
+- [CI/CD](/developers/ci-cd)
+- [Coding standards](/developers/coding-standards)
+- [Contributing](/developers/contributing)
+- [Troubleshooting](/developers/troubleshooting)
+
+## Audience note
+
+End-user documentation lives under [Product Guide](/users/introduction). Do not mix user tutorials into developer pages.

@@ -1,0 +1,109 @@
+---
+title: Data model
+---
+
+# Data model
+
+Postgres schema managed by **Drizzle ORM**. Source of truth: `apps/web/src/db/schema/`. Migrations under `drizzle/dev/` and `drizzle/prod/`.
+
+## Entity relationship
+
+```mermaid
+erDiagram
+  decks ||--o{ cards : contains
+  decks ||--o{ study_sessions : has
+  study_sessions ||--o{ study_session_cards : records
+  cards ||--o{ study_session_cards : "rated in"
+
+  decks {
+    int id PK
+    uuid uuid UK
+    string clerkUserId
+    string name
+    text description
+    timestamp createdAt
+    timestamp updatedAt
+  }
+
+  cards {
+    int id PK
+    uuid uuid UK
+    int deckId FK
+    text front
+    text back
+    timestamp createdAt
+    timestamp updatedAt
+  }
+
+  study_sessions {
+    int id PK
+    uuid uuid UK
+    string clerkUserId
+    int deckId FK
+    int totalCards
+    int correctCount
+    int incorrectCount
+    timestamp completedAt
+  }
+
+  study_session_cards {
+    int id PK
+    uuid uuid UK
+    int sessionId FK
+    int cardId FK "nullable"
+    boolean isCorrect
+  }
+```
+
+## Tables
+
+### `decks`
+
+User-owned flashcard collections.
+
+| Column | Notes |
+|--------|-------|
+| `id` | Internal integer PK |
+| `uuid` | Public identifier (UUID v7) — used in API paths |
+| `clerkUserId` | Owner — all queries filter on this |
+| `name` | Required, max 255 chars |
+| `description` | Optional text |
+
+### `cards`
+
+Flashcards belonging to a deck. Cascade delete when deck is removed.
+
+| Column | Notes |
+|--------|-------|
+| `deckId` | FK → `decks.id` |
+| `front` / `back` | Required text |
+| `uuid` | Public identifier for API |
+
+### `study_sessions`
+
+One row per completed study run.
+
+| Column | Notes |
+|--------|-------|
+| `deckId` | FK → `decks.id` |
+| `totalCards` | Cards in session |
+| `correctCount` / `incorrectCount` | Aggregates |
+| `completedAt` | Timestamp |
+
+### `study_session_cards`
+
+Per-card results within a session. `cardId` is **nullable** (`onDelete: set null`) so history survives card deletion.
+
+## Public identifiers
+
+API routes use **`uuid`** fields (`deckUuid`, `cardUuid`), not integer `id` values. Integer IDs are internal.
+
+## Ratings API
+
+`GET /api/decks/{deckUuid}/ratings` aggregates `study_session_cards` into per-card correct/incorrect counts — not a separate table.
+
+## Related
+
+- [Architecture](/developers/architecture)
+- [API overview](/api/overview)
+- [Local development](/developers/local-development) — migration commands

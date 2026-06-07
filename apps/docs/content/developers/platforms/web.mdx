@@ -1,0 +1,84 @@
+---
+title: Web app
+---
+
+# Web app (`apps/web`)
+
+Primary Flashycardy product — Next.js 16 App Router, Server Components, Server Actions, REST API, and MCP.
+
+**Package:** `@flashycardy/web`
+
+## Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 16, React 19 |
+| Auth & billing | Clerk |
+| Database | Drizzle ORM + Neon Postgres |
+| AI | Vercel AI SDK + OpenAI (`gpt-4.1-nano`) |
+| UI | shadcn via `@flashycardy/ui`, features via `@flashycardy/features` |
+| i18n | next-intl + `@flashycardy/i18n` (en, es) |
+| Tests | Vitest, Playwright |
+
+## Key directories
+
+| Path | Purpose |
+|------|---------|
+| `src/app/` | Routes: `/`, `/dashboard`, `/decks/…`, `/analytics`, `/pricing`, `/api/*` |
+| `src/actions/` | Server Actions (web-only mutations) |
+| `src/db/queries/` | All database reads/writes |
+| `src/db/schema/` | Drizzle schema |
+| `src/lib/mcp/` | MCP tools and auth |
+| `src/components/` | Web-specific components |
+
+## Data access pattern
+
+```text
+Server Component  →  getXxxByUser()     in db/queries/
+Server Action     →  insertXxx()        in db/queries/
+REST handler      →  same query helpers
+MCP tool          →  same query helpers
+```
+
+Never import `db` directly in pages or actions — use query helpers.
+
+## Routes (UI)
+
+| Route | Auth | Notes |
+|-------|------|-------|
+| `/` | Public | Redirects signed-in users to `/dashboard` |
+| `/dashboard` | Required | Deck list, create/edit/delete |
+| `/decks/[deckUuid]` | Required | Cards CRUD, AI generate (Pro) |
+| `/decks/[deckUuid]/study` | Required | Study session |
+| `/analytics` | Required | Study history |
+| `/pricing` | Public | Clerk `<PricingTable />` |
+
+Settings via Clerk UserButton profile page (`SettingsPage`).
+
+## Public API
+
+REST: `/api/*` — see [API overview](/api/overview).
+
+MCP: `/api/mcp` — see [MCP architecture](/developers/mcp-architecture).
+
+## Local development
+
+```bash
+pnpm dev                    # :3000
+pnpm --filter @flashycardy/web db:migrate:dev:programmatic
+pnpm test:unit
+pnpm build && pnpm test:e2e
+```
+
+See [Local development](/developers/local-development) and [Environment variables](/developers/environment-variables).
+
+## Deployment
+
+[Deploy web app (Vercel)](/developers/deployment/web-vercel)
+
+## Related
+
+- [Architecture](/developers/architecture)
+- [Data model](/developers/data-model)
+- [Chrome extension](/developers/platforms/chrome-extension) — REST client
+- [iOS app](/developers/platforms/ios) — REST client

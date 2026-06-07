@@ -4,43 +4,124 @@ title: Architecture
 
 # Architecture
 
-This page is a stub. A deeper architecture overview will be added in a follow-up release.
+High-level view of how Flashycardy components connect. For file-level layout, see [Monorepo structure](/developers/monorepo-structure). For database tables, see [Data model](/developers/data-model).
 
-## Monorepo layout
+## System context
 
-```text
-apps/
-  web/        # Next.js 16 app (primary product, deployed to Vercel)
-  docs/       # Nextra docs site (this site, deployed as a separate Vercel project)
-  extension/  # Chrome MV3 side-panel extension (WXT + React)
-  ios/        # SwiftUI native client
-packages/
-  ui/         # Shared shadcn/ui components
-  features/   # Props-driven deck/card/study UI
-  api-client/ # Typed REST client
-  i18n/       # Shared locales and messages (en, es)
+```mermaid
+flowchart TB
+  subgraph clients [Clients]
+    Web[Web App]
+    Ext[Chrome Extension]
+    iOS[iOS App]
+    MCP[MCP Clients]
+  end
+
+  subgraph vercel [apps/web on Vercel]
+    UI[Server Components + Actions]
+    REST["REST /api/*"]
+    MCPServer["MCP /api/mcp"]
+  end
+
+  subgraph external [External services]
+    Clerk[Clerk Auth + Billing]
+    Neon[(Neon Postgres)]
+    OpenAI[OpenAI via AI SDK]
+  end
+
+  Web --> UI
+  Ext --> REST
+  iOS --> REST
+  MCP --> MCPServer
+  UI --> Neon
+  REST --> Neon
+  MCPServer --> Neon
+  UI --> Clerk
+  REST --> Clerk
+  MCPServer --> Clerk
+  UI --> OpenAI
+  REST --> OpenAI
 ```
 
-## Web app data flow
+## Request paths (web app)
 
-- **Auth** — Clerk, scoped via `auth()` on every server-side operation.
-- **Database** — Drizzle ORM against PostgreSQL on Neon.
-- **AI** — Vercel AI SDK + OpenAI (`gpt-4.1-nano`) for flashcard generation.
+```mermaid
+flowchart LR
+  subgraph webUI [Web browser]
+    SC[Server Components]
+    SA[Server Actions]
+  end
 
-## Clients
+  subgraph apiLayer [Public API]
+    REST[REST handlers]
+    MCP[MCP handler]
+  end
 
-| Client | Data access |
-|--------|-------------|
-| Web app | Server Components + Server Actions |
-| Chrome extension | REST API with Clerk Bearer tokens |
-| iOS app | REST API with Clerk Bearer tokens |
-| MCP clients | `/api/mcp` (tools mirror REST) |
+  subgraph data [Shared data layer]
+    Q["db/queries/*"]
+    DB[(Postgres)]
+  end
+
+  SC --> Q
+  SA --> Q
+  REST --> Q
+  MCP --> Q
+  Q --> DB
+```
+
+| Path | Used by | Notes |
+|------|---------|-------|
+| Server Components → query helpers | Web UI | Read-only data in RSC |
+| Server Actions → query helpers | Web UI | Mutations; **not** a public API |
+| REST `/api/*` | Extension, iOS, integrators | Bearer or cookie auth |
+| MCP `/api/mcp` | AI agents | OAuth preferred; tools mirror REST |
+
+Server Actions are **web-only** RPC — never call them from mobile or extension clients. See [API authentication](/api/authentication).
+
+## Auth flow
+
+```mermaid
+flowchart TD
+  subgraph web [Web app]
+    Cookie[Clerk session cookie]
+  end
+
+  subgraph mobile [Extension / iOS]
+    Bearer["Authorization: Bearer session JWT"]
+  end
+
+  subgraph mcp [MCP]
+    OAuth[Clerk OAuth access token]
+    Fallback[Session JWT fallback]
+  end
+
+  Cookie --> withAuth[withAuth middleware]
+  Bearer --> withAuth
+  OAuth --> verifyMcp[verifyMcpToken]
+  Fallback --> verifyMcp
+  withAuth --> Queries[Scoped db/queries]
+  verifyMcp --> Queries
+```
+
+Every query filters by `clerkUserId` from `auth()` — never trust client-supplied user IDs.
+
+## Shared packages
+
+| Package | Role |
+|---------|------|
+| `@flashycardy/ui` | shadcn/ui components + Tailwind globals |
+| `@flashycardy/features` | Props-driven deck/card/study UI |
+| `@flashycardy/api-client` | Typed REST client |
+| `@flashycardy/i18n` | Locales (`en`, `es`) and messages |
+
+Web and extension import shared packages. iOS uses Swift services that mirror the API client.
 
 ## Docs site
 
-The docs site is a stripped-down Next.js app powered by [Nextra](https://nextra.site/) and `nextra-theme-docs`. It does not import from `apps/web`; this keeps docs builds fast and deploys independent.
+`apps/docs` is an independent Nextra app. It does **not** import from `apps/web`, keeping docs builds fast and deploys separate from production.
 
 ## Related
 
-- [HTTP API (REST)](/api/overview)
+- [Data model](/developers/data-model)
 - [MCP architecture](/developers/mcp-architecture)
+- [API overview](/api/overview)

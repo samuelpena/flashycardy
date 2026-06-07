@@ -1,0 +1,64 @@
+---
+title: Contributing
+---
+
+# Contributing
+
+Guidelines for submitting changes to Flashycardy.
+
+## Before you start
+
+1. Read [Local development](/developers/local-development) and [Coding standards](/developers/coding-standards)
+2. For API or user-visible features, plan docs updates in the same PR ([Product Guide](/users/introduction) or [Developer Guide](/developers/introduction))
+
+## Workflow
+
+1. **Branch** from `main` — use descriptive names (`feat/…`, `fix/…`, `docs/…`)
+2. **Implement** with tests where appropriate ([Testing](/developers/testing))
+3. **Document** — update `apps/docs` when behavior changes
+4. **Verify locally:**
+
+   ```bash
+   pnpm lint:all
+   pnpm test:unit
+   pnpm build
+   pnpm build:docs
+   ```
+
+5. **Open a PR** — CI runs lint, unit tests, builds, and E2E ([CI/CD](/developers/ci-cd))
+
+## Pull request checklist
+
+- [ ] Scope is focused — one feature or fix per PR when possible
+- [ ] Query helpers used for all DB access
+- [ ] Zod validation on Server Action inputs
+- [ ] Auth and ownership checks on mutations
+- [ ] REST changes include MCP tool parity + API docs
+- [ ] User-facing changes include Product Guide updates (if applicable)
+- [ ] No secrets committed (`.env`, xcconfig, keys)
+
+## Database schema changes
+
+1. Edit `apps/web/src/db/schema/`
+2. `pnpm --filter @flashycardy/web db:generate:dev`
+3. `pnpm --filter @flashycardy/web db:migrate:dev:programmatic`
+4. Commit schema + migration folder together
+
+Never use `drizzle-kit push` in production.
+
+## Docs-only PRs
+
+Documentation PRs (like the audience split) should still pass:
+
+```bash
+pnpm build:docs && pnpm lint:docs
+```
+
+## Code review
+
+Reviewers check security (auth scoping), API/MCP parity, billing gates, and docs accuracy.
+
+## Related
+
+- [Coding standards](/developers/coding-standards)
+- [Troubleshooting](/developers/troubleshooting)

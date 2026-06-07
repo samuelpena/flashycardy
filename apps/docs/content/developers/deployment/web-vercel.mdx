@@ -1,0 +1,62 @@
+---
+title: Deploy web app (Vercel)
+---
+
+# Deploy web app (Vercel)
+
+Production deployment for `apps/web` — Next.js UI, REST API, and MCP endpoint.
+
+## Vercel project settings
+
+| Setting | Value |
+|---------|-------|
+| **Root Directory** | `apps/web` |
+| **Include files outside root** | ON |
+| **Production Build Command** | `pnpm vercel-build` (migrations + `next build`) |
+| **Install Command** | `pnpm install` (from repo root via Vercel monorepo detection) |
+| **Node.js** | 22.x |
+
+## Environment variables
+
+Set on the **Production** (and Preview if needed) environment:
+
+| Variable | Required |
+|----------|----------|
+| `DATABASE_URL` | Yes |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes |
+| `CLERK_SECRET_KEY` | Yes |
+| `OPENAI_API_KEY` | Yes |
+| `REDIS_URL` or `KV_URL` | Optional (MCP SSE/resumability) |
+| `NEXT_PUBLIC_APP_URL` | Recommended |
+
+See [Environment variables](/developers/environment-variables).
+
+## Ignored build step
+
+`apps/web/vercel.json` runs `scripts/vercel-ignore-build-web.sh`:
+
+- **Exit 0** → skip build (no relevant file changes)
+- **Exit 1** → run build
+
+Watches `apps/web/`, `packages/`, root workspace files, and the script itself. First deploy on a branch always builds.
+
+Remove conflicting **Ignored Build Step** commands from the Vercel dashboard if duplicated.
+
+## Clerk (production)
+
+- Use **live** keys (`pk_live_`, `sk_live_`) in production
+- Enable Billing features: `unlimited_decks`, `ai_flashcard_generation`, `document_deck_generation`
+- Configure Chrome extension `allowed_origins` for production extension ID
+- Configure MCP OAuth app if exposing `/api/mcp` publicly
+
+## Post-deploy checks
+
+1. Sign in on production URL
+2. Create a deck and study session
+3. Hit `GET /api/decks` with a valid Bearer token
+4. Optional: MCP smoke test — see [Deploy MCP on Vercel](/developers/deployment/mcp-vercel)
+
+## Related
+
+- [Deployment overview](/developers/deployment)
+- [Deploy docs (Vercel)](/developers/deployment/docs-vercel)

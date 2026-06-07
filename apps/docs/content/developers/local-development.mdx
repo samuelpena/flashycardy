@@ -4,34 +4,92 @@ title: Local development
 
 # Local development
 
-This page is a stub. Full setup instructions will be expanded in a follow-up release.
+Set up the Flashycardy monorepo on your machine.
 
-## Quick start
+## Prerequisites
 
-From the monorepo root:
+- **Node.js 22** (matches CI)
+- **pnpm 10** (`corepack enable` or install globally)
+- **Neon** PostgreSQL database ([neon.tech](https://neon.tech))
+- **Clerk** application with Billing enabled ([clerk.com](https://clerk.com))
+- **OpenAI** API key (AI flashcard generation)
+
+Optional:
+
+- **Chrome** — extension development
+- **Xcode 16+** — iOS development
+
+## 1. Install dependencies
 
 ```bash
+git clone <repo-url>
+cd flashycardy
 pnpm install
-pnpm dev
 ```
 
-The web app boots on `http://localhost:3000`. To run the docs site instead:
+## 2. Environment variables
+
+Create `.env` at the **repository root** (see [Environment variables](/developers/environment-variables)):
+
+```env
+DATABASE_URL=postgresql://user:password@host/database?sslmode=require
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+OPENAI_API_KEY=sk-proj-...
+```
+
+## 3. Database migrations
 
 ```bash
-pnpm dev:docs
+pnpm --filter @flashycardy/web db:generate:dev
+pnpm --filter @flashycardy/web db:migrate:dev:programmatic
 ```
 
-The docs site boots on `http://localhost:3001`.
+Schema source: `apps/web/src/db/schema/`. See project rule `drizzle-schema-migrations.mdc` for prod track workflow.
 
-Other apps:
+## 4. Run apps
+
+| Command | App | URL |
+|---------|-----|-----|
+| `pnpm dev` | Web | http://localhost:3000 |
+| `pnpm dev:docs` | Docs | http://localhost:3001 |
+| `pnpm dev:all` | Web + docs | Both ports |
+| `pnpm dev:extension` | Extension (WXT) | Load unpacked from `.output/` |
+| `pnpm dev:ios` | Opens Xcode | Simulator/device |
+
+Extension and iOS require the **web app running** on `:3000` for live API calls.
+
+## 5. Extension setup (optional)
 
 ```bash
-pnpm dev:extension   # Chrome extension (WXT)
-pnpm dev:ios         # Opens Xcode project
+cp apps/extension/.env.development.example apps/extension/.env.development
+# Edit Clerk keys + VITE_SYNC_HOST=http://localhost:3000
+pnpm dev              # terminal 1
+pnpm dev:extension    # terminal 2
 ```
 
-## Environment variables
+Load unpacked extension: `apps/extension/.output/chrome-mv3-dev`. See [Chrome extension](/developers/platforms/chrome-extension).
 
-Environment files live at the repo root (`.env`, `.env.development`, `.env.production`). The docs site does not need any of them.
+## 6. iOS setup (optional)
 
-See the [Developer Guide introduction](/developers/introduction) for platform-specific setup (extension, iOS) and the [HTTP API (REST)](/api/overview) for integration details.
+```bash
+cp apps/ios/Config/Secrets.xcconfig.example apps/ios/Config/Secrets.xcconfig
+pnpm dev:ios
+```
+
+See [iOS app](/developers/platforms/ios).
+
+## Common commands
+
+```bash
+pnpm lint:all          # ESLint all packages
+pnpm test:unit         # Vitest (web)
+pnpm test:e2e          # Playwright (web; starts prod server)
+pnpm build:docs        # Verify docs site builds
+```
+
+## Related
+
+- [Environment variables](/developers/environment-variables)
+- [Testing](/developers/testing)
+- [Troubleshooting](/developers/troubleshooting)
