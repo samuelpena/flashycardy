@@ -7,7 +7,7 @@ todos:
     status: completed
   - id: pr-2-user-mvp
     content: "PR 2 — docs/user-guide-mvp: introduction, getting-started, core features, workflows, billing, account, troubleshooting, faq, Help menu link"
-    status: pending
+    status: completed
   - id: pr-3-api-split
     content: "PR 3 — docs/api-reference: split rest-api.mdx into endpoints/*, overview/auth/errors/pagination, examples, rate-limits TODO"
     status: pending

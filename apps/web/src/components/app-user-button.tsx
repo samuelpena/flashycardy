@@ -40,7 +40,7 @@ export function AppUserButton() {
           label={t("helpDocsLabel")}
           labelIcon={<HelpMenuIcon />}
           onClick={() => {
-            window.open(DOCS_BASE_URL, "_blank", "noopener,noreferrer");
+            window.open(`${DOCS_BASE_URL}users/introduction`, "_blank", "noopener,noreferrer");
           }}
         />
         <UserButton.Action label="signOut" />
