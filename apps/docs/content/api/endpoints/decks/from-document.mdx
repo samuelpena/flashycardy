@@ -1,0 +1,55 @@
+---
+title: Create from document
+---
+
+# Create deck from document
+
+Creates a new deck with **20** AI-generated cards extracted from an uploaded document.
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `POST` |
+| **Path** | `/api/decks/from-document` |
+| **Auth** | Required |
+| **Billing** | Requires `document_deck_generation` (Pro). Subject to 3-deck limit without `unlimited_decks`. |
+
+### Body (JSON)
+
+```json
+{
+  "fileBase64": "string (required, base64-encoded file)",
+  "fileName": "string (required, 1–255 chars, e.g. notes.pdf)"
+}
+```
+
+**Supported extensions:** `.pdf`, `.docx`, `.pptx` (max **10 MB** decoded).
+
+## Response
+
+**Status:** `201`
+
+```json
+{
+  "data": { "deckUuid": "550e8400-e29b-41d4-a716-446655440000" }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid body, unsupported file type, or empty file |
+| `401` | Not authenticated |
+| `403` | Pro feature required or deck limit reached |
+| `500` | AI or save failure |
+
+## Example
+
+```bash
+curl -s -X POST -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"fileBase64":"…","fileName":"notes.pdf"}' \
+  https://your-app.example/api/decks/from-document
+```

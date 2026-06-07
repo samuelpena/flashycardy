@@ -1,0 +1,38 @@
+---
+title: Deck count
+---
+
+# Deck count
+
+Returns how many decks the authenticated user owns.
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `GET` |
+| **Path** | `/api/decks/count` |
+| **Auth** | Required |
+
+## Response
+
+**Status:** `200`
+
+```json
+{
+  "data": { "count": 3 }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `401` | Not authenticated |
+
+## Example
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" \
+  https://your-app.example/api/decks/count
+```

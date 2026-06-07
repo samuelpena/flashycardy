@@ -1,0 +1,66 @@
+---
+title: Create deck
+---
+
+# Create deck
+
+Creates a deck. Optionally creates initial cards in the same request.
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `POST` |
+| **Path** | `/api/decks` |
+| **Auth** | Required |
+| **Billing** | Free plan: max **3** decks unless user has `unlimited_decks` |
+
+### Body (JSON)
+
+```json
+{
+  "name": "string (1–255 chars, required)",
+  "description": "optional string, max 1000",
+  "cards": [
+    { "front": "string (required)", "back": "string (required)" }
+  ]
+}
+```
+
+`cards` is optional. When present and non-empty, the deck is created with those cards in one operation.
+
+## Response
+
+**Status:** `201`
+
+```json
+{
+  "data": {
+    "id": 1,
+    "uuid": "550e8400-e29b-41d4-a716-446655440000",
+    "clerkUserId": "user_…",
+    "name": "Spanish Vocabulary",
+    "description": null,
+    "createdAt": "2025-01-15T12:00:00.000Z",
+    "updatedAt": "2025-01-15T12:00:00.000Z"
+  }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid body |
+| `401` | Not authenticated |
+| `403` | `{ "error": "Deck limit reached for the free plan" }` |
+| `500` | Create failure |
+
+## Example
+
+```bash
+curl -s -X POST -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"My Deck","description":"Optional"}' \
+  https://your-app.example/api/decks
+```

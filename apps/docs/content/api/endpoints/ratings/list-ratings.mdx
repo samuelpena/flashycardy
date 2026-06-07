@@ -1,0 +1,61 @@
+---
+title: List ratings
+---
+
+# List ratings
+
+Returns aggregated correct/incorrect counts per card in a deck, derived from the user's study sessions.
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `GET` |
+| **Path** | `/api/decks/{deckUuid}/ratings` |
+| **Auth** | Required |
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `deckUuid` | UUID v4 | Target deck (must belong to user) |
+
+### Query parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `page` | Page number (default `1`) |
+| `pageSize` | Items per page (default `20`, max `100`) |
+
+## Response
+
+**Status:** `200`
+
+```json
+{
+  "data": [
+    {
+      "cardUuid": "660e8400-e29b-41d4-a716-446655440001",
+      "correctCount": 5,
+      "incorrectCount": 2
+    }
+  ],
+  "meta": { "total_items": 12, "per_page": 20, "total_pages": 1, "current_page": 1 },
+  "links": { "next": null, "prev": null, "first": "…", "last": "…" }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid UUID |
+| `401` | Not authenticated |
+| `404` | Deck not found |
+
+## Example
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://your-app.example/api/decks/550e8400-e29b-41d4-a716-446655440000/ratings"
+```

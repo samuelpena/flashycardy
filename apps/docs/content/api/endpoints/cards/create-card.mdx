@@ -1,0 +1,65 @@
+---
+title: Create card
+---
+
+# Create card
+
+Creates one flashcard in a deck.
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `POST` |
+| **Path** | `/api/decks/{deckUuid}/cards` |
+| **Auth** | Required |
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `deckUuid` | UUID v4 | Parent deck |
+
+### Body (JSON)
+
+```json
+{
+  "front": "string (required)",
+  "back": "string (required)"
+}
+```
+
+## Response
+
+**Status:** `201`
+
+```json
+{
+  "data": {
+    "id": 1,
+    "uuid": "660e8400-e29b-41d4-a716-446655440001",
+    "deckId": 1,
+    "front": "hola",
+    "back": "hello",
+    "createdAt": "2025-01-15T12:05:00.000Z",
+    "updatedAt": "2025-01-15T12:05:00.000Z"
+  }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid UUID or body |
+| `401` | Not authenticated |
+| `404` | Deck not found |
+
+## Example
+
+```bash
+curl -s -X POST -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"front":"Question","back":"Answer"}' \
+  https://your-app.example/api/decks/550e8400-e29b-41d4-a716-446655440000/cards
+```

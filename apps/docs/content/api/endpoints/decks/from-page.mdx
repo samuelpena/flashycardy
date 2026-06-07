@@ -1,0 +1,54 @@
+---
+title: Create from page
+---
+
+# Create deck from page
+
+Creates a new deck with **20** AI-generated cards from plain text scraped from a web page (used by the Chrome extension).
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `POST` |
+| **Path** | `/api/decks/from-page` |
+| **Auth** | Required |
+| **Billing** | Requires `document_deck_generation` (Pro). Subject to 3-deck limit without `unlimited_decks`. |
+
+### Body (JSON)
+
+```json
+{
+  "pageText": "string (required, 100–50000 chars)",
+  "pageUrl": "optional valid URL",
+  "pageTitle": "optional string, max 255 chars"
+}
+```
+
+## Response
+
+**Status:** `201`
+
+```json
+{
+  "data": { "deckUuid": "550e8400-e29b-41d4-a716-446655440000" }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid body or page text too short |
+| `401` | Not authenticated |
+| `403` | Pro feature required or deck limit reached |
+| `500` | AI or save failure |
+
+## Example
+
+```bash
+curl -s -X POST -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"pageText":"Long article text here…","pageTitle":"Article title"}' \
+  https://your-app.example/api/decks/from-page
+```

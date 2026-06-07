@@ -1,5 +1,11 @@
 const meta = {
-  "rest-api": "HTTP API (REST)",
+  overview: "Overview",
+  authentication: "Authentication",
+  errors: "Errors",
+  "pagination-and-cors": "Pagination & CORS",
+  "rate-limits": "Rate limits",
+  endpoints: "Endpoints",
+  examples: "Examples",
   mcp: "MCP",
 };
 
