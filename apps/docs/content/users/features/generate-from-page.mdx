@@ -1,0 +1,62 @@
+---
+title: Generate from web page
+---
+
+# Generate from web page
+
+Create a **new deck** from the text on a web page you are viewing. Flashycardy reads the page content and generates **20 flashcards** — useful for articles, documentation, and study pages.
+
+## When to use it
+
+Use this when you are browsing the web and want flashcards from the current page without copying text manually.
+
+## Requirements
+
+- **Pro plan** with document deck generation enabled (same feature as [Import from document](/users/features/document-deck-import))
+- **Chrome extension** installed and signed in
+- Page must have enough readable text (very short pages may fail)
+
+## Where it works
+
+| Platform | Supported |
+|----------|-----------|
+| **Chrome extension** | Yes |
+| **Web app** | No |
+| **iOS** | No |
+
+## Steps (Chrome extension)
+
+### Full page
+
+1. Open the page you want to study in Chrome.
+2. Open the Flashycardy **side panel**.
+3. Click **Generate from this page** (or equivalent control in the panel header).
+4. Confirm — the extension reads visible page text and creates a deck.
+5. The side panel navigates to your new deck.
+
+### Selected text only
+
+1. Select text on any web page.
+2. Right-click and choose **Save selection to FlashyCardy**.
+3. The side panel opens on **Add card** with the selection as the card **front** — save one card manually, or use full-page generation for a full deck.
+
+For saving a single card from a selection, see [Save selection from browser](/users/workflows/save-selection-from-browser).
+
+## Expected outcome
+
+A new deck with generated title, description, and 20 cards. The deck syncs to your account — open it on the [web app](/users/platforms/web) or [iOS](/users/platforms/ios) after signing in.
+
+## Troubleshooting
+
+| Issue | What to try |
+|-------|-------------|
+| Button missing or locked | Upgrade to Pro |
+| Page blocked | Extension cannot read `chrome://`, PDF viewer, or some restricted pages |
+| Not enough text | Use a longer article or select a different page |
+
+See [AI generation failed](/users/troubleshooting/ai-generation-failed).
+
+## Related
+
+- [Chrome extension](/users/platforms/chrome-extension)
+- [Import from document](/users/features/document-deck-import)
