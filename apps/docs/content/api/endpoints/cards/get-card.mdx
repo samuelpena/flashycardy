@@ -1,0 +1,55 @@
+---
+title: Get card
+---
+
+# Get card
+
+Returns a single card by UUID.
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `GET` |
+| **Path** | `/api/decks/{deckUuid}/cards/{cardUuid}` |
+| **Auth** | Required |
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `deckUuid` | UUID v4 | Parent deck |
+| `cardUuid` | UUID v4 | Card identifier |
+
+## Response
+
+**Status:** `200`
+
+```json
+{
+  "data": {
+    "id": 1,
+    "uuid": "660e8400-e29b-41d4-a716-446655440001",
+    "deckId": 1,
+    "front": "hola",
+    "back": "hello",
+    "createdAt": "2025-01-15T12:05:00.000Z",
+    "updatedAt": "2025-01-15T12:05:00.000Z"
+  }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid parameters |
+| `401` | Not authenticated |
+| `404` | Deck or card not found |
+
+## Example
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" \
+  https://your-app.example/api/decks/550e8400-e29b-41d4-a716-446655440000/cards/660e8400-e29b-41d4-a716-446655440001
+```

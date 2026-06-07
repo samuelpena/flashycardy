@@ -1,0 +1,73 @@
+---
+title: Overview
+---
+
+# HTTP API (REST)
+
+Public JSON API served by `apps/web` under the `/api` path. All resource routes require an authenticated Clerk session. Unauthenticated requests receive **`401`** with `{ "error": "Unauthorized" }`.
+
+**REST clients in this monorepo:** the [Chrome extension](/developers/platforms/chrome-extension) and [iOS app](/developers/platforms/ios) call these routes with an **`Authorization: Bearer`** header carrying the Clerk session JWT. The web app uses session cookies via Next.js; mobile and extension clients never use Server Actions for data access.
+
+For **AI / MCP clients**, see [Model Context Protocol (MCP)](/api/mcp/overview) at `/api/mcp` (Streamable HTTP). MCP prefers Clerk OAuth access tokens and falls back to session JWTs — see the MCP doc for details.
+
+## Base URL
+
+Paths are relative to your deployment origin. Local development: `http://localhost:3000`.
+
+Example: `GET http://localhost:3000/api/decks`
+
+## Conventions
+
+| Topic | Documentation |
+|-------|----------------|
+| Authentication | [Authentication](/api/authentication) |
+| Response envelope | [Errors](/api/errors) |
+| Pagination & CORS | [Pagination & CORS](/api/pagination-and-cors) |
+| Rate limits | [Rate limits](/api/rate-limits) |
+| Code examples | [Examples](/api/examples/curl) |
+
+## Endpoints
+
+### Decks
+
+| Method | Path | Page |
+|--------|------|------|
+| `GET` | `/api/decks` | [List decks](/api/endpoints/decks/list-decks) |
+| `POST` | `/api/decks` | [Create deck](/api/endpoints/decks/create-deck) |
+| `GET` | `/api/decks/count` | [Deck count](/api/endpoints/decks/deck-count) |
+| `GET` | `/api/decks/{deckUuid}` | [Get deck](/api/endpoints/decks/get-deck) |
+| `PUT` / `PATCH` | `/api/decks/{deckUuid}` | [Update deck](/api/endpoints/decks/update-deck) |
+| `DELETE` | `/api/decks/{deckUuid}` | [Delete deck](/api/endpoints/decks/delete-deck) |
+| `POST` | `/api/decks/{deckUuid}/generate-cards` | [Generate cards](/api/endpoints/decks/generate-cards) |
+| `POST` | `/api/decks/from-document` | [Create from document](/api/endpoints/decks/from-document) |
+| `POST` | `/api/decks/from-page` | [Create from page](/api/endpoints/decks/from-page) |
+
+### Cards
+
+| Method | Path | Page |
+|--------|------|------|
+| `GET` | `/api/decks/{deckUuid}/cards` | [List cards](/api/endpoints/cards/list-cards) |
+| `POST` | `/api/decks/{deckUuid}/cards` | [Create card](/api/endpoints/cards/create-card) |
+| `GET` | `/api/decks/{deckUuid}/cards/{cardUuid}` | [Get card](/api/endpoints/cards/get-card) |
+| `PUT` / `PATCH` | `/api/decks/{deckUuid}/cards/{cardUuid}` | [Update card](/api/endpoints/cards/update-card) |
+| `DELETE` | `/api/decks/{deckUuid}/cards/{cardUuid}` | [Delete card](/api/endpoints/cards/delete-card) |
+
+### Ratings
+
+| Method | Path | Page |
+|--------|------|------|
+| `GET` | `/api/decks/{deckUuid}/ratings` | [List ratings](/api/endpoints/ratings/list-ratings) |
+
+### Study sessions
+
+| Method | Path | Page |
+|--------|------|------|
+| `GET` | `/api/study-sessions` | [List sessions](/api/endpoints/study-sessions/list-sessions) |
+| `POST` | `/api/study-sessions` | [Create session](/api/endpoints/study-sessions/create-session) |
+| `GET` | `/api/study-sessions/counts` | [Session counts](/api/endpoints/study-sessions/session-counts) |
+
+Every path above also supports **`OPTIONS`** for CORS preflight. See [Pagination & CORS](/api/pagination-and-cors).
+
+## OpenAPI
+
+> **TODO:** A machine-readable OpenAPI specification is not yet published for this API.

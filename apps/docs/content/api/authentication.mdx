@@ -1,0 +1,52 @@
+---
+title: Authentication
+---
+
+# Authentication
+
+All REST resource routes under `/api/*` (except CORS preflight) require an authenticated Clerk user. Requests without valid credentials receive:
+
+```json
+{ "error": "Unauthorized" }
+```
+
+Status: **`401`**
+
+## Web app (session cookie)
+
+The Next.js web app sends the Clerk session cookie automatically. No `Authorization` header is required for browser requests to the same origin.
+
+## Mobile & extension (Bearer token)
+
+The [Chrome extension](/developers/platforms/chrome-extension) and [iOS app](/developers/platforms/ios) attach a Clerk **session JWT**:
+
+```http
+Authorization: Bearer <session_jwt>
+```
+
+Obtain the token from the Clerk client SDK (`getToken()` in JavaScript, or the equivalent in the iOS SDK).
+
+## Ownership
+
+Every route scopes data to the authenticated user. You cannot read or mutate another user's decks, cards, or study sessions. Missing or foreign resources return **`404`**.
+
+## Billing features
+
+Some routes check Clerk billing features server-side:
+
+| Feature slug | Gates |
+|--------------|-------|
+| `unlimited_decks` | Bypasses the 3-deck limit on create |
+| `ai_flashcard_generation` | `POST .../generate-cards` |
+| `document_deck_generation` | `POST /api/decks/from-document`, `POST /api/decks/from-page` |
+
+Missing features return **`403`** with a plain-text error message. See individual endpoint pages.
+
+## MCP (separate auth flow)
+
+The MCP server at `/api/mcp` uses OAuth access tokens (preferred) with session JWT fallback. See [MCP overview](/api/mcp/overview) — do not assume MCP and REST use identical token types in all clients.
+
+## Related
+
+- [Overview](/api/overview)
+- [Errors](/api/errors)

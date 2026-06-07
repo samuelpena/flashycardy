@@ -1,0 +1,33 @@
+---
+title: Rate limits
+---
+
+# Rate limits
+
+> **TODO:** Flashycardy does not enforce application-level rate limits on REST routes today. Abuse prevention relies on Clerk authentication, billing gates, and infrastructure-level protection (e.g. Vercel WAF) in production.
+
+## Current behavior
+
+- No per-user or per-IP request quotas are returned in response headers.
+- No **`429 Too Many Requests`** responses are emitted by the API handlers in `apps/web`.
+
+## Production recommendations
+
+When deploying a public API surface, consider:
+
+1. **Vercel Firewall (WAF)** — managed rules and rate limiting at the edge. See [Deploy MCP on Vercel](/developers/deployment/mcp-vercel) for MCP-specific guidance that also applies to `/api/*` traffic.
+2. **Clerk** — authentication required on every mutating route reduces anonymous abuse.
+3. **Monitoring** — alert on unusual error rates or AI endpoint volume.
+
+## Future work
+
+When rate limits are implemented, this page will document:
+
+- Limit scopes (per user, per route, per plan)
+- Response headers (e.g. `Retry-After`)
+- **`429`** error body shape
+
+## Related
+
+- [Overview](/api/overview)
+- [Authentication](/api/authentication)

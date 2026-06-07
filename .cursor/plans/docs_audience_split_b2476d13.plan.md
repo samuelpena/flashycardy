@@ -10,7 +10,7 @@ todos:
     status: completed
   - id: pr-3-api-split
     content: "PR 3 — docs/api-reference: split rest-api.mdx into endpoints/*, overview/auth/errors/pagination, examples, rate-limits TODO"
-    status: pending
+    status: completed
   - id: pr-4-developer-depth
     content: "PR 4 — docs/developer-guide: architecture, monorepo, env vars, testing, CI/CD, deployment, coding-standards, contributing, platform guides"
     status: pending

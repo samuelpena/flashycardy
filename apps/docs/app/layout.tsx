@@ -21,7 +21,7 @@ const navbar = (
     <Link href="/developers/introduction" className="x:mr-4 x:max-md:hidden">
       Developer Guide
     </Link>
-    <Link href="/api/rest-api" className="x:max-md:hidden">
+    <Link href="/api/overview" className="x:max-md:hidden">
       API
     </Link>
   </Navbar>

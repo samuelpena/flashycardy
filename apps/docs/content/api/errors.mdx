@@ -1,0 +1,51 @@
+---
+title: Errors
+---
+
+# Errors
+
+## Error envelope
+
+Failed requests return JSON:
+
+```json
+{ "error": "<message>" }
+```
+
+The message is a plain English string suitable for display or logging. Clients should not parse structured error codes from this field today.
+
+## Status codes
+
+| Status | Meaning |
+|--------|---------|
+| **`400`** | Invalid path parameter, query parameter, or request body |
+| **`401`** | Missing or invalid authentication |
+| **`403`** | Authenticated but not allowed (plan limit or missing billing feature) |
+| **`404`** | Resource not found or not owned by the user |
+| **`500`** | Server or upstream failure (AI generation, database, etc.) |
+
+## Success envelope
+
+Successful responses wrap payloads in `{ "data": … }`. Paginated lists add `meta` and `links` — see [Pagination & CORS](/api/pagination-and-cors).
+
+| Outcome | Body shape | Typical status |
+|--------|------------|----------------|
+| Single resource | `{ "data": … }` | `200` or `201` |
+| Paginated list | `{ "data": [ … ], "meta", "links" }` | `200` |
+| Nested list (deck + cards) | `{ "data": { …, "cards": [ … ] }, "meta", "links" }` | `200` |
+
+## Common error messages
+
+| Message | Typical status | Cause |
+|---------|----------------|-------|
+| `Unauthorized` | `401` | No valid Clerk session |
+| `Invalid page` / `Invalid pageSize` | `400` | Bad pagination query |
+| `Deck limit reached for the free plan` | `403` | Free user at 3 decks |
+| `Deck not found` | `404` | Unknown or unowned `deckUuid` |
+| `Card not found` | `404` | Unknown or unowned `cardUuid` |
+
+Endpoint-specific errors are documented on each [endpoint page](/api/overview).
+
+## TypeScript client
+
+`@flashycardy/api-client` throws `ApiError` with `status` and `message` properties. See [TypeScript client](/api/examples/typescript-api-client).

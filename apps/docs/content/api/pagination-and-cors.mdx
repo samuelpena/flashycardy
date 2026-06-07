@@ -1,0 +1,64 @@
+---
+title: Pagination & CORS
+---
+
+# Pagination & CORS
+
+## Pagination query parameters
+
+Used by every **GET** that returns paginated data:
+
+| Parameter | Type | Default | Constraints |
+|-----------|------|---------|-------------|
+| `page` | integer | `1` | ≥ `1` |
+| `pageSize` | integer | `20` | `1` … `100` |
+
+Invalid values return **`400`**:
+
+```json
+{ "error": "Invalid page" }
+```
+
+```json
+{ "error": "Invalid pageSize" }
+```
+
+## Paginated response shape
+
+```json
+{
+  "data": [ … ],
+  "meta": {
+    "total_items": 42,
+    "per_page": 20,
+    "total_pages": 3,
+    "current_page": 1
+  },
+  "links": {
+    "next": "https://example.com/api/decks?page=2&pageSize=20",
+    "prev": null,
+    "first": "https://example.com/api/decks?page=1&pageSize=20",
+    "last": "https://example.com/api/decks?page=3&pageSize=20"
+  }
+}
+```
+
+- **`links`** contain absolute URLs; `next` and `prev` may be `null`.
+- On [Get deck](/api/endpoints/decks/get-deck), pagination **`meta` / `links`** describe the **cards** list inside `data`, not decks.
+
+## CORS
+
+Every resource route exports **`OPTIONS`**, responding with **`204`** and:
+
+```http
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+```
+
+Successful and error JSON responses from other methods include the same CORS headers. This allows browser-based clients (extension side panel) to call the API from a different origin when using Bearer auth.
+
+## Related
+
+- [Overview](/api/overview)
+- [Errors](/api/errors)

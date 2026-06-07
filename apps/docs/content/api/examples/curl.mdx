@@ -1,0 +1,75 @@
+---
+title: cURL
+---
+
+# cURL examples
+
+Replace placeholders before running:
+
+| Placeholder | Value |
+|-------------|-------|
+| `your-app.example` | Your deployment host (e.g. `localhost:3000`) |
+| `$TOKEN` | Clerk session JWT from `getToken()` |
+
+All examples use Bearer authentication. See [Authentication](/api/authentication).
+
+## List decks
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:3000/api/decks?page=1&pageSize=20"
+```
+
+## Create deck
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"API test deck","description":"Created via curl"}' \
+  http://localhost:3000/api/decks
+```
+
+## Create card
+
+```bash
+DECK_UUID="550e8400-e29b-41d4-a716-446655440000"
+
+curl -s -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"front":"What is HTTP?","back":"Hypertext Transfer Protocol"}' \
+  "http://localhost:3000/api/decks/${DECK_UUID}/cards"
+```
+
+## Save study session
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "deckUuid": "550e8400-e29b-41d4-a716-446655440000",
+    "cardResults": [
+      { "cardUuid": "660e8400-e29b-41d4-a716-446655440001", "isCorrect": true }
+    ]
+  }' \
+  http://localhost:3000/api/study-sessions
+```
+
+## CORS preflight
+
+```bash
+curl -s -X OPTIONS -i \
+  -H "Origin: chrome-extension://YOUR_EXTENSION_ID" \
+  -H "Access-Control-Request-Method: GET" \
+  -H "Access-Control-Request-Headers: Authorization, Content-Type" \
+  http://localhost:3000/api/decks
+```
+
+Expect **`204`** with `Access-Control-Allow-Origin: *`.
+
+## Related
+
+- [Overview](/api/overview) — full endpoint index
+- [TypeScript client](/api/examples/typescript-api-client)

@@ -1,0 +1,52 @@
+---
+title: Generate cards
+---
+
+# Generate cards
+
+AI-generates **20** flashcards from the deck's title and description and appends them to the deck.
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `POST` |
+| **Path** | `/api/decks/{deckUuid}/generate-cards` |
+| **Auth** | Required |
+| **Billing** | Requires Clerk feature `ai_flashcard_generation` (Pro) |
+| **Body** | None |
+
+The deck must have a non-empty **description** before generation.
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `deckUuid` | UUID v4 | Target deck |
+
+## Response
+
+**Status:** `200`
+
+```json
+{
+  "data": { "success": true }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid UUID or deck missing description |
+| `401` | Not authenticated |
+| `403` | Pro feature required |
+| `404` | Deck not found |
+| `500` | AI generation failure |
+
+## Example
+
+```bash
+curl -s -X POST -H "Authorization: Bearer $TOKEN" \
+  https://your-app.example/api/decks/550e8400-e29b-41d4-a716-446655440000/generate-cards
+```

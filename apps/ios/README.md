@@ -179,7 +179,7 @@ Or **Product → Test** (⌘U) in Xcode.
 
 ## Related docs
 
-- REST API: [`apps/docs/content/api/rest-api.mdx`](../docs/content/api/rest-api.mdx)
+- REST API: [`apps/docs/content/api/overview.mdx`](../docs/content/api/overview.mdx) — endpoint index; see [`api/endpoints/`](../docs/content/api/endpoints/)
 - iOS development: [`apps/docs/content/developers/platforms/ios.mdx`](../docs/content/developers/platforms/ios.mdx)
 - Chrome extension setup (similar Clerk + Bearer pattern): [`apps/extension/README.md`](../extension/README.md)
 - iOS plan: [`.cursor/plans/ios_swiftui_app_c59e56a6.plan.md`](../../.cursor/plans/ios_swiftui_app_c59e56a6.plan.md)

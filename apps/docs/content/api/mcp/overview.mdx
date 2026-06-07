@@ -4,14 +4,14 @@ title: Model Context Protocol (MCP)
 
 # Model Context Protocol (MCP)
 
-`apps/web` exposes a **Streamable HTTP** MCP server for AI clients at **`/api/mcp`**. Tools mirror the public [HTTP API (REST)](/api/rest-api) (decks, cards, study sessions, ratings) and use the same Drizzle query helpers.
+`apps/web` exposes a **Streamable HTTP** MCP server for AI clients at **`/api/mcp`**. Tools mirror the public [HTTP API (REST)](/api/overview) (decks, cards, study sessions, ratings) and use the same Drizzle query helpers.
 
 ## Authentication (Clerk)
 
 MCP requests must send **`Authorization: Bearer <token>`**. Verification follows [Clerk’s Next.js MCP guide](https://clerk.com/docs/nextjs/guides/ai/mcp/build-mcp-server) first, with a **session JWT fallback** for clients that reuse the same bearer style as the REST API.
 
 1. **OAuth access token (recommended for MCP clients)** — `auth({ acceptsToken: "oauth_token" })` plus **`verifyClerkToken`** from **`@clerk/mcp-tools`**. This is what Clerk documents for MCP; deck limits use **`has({ feature: "unlimited_decks" })`** in that OAuth context when the token is recognized as an OAuth token.
-2. **Session JWT (compatibility)** — If OAuth verification does not yield a user id, the server falls back to **`createClerkClient`**.**`authenticateRequest`** with **`acceptsToken: "session_token"`** (same shape as [REST](/api/rest-api) bearer sessions). Billing for that path uses **`has({ feature: "unlimited_decks" })`** on the signed-in session auth object.
+2. **Session JWT (compatibility)** — If OAuth verification does not yield a user id, the server falls back to **`createClerkClient`**.**`authenticateRequest`** with **`acceptsToken: "session_token"`** (same shape as [REST](/api/overview) bearer sessions). Billing for that path uses **`has({ feature: "unlimited_decks" })`** on the signed-in session auth object.
 
 After verification, MCP tools receive **`userId`** and **`hasUnlimitedDecks`** in **`AuthInfo.extra`** (Flashycardy’s internal contract).
 
@@ -102,5 +102,5 @@ Use **`mcp-remote`** (see [Vercel MCP docs](https://vercel.com/docs/mcp/deploy-m
 ## Related
 
 - [MCP architecture & dependencies](/developers/mcp-architecture) — file dependency tree and third-party OAuth + tool-call flow diagrams.
-- [HTTP API (REST)](/api/rest-api) — canonical field validation and response envelopes; REST uses session/cookie or bearer **session** semantics, while MCP prefers **OAuth** per Clerk.
+- [HTTP API (REST)](/api/overview) — canonical field validation and response envelopes; REST uses session/cookie or bearer **session** semantics, while MCP prefers **OAuth** per Clerk.
 - [Deploy MCP on Vercel](/developers/deployment/mcp-vercel) — firewall, Redis, and environment checklist.

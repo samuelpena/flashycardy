@@ -1,0 +1,65 @@
+---
+title: List cards
+---
+
+# List cards
+
+Lists cards for a deck (paginated).
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `GET` |
+| **Path** | `/api/decks/{deckUuid}/cards` |
+| **Auth** | Required |
+
+### Path parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `deckUuid` | UUID v4 | Parent deck |
+
+### Query parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `page` | Page number (default `1`) |
+| `pageSize` | Items per page (default `20`, max `100`) |
+
+## Response
+
+**Status:** `200`
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "uuid": "660e8400-e29b-41d4-a716-446655440001",
+      "deckId": 1,
+      "front": "hola",
+      "back": "hello",
+      "createdAt": "2025-01-15T12:05:00.000Z",
+      "updatedAt": "2025-01-15T12:05:00.000Z"
+    }
+  ],
+  "meta": { "total_items": 1, "per_page": 20, "total_pages": 1, "current_page": 1 },
+  "links": { "next": null, "prev": null, "first": "…", "last": "…" }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid UUID |
+| `401` | Not authenticated |
+| `404` | Deck not found |
+
+## Example
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://your-app.example/api/decks/550e8400-e29b-41d4-a716-446655440000/cards"
+```

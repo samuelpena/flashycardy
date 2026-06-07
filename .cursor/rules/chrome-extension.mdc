@@ -46,7 +46,7 @@ MV3 side-panel extension built with **WXT + Vite + React 19**. Data layer is **R
 
 ## New REST routes
 
-When adding backend routes used by the extension: implement in `apps/web`, add to `@flashycardy/api-client`, register MCP tool, update `apps/docs/content/api/rest-api.mdx` (see `mcp-route-handlers.mdc`).
+When adding backend routes used by the extension: implement in `apps/web`, add to `@flashycardy/api-client`, register MCP tool, update `apps/docs/content/api/endpoints/` (see `mcp-route-handlers.mdc`).
 
 ## Build & CI
 

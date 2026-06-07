@@ -1,0 +1,60 @@
+---
+title: Create session
+---
+
+# Create study session
+
+Persists a completed study session with per-card results.
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `POST` |
+| **Path** | `/api/study-sessions` |
+| **Auth** | Required |
+
+### Body (JSON)
+
+```json
+{
+  "deckUuid": "550e8400-e29b-41d4-a716-446655440000",
+  "cardResults": [
+    { "cardUuid": "660e8400-e29b-41d4-a716-446655440001", "isCorrect": true },
+    { "cardUuid": "660e8400-e29b-41d4-a716-446655440002", "isCorrect": false }
+  ]
+}
+```
+
+`cardResults` must contain **at least one** entry.
+
+## Response
+
+**Status:** `201`
+
+```json
+{
+  "data": {
+    "uuid": "770e8400-e29b-41d4-a716-446655440002",
+    "deckId": 1,
+    "completedAt": "2025-01-20T18:00:00.000Z"
+  }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid body |
+| `401` | Not authenticated |
+| `404` | `{ "error": "Deck not found" }` if deck missing or not owned |
+
+## Example
+
+```bash
+curl -s -X POST -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"deckUuid":"550e8400-e29b-41d4-a716-446655440000","cardResults":[{"cardUuid":"660e8400-e29b-41d4-a716-446655440001","isCorrect":true}]}' \
+  https://your-app.example/api/study-sessions
+```

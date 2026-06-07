@@ -1,0 +1,75 @@
+---
+title: Update card
+---
+
+# Update card
+
+Replace or partially update a card's front and back text.
+
+## Request
+
+| | |
+|---|---|
+| **Auth** | Required |
+| **Path parameters** | `deckUuid`, `cardUuid` (UUID v4) |
+
+### `PUT /api/decks/{deckUuid}/cards/{cardUuid}`
+
+Full replace of both sides.
+
+**Body:**
+
+```json
+{
+  "front": "string (required)",
+  "back": "string (required)"
+}
+```
+
+### `PATCH /api/decks/{deckUuid}/cards/{cardUuid}`
+
+Partial update — at least one of `front`, `back` required.
+
+**Body:**
+
+```json
+{
+  "front": "optional string",
+  "back": "optional string"
+}
+```
+
+## Response
+
+**Status:** `200`
+
+```json
+{
+  "data": {
+    "id": 1,
+    "uuid": "660e8400-e29b-41d4-a716-446655440001",
+    "deckId": 1,
+    "front": "updated front",
+    "back": "updated back",
+    "createdAt": "2025-01-15T12:05:00.000Z",
+    "updatedAt": "2025-01-21T10:00:00.000Z"
+  }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `400` | Invalid parameters or body |
+| `401` | Not authenticated |
+| `404` | Deck or card not found |
+
+## Example
+
+```bash
+curl -s -X PATCH -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"front":"New question"}' \
+  https://your-app.example/api/decks/550e8400-e29b-41d4-a716-446655440000/cards/660e8400-e29b-41d4-a716-446655440001
+```

@@ -1,0 +1,114 @@
+---
+title: TypeScript client
+---
+
+# TypeScript client (`@flashycardy/api-client`)
+
+Monorepo package used by the [Chrome extension](/developers/platforms/chrome-extension). Mirrors every REST endpoint documented under [Endpoints](/api/overview).
+
+**Location:** `packages/api-client/`
+
+## Install (within monorepo)
+
+The package is a workspace dependency — no npm publish step:
+
+```json
+{
+  "dependencies": {
+    "@flashycardy/api-client": "workspace:*"
+  }
+}
+```
+
+## Setup
+
+```typescript
+import { createFlashycardyApi } from "@flashycardy/api-client";
+
+const api = createFlashycardyApi({
+  baseUrl: "http://localhost:3000",
+  getToken: async () => {
+    // Clerk session JWT — e.g. from @clerk/chrome-extension getToken()
+    return (await clerk.session?.getToken()) ?? null;
+  },
+});
+```
+
+## Usage
+
+### Decks
+
+```typescript
+// GET /api/decks
+const page = await api.decks.list({ page: 1, pageSize: 20 });
+
+// POST /api/decks
+const deck = await api.decks.create({ name: "My deck", description: "Optional" });
+
+// GET /api/decks/count
+const { count } = await api.decks.count();
+
+// GET /api/decks/{uuid}
+const withCards = await api.decks.get(deckUuid, { page: 1 });
+
+// PATCH /api/decks/{uuid}
+await api.decks.patch(deckUuid, { name: "Renamed" });
+
+// DELETE /api/decks/{uuid}
+await api.decks.delete(deckUuid);
+
+// POST /api/decks/from-page (Pro)
+const { deckUuid } = await api.decks.createFromPage({
+  pageText: "Article content…",
+  pageTitle: "Article",
+});
+```
+
+### Cards
+
+```typescript
+const cards = await api.cards.list(deckUuid);
+const card = await api.cards.create(deckUuid, { front: "Q", back: "A" });
+await api.cards.patch(deckUuid, cardUuid, { front: "Updated Q" });
+await api.cards.delete(deckUuid, cardUuid);
+```
+
+### Study sessions
+
+```typescript
+const sessions = await api.studySessions.list();
+await api.studySessions.create({
+  deckUuid,
+  cardResults: [{ cardUuid, isCorrect: true }],
+});
+const counts = await api.studySessions.counts();
+```
+
+## Error handling
+
+Failed responses throw `ApiError`:
+
+```typescript
+import { ApiError } from "@flashycardy/api-client";
+
+try {
+  await api.decks.create({ name: "" });
+} catch (err) {
+  if (err instanceof ApiError) {
+    console.error(err.status, err.message);
+  }
+}
+```
+
+See [Errors](/api/errors) for HTTP status meanings.
+
+## Response types
+
+- Single resources: unwrapped `data` from `{ "data": T }`
+- Lists: `{ data, meta, links }` as `PaginatedResponse<T>`
+- [Get deck](/api/endpoints/decks/get-deck): `requestDataWithPagination` returns `{ data, meta, links }` where `data` includes nested `cards`
+
+## Related
+
+- [cURL examples](/api/examples/curl)
+- [Chrome extension development](/developers/platforms/chrome-extension)

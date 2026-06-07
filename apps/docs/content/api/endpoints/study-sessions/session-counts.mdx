@@ -1,0 +1,53 @@
+---
+title: Session counts
+---
+
+# Study session counts
+
+Returns paginated session counts grouped by deck for the current user (one row per deck that has at least one session).
+
+## Request
+
+| | |
+|---|---|
+| **Method** | `GET` |
+| **Path** | `/api/study-sessions/counts` |
+| **Auth** | Required |
+
+### Query parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `page` | Page number (default `1`) |
+| `pageSize` | Items per page (default `20`, max `100`) |
+
+## Response
+
+**Status:** `200`
+
+```json
+{
+  "data": [
+    {
+      "deckUuid": "550e8400-e29b-41d4-a716-446655440000",
+      "sessionCount": 7
+    }
+  ],
+  "meta": { "total_items": 1, "per_page": 20, "total_pages": 1, "current_page": 1 },
+  "links": { "next": null, "prev": null, "first": "…", "last": "…" }
+}
+```
+
+## Errors
+
+| Status | Condition |
+|--------|-----------|
+| `401` | Not authenticated |
+| `400` | Invalid pagination |
+
+## Example
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" \
+  https://your-app.example/api/study-sessions/counts
+```
