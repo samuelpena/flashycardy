@@ -1,0 +1,46 @@
+---
+title: Architecture
+---
+
+# Architecture
+
+This page is a stub. A deeper architecture overview will be added in a follow-up release.
+
+## Monorepo layout
+
+```text
+apps/
+  web/        # Next.js 16 app (primary product, deployed to Vercel)
+  docs/       # Nextra docs site (this site, deployed as a separate Vercel project)
+  extension/  # Chrome MV3 side-panel extension (WXT + React)
+  ios/        # SwiftUI native client
+packages/
+  ui/         # Shared shadcn/ui components
+  features/   # Props-driven deck/card/study UI
+  api-client/ # Typed REST client
+  i18n/       # Shared locales and messages (en, es)
+```
+
+## Web app data flow
+
+- **Auth** — Clerk, scoped via `auth()` on every server-side operation.
+- **Database** — Drizzle ORM against PostgreSQL on Neon.
+- **AI** — Vercel AI SDK + OpenAI (`gpt-4.1-nano`) for flashcard generation.
+
+## Clients
+
+| Client | Data access |
+|--------|-------------|
+| Web app | Server Components + Server Actions |
+| Chrome extension | REST API with Clerk Bearer tokens |
+| iOS app | REST API with Clerk Bearer tokens |
+| MCP clients | `/api/mcp` (tools mirror REST) |
+
+## Docs site
+
+The docs site is a stripped-down Next.js app powered by [Nextra](https://nextra.site/) and `nextra-theme-docs`. It does not import from `apps/web`; this keeps docs builds fast and deploys independent.
+
+## Related
+
+- [HTTP API (REST)](/api/rest-api)
+- [MCP architecture](/developers/mcp-architecture)

@@ -4,7 +4,7 @@ title: Deploy MCP on Vercel (production)
 
 # Deploy MCP on Vercel (production)
 
-Task-oriented checklist for the Streamable HTTP MCP server shipped with `apps/web` (see [Model Context Protocol (MCP)](../reference/mcp)).
+Task-oriented checklist for the Streamable HTTP MCP server shipped with `apps/web` (see [Model Context Protocol (MCP)](/api/mcp/overview)).
 
 ## 1. Environment variables
 
@@ -21,7 +21,7 @@ OAuth **protected resource** and **authorization server** metadata are served fr
 
 ## 2. Clerk Dashboard (OAuth MCP clients)
 
-1. Configure an **OAuth application** in the Clerk Dashboard as described in [Clerk’s MCP guide](https://clerk.com/docs/nextjs/guides/ai/mcp/build-mcp-server).
+1. Configure an **OAuth application** in the Clerk Dashboard as described in [Clerk's MCP guide](https://clerk.com/docs/nextjs/guides/ai/mcp/build-mcp-server).
 2. When your MCP client requires it, enable **dynamic client registration** for that OAuth application so clients can register against Clerk at runtime.
 
 ## 3. Vercel Firewall (WAF)
@@ -52,4 +52,4 @@ OAuth **protected resource** and **authorization server** metadata are served fr
 
 ## Related
 
-- [Model Context Protocol (MCP)](../reference/mcp) — tools, auth, and client config.
+- [Model Context Protocol (MCP)](/api/mcp/overview) — tools, auth, and client config.

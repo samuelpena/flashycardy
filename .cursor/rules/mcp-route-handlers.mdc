@@ -8,7 +8,7 @@ alwaysApply: false
 
 Flashycardy exposes **Streamable HTTP MCP** at **`/api/mcp`** (Clerk OAuth + session JWT fallback). Every **public REST** operation under `src/app/api/` (except `mcp/`) must have a **matching MCP tool**.
 
-REST conventions: **`api-route-handlers.mdc`**, **`public-api.mdc`**. Docs: `apps/docs/content/reference/mcp.mdx`, `mcp-architecture.mdx`.
+REST conventions: **`api-route-handlers.mdc`**, **`public-api.mdc`**. Docs: `apps/docs/content/api/mcp/overview.mdx`, `apps/docs/content/developers/mcp-architecture.mdx`.
 
 ## Layout
 
@@ -60,7 +60,7 @@ When adding or changing **`src/app/api/**/route.ts`**:
 3. **Handler:** `parseMcpAuthExtra(extra.authInfo)` → `mcpToolError("Unauthorized")` if null → `run*(ctx, args)`.
 4. **Pagination lists:** `pageFieldsSchema`, `parsePageArgs`, `paginationMeta` (`pagination-args.ts`).
 5. **Plan limits:** `ctx.hasUnlimitedDecks` + `FREE_DECK_LIMIT` (`constants.ts`).
-6. **Tests:** `tools/<name>.test.ts` (mock queries). **Docs:** `mcp.mdx` + `rest-api.mdx`.
+6. **Tests:** `tools/<name>.test.ts` (mock queries). **Docs:** `apps/docs/content/api/mcp/overview.mdx` + `apps/docs/content/api/rest-api.mdx` (or per-endpoint pages under `api/endpoints/`).
 
 ```typescript
 // ✅ GOOD — tool mirrors REST validation and queries

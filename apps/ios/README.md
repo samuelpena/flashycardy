@@ -168,7 +168,7 @@ Or **Product → Test** (⌘U) in Xcode.
 - **Accessibility IDs:** `AccessibilityID` enum for XCUITest (`auth.signIn`, `dashboard.title`, …)
 - **UI tests:** `FlashycardyUITests` — launch smoke (sets `UITestingForceAuthGate` to show the auth gate without waiting for Clerk). Requires a valid `CLERK_PUBLISHABLE_KEY` in `Secrets.xcconfig` (CI uses `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` from GitHub secrets).
 - **CI:** GitHub Actions `ios` job on `macos-15` runs `xcodebuild test` (see `.github/workflows/ci.yml`)
-- **Docs:** [iOS development how-to](../docs/content/how-to/ios-development.mdx)
+- **Docs:** [iOS development](/developers/platforms/ios) on the docs site
 
 ### Test targets
 
@@ -179,7 +179,7 @@ Or **Product → Test** (⌘U) in Xcode.
 
 ## Related docs
 
-- REST API: [`apps/docs/content/reference/rest-api.mdx`](../docs/content/reference/rest-api.mdx)
-- iOS how-to: [`apps/docs/content/how-to/ios-development.mdx`](../docs/content/how-to/ios-development.mdx)
+- REST API: [`apps/docs/content/api/rest-api.mdx`](../docs/content/api/rest-api.mdx)
+- iOS development: [`apps/docs/content/developers/platforms/ios.mdx`](../docs/content/developers/platforms/ios.mdx)
 - Chrome extension setup (similar Clerk + Bearer pattern): [`apps/extension/README.md`](../extension/README.md)
 - iOS plan: [`.cursor/plans/ios_swiftui_app_c59e56a6.plan.md`](../../.cursor/plans/ios_swiftui_app_c59e56a6.plan.md)

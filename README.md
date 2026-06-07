@@ -70,9 +70,10 @@ apps/docs/
 │   └── [[...mdxPath]]/page.tsx # Nextra catch-all route
 ├── content/                    # MDX pages (sidebar order via _meta.ts)
 │   ├── _meta.ts
-│   ├── index.mdx
-│   ├── getting-started.mdx
-│   └── architecture.mdx
+│   ├── index.mdx               # Audience landing
+│   ├── users/                  # Product guide (end users)
+│   ├── developers/             # Developer guide (contributors, integrators)
+│   └── api/                    # API reference (REST + MCP)
 ├── mdx-components.tsx
 ├── next.config.mjs             # withNextra(...)
 └── package.json
