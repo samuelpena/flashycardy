@@ -1,0 +1,42 @@
+---
+title: Overview
+---
+
+# Deployment
+
+Flashycardy deploys as **separate Vercel projects** from one Git repository. The Chrome extension ships as a **zip artifact** (CI or manual). iOS is distributed outside this pipeline (App Store — not documented in repo).
+
+## Deploy targets
+
+| Target | Platform | Doc |
+|--------|----------|-----|
+| Web app + REST + MCP | Vercel (`apps/web`) | [Deploy web app](/developers/deployment/web-vercel) |
+| Documentation | Vercel (`apps/docs`) | [Deploy docs](/developers/deployment/docs-vercel) |
+| MCP production checklist | Vercel + Clerk + WAF | [Deploy MCP on Vercel](/developers/deployment/mcp-vercel) |
+| Chrome extension | Chrome Web Store | [Chrome Web Store checklist](/developers/platforms/chrome-web-store) |
+
+## Monorepo strategy
+
+Each Vercel project sets:
+
+- **Root Directory** → `apps/web` or `apps/docs`
+- **Include files outside the root directory** → ON (for `packages/`)
+
+Both apps use an **Ignored Build Step** in `vercel.json` that skips deploys when unrelated paths change.
+
+## Environment separation
+
+| App | Secrets required |
+|-----|------------------|
+| Web | `DATABASE_URL`, Clerk, OpenAI, optional Redis |
+| Docs | None |
+| Extension | Baked into build via `.env.production` at pack time |
+
+## Database migrations (web only)
+
+Production web deploys run Drizzle migrations via `pnpm vercel-build` before `next build`. Docs builds never touch the database.
+
+## Related
+
+- [CI/CD](/developers/ci-cd)
+- [Environment variables](/developers/environment-variables)

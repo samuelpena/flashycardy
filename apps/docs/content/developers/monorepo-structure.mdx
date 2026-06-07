@@ -1,0 +1,94 @@
+---
+title: Monorepo structure
+---
+
+# Monorepo structure
+
+Flashycardy is a **pnpm workspace** orchestrated by **Turborepo**. All paths below are relative to the repository root.
+
+## Top-level layout
+
+```text
+flashycardy/
+├── apps/
+│   ├── web/           @flashycardy/web — Next.js product + API
+│   ├── docs/          @flashycardy/docs — Nextra docs (port 3001)
+│   ├── extension/     @flashycardy/extension — WXT Chrome extension
+│   └── ios/           Flashycardy.xcodeproj — SwiftUI app
+├── packages/
+│   ├── ui/            @flashycardy/ui
+│   ├── features/      @flashycardy/features
+│   ├── api-client/    @flashycardy/api-client
+│   └── i18n/          @flashycardy/i18n
+├── drizzle/           Migration tracks (dev/, prod/)
+├── scripts/           CI, Vercel ignore, iOS secrets, extension zip
+├── .github/workflows/ CI (ci.yml)
+├── pnpm-workspace.yaml
+├── turbo.json
+└── package.json       Root scripts (filter to apps/packages)
+```
+
+## `apps/web` (primary)
+
+| Path | Purpose |
+|------|---------|
+| `src/app/` | Next.js App Router pages and `/api` route handlers |
+| `src/actions/` | Server Actions (web-only mutations) |
+| `src/db/queries/` | **All** Drizzle query helpers |
+| `src/db/schema/` | Postgres schema (source of truth) |
+| `src/lib/mcp/` | MCP auth, tool registration, runners |
+| `src/components/` | Web-specific UI |
+| `tests/` | Playwright E2E |
+
+Public REST API: `src/app/api/`. MCP: `src/app/api/mcp/route.ts`.
+
+## `apps/docs`
+
+| Path | Purpose |
+|------|---------|
+| `content/` | MDX pages (`users/`, `developers/`, `api/`) |
+| `app/layout.tsx` | Nextra theme + navbar |
+| `vercel.json` | Docs-only ignore build step |
+
+## `apps/extension`
+
+| Path | Purpose |
+|------|---------|
+| `src/entrypoints/` | sidepanel, popup, background, auth-callback |
+| `src/screens/` | HashRouter screens |
+| `src/lib/api-provider.tsx` | `@flashycardy/api-client` + Clerk token |
+
+## `apps/ios`
+
+| Path | Purpose |
+|------|---------|
+| `Flashycardy/Flashycardy/` | SwiftUI app sources |
+| `Flashycardy/Flashycardy/Services/` | REST API client + services |
+| `Config/Secrets.xcconfig` | Clerk + API URL (gitignored) |
+
+## Shared packages
+
+Import via workspace protocol: `"@flashycardy/ui": "workspace:*"`.
+
+## Turborepo tasks
+
+Defined in `turbo.json`:
+
+| Task | Depends on | Notes |
+|------|------------|-------|
+| `build` | `^build` | `.next/`, `.output/`, `dist/` outputs |
+| `lint` | — | ESLint per package |
+| `test:unit` | `^build` | Vitest |
+| `test:e2e` | `^build`, `build` | Playwright; not cached |
+| `dev` | — | Persistent; not cached |
+
+Run filtered tasks from root, e.g. `pnpm build:docs` → `turbo run build --filter=@flashycardy/docs`.
+
+## Cursor rules
+
+Project conventions live in `.cursor/rules/` (data access, auth, shadcn, testing, MCP parity, docs). Summarized in [Coding standards](/developers/coding-standards).
+
+## Related
+
+- [Local development](/developers/local-development)
+- [Architecture](/developers/architecture)

@@ -1,0 +1,78 @@
+---
+title: Environment variables
+---
+
+# Environment variables
+
+Central reference for configuration across apps. Never commit secrets — use `.env` (gitignored) locally and Vercel/GitHub secrets in CI/production.
+
+## Web app (`apps/web`)
+
+Loaded from **repository root** `.env`, `.env.development`, `.env.production`.
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `DATABASE_URL` | Yes | Neon Postgres connection string |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes | Clerk publishable key (client + server) |
+| `CLERK_SECRET_KEY` | Yes | Clerk secret key (server auth, API, MCP) |
+| `OPENAI_API_KEY` | Yes | OpenAI for AI flashcard generation |
+| `REDIS_URL` or `KV_URL` | No | Optional MCP handler backing store (SSE/resumability) |
+| `NEXT_PUBLIC_APP_URL` | Recommended | Stable public origin for metadata/links |
+
+Example:
+
+```env
+DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+OPENAI_API_KEY=sk-proj-...
+```
+
+## Docs site (`apps/docs`)
+
+No environment variables required for local dev or Vercel deploy.
+
+## Chrome extension (`apps/extension`)
+
+File: `apps/extension/.env.development` / `.env.production` (copy from `.env.development.example`).
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `VITE_CLERK_PUBLISHABLE_KEY` | Yes | Same Clerk instance as web |
+| `VITE_CLERK_FRONTEND_API` | Recommended | Clerk Frontend API URL |
+| `VITE_SYNC_HOST` | Yes | Web origin for session sync (e.g. `http://localhost:3000`) |
+| `VITE_API_BASE_URL` | Yes | REST API base (usually same as sync host) |
+
+The extension does **not** use `DATABASE_URL` or `CLERK_SECRET_KEY` directly — it calls `apps/web` over HTTP.
+
+## iOS (`apps/ios`)
+
+File: `apps/ios/Config/Secrets.xcconfig` (copy from `Secrets.xcconfig.example`, gitignored).
+
+| Key | Purpose |
+|-----|---------|
+| `CLERK_PUBLISHABLE_KEY` | Same as `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` |
+| `API_BASE_URL` | Web/API origin (`http://127.0.0.1:3000` for Simulator) |
+| `CLERK_FRONTEND_API_HOST` | Clerk hostname (e.g. `your-instance.clerk.accounts.dev`) |
+
+CI writes this file via `scripts/write-ios-secrets-xcconfig.sh` from GitHub secrets.
+
+## GitHub Actions (CI)
+
+| Secret | Used by |
+|--------|---------|
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Web/extension/iOS builds |
+| `CLERK_SECRET_KEY` | E2E authenticated tests |
+| `E2E_CLERK_USER_EMAIL` | Extension/web E2E sign-in |
+| `VITE_CLERK_FRONTEND_API` | Extension/iOS CI placeholders |
+
+Placeholder fallbacks exist for PR builds without secrets (see [CI/CD](/developers/ci-cd)).
+
+## Vercel
+
+Set web app variables on the **`apps/web`** Vercel project only. Docs project needs none. See [Deploy web app (Vercel)](/developers/deployment/web-vercel).
+
+## Related
+
+- [Local development](/developers/local-development)
+- [Deploy MCP on Vercel](/developers/deployment/mcp-vercel) — MCP-specific env notes

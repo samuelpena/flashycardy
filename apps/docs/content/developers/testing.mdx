@@ -1,0 +1,76 @@
+---
+title: Testing
+---
+
+# Testing
+
+Flashycardy uses **Vitest** for unit tests and **Playwright** for E2E. iOS uses **XCTest** via `xcodebuild`.
+
+## Unit tests (Vitest)
+
+| Package | Command | Scope |
+|---------|---------|-------|
+| Web | `pnpm test:unit` | Components, API route handlers, MCP tools (mocked queries) |
+| Extension | `pnpm test:extension:unit` | Origin guard, page content helpers |
+| API client | `pnpm --filter @flashycardy/api-client test:unit` | Client envelope/pagination |
+| Features / UI / i18n | via `turbo run test:unit` in CI | Shared package tests |
+
+Watch mode (web):
+
+```bash
+pnpm test:unit:watch
+```
+
+**Rules:** Do not unit-test async Server Components — use E2E instead. Do not unit-test `src/db/queries/*` against a real DB.
+
+## E2E tests (Playwright)
+
+Run against the **production build** of the web app:
+
+```bash
+pnpm build
+pnpm test:e2e
+```
+
+Playwright config starts `pnpm start` on port 3000 (or reuses an existing server locally).
+
+| App | Command | Notes |
+|-----|---------|-------|
+| Web | `pnpm test:e2e` | Dashboard, decks, study flows |
+| Extension | `pnpm test:extension:e2e` | Loads unpacked MV3 build; smoke + optional auth tests |
+
+Extension authenticated E2E requires:
+
+- `E2E_CLERK_USER_EMAIL`
+- `CLERK_SECRET_KEY`
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+
+## iOS tests
+
+```bash
+pnpm test:ios
+```
+
+Runs `xcodebuild test` on iPhone 17 simulator. Targets:
+
+- `FlashycardyTests` — unit (API decoding, billing, L10n)
+- `FlashycardyUITests` — launch smoke
+
+## CI coverage
+
+See [CI/CD](/developers/ci-cd) for the full GitHub Actions matrix.
+
+## Adding tests
+
+| Change type | Test type |
+|-------------|-----------|
+| Client/sync component | Vitest + RTL |
+| REST route handler | Vitest with mocked auth/queries |
+| MCP tool | Vitest in `tools/*.test.ts` |
+| Async Server Component page | Playwright E2E |
+| Full auth/CRUD flow | Playwright E2E |
+
+## Related
+
+- [Coding standards](/developers/coding-standards)
+- [Local development](/developers/local-development)

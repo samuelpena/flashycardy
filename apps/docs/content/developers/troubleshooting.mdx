@@ -1,0 +1,96 @@
+---
+title: Troubleshooting
+---
+
+# Developer troubleshooting
+
+Common issues when working on the Flashycardy monorepo.
+
+## Install & workspace
+
+### `pnpm install` fails
+
+- Use **pnpm 10** and **Node 22**
+- Run from repository root, not inside `apps/web`
+- Delete `node_modules` and retry: `rm -rf node_modules && pnpm install`
+
+### Package not found (`@flashycardy/*`)
+
+Ensure `pnpm-workspace.yaml` includes `apps/*` and `packages/*`. Run install from root.
+
+## Web app
+
+### Database connection errors
+
+- Verify `DATABASE_URL` in root `.env`
+- Run migrations: `pnpm --filter @flashycardy/web db:migrate:dev:programmatic`
+- Check Neon project is active and IP allowlist permits your connection
+
+### Clerk auth errors locally
+
+- Match `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from the same Clerk instance
+- Use test keys in development
+
+### AI generation fails
+
+- Confirm `OPENAI_API_KEY` is set and valid
+- Pro features require Clerk Billing feature flags on your test user
+
+### `redirect("/")` on protected pages
+
+Expected when not signed in. Sign in via home page modal first.
+
+## Extension
+
+### Extension cannot reach API
+
+- Run `pnpm dev` on port **3000**
+- Set `VITE_API_BASE_URL` and `VITE_SYNC_HOST` to `http://localhost:3000`
+- Register dev extension ID in Clerk `allowed_origins`
+
+### Session not syncing from web
+
+Reopen side panel after web sign-in, or sign in directly in the extension auth gate.
+
+See [Chrome extension](/developers/platforms/chrome-extension).
+
+## iOS
+
+### Simulator cannot reach API
+
+Use `http://127.0.0.1:3000` in `Secrets.xcconfig`, not `localhost` (if issues persist, try LAN IP on device).
+
+### Missing `Secrets.xcconfig`
+
+```bash
+cp apps/ios/Config/Secrets.xcconfig.example apps/ios/Config/Secrets.xcconfig
+```
+
+Clean build in Xcode after editing xcconfig.
+
+See [iOS app](/developers/platforms/ios).
+
+## Docs site
+
+### MDX parse error (`Unexpected character !`)
+
+Do not use HTML comments `<!-- -->` in MDX. Use JSX comments: `{/* comment */}`.
+
+### Build fails after adding pages
+
+Register every new page in the nearest `_meta.ts` file.
+
+## CI failures
+
+| Failure | Check |
+|---------|-------|
+| Unit test | Run `pnpm test:unit` locally |
+| E2E | `pnpm build && pnpm test:e2e` |
+| Extension E2E | Build web first; set Clerk secrets for auth tests |
+| iOS job | macOS-only; verify simulator name matches workflow (`iPhone 17`) |
+
+## Still stuck?
+
+- [Local development](/developers/local-development)
+- [Environment variables](/developers/environment-variables)
+- [CI/CD](/developers/ci-cd)

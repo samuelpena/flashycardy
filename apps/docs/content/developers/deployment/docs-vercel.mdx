@@ -1,0 +1,50 @@
+---
+title: Deploy docs (Vercel)
+---
+
+# Deploy docs (Vercel)
+
+Production deployment for `apps/docs` — this Nextra documentation site.
+
+## Vercel project settings
+
+| Setting | Value |
+|---------|-------|
+| **Root Directory** | `apps/docs` |
+| **Include files outside root** | ON |
+| **Framework** | Next.js (auto-detected) |
+| **Build Command** | `next build` (default via `pnpm build:docs`) |
+| **Output** | Standard Next.js + Pagefind index at `public/_pagefind` |
+
+No custom `vercel-build` script — docs do not run database migrations.
+
+## Environment variables
+
+**None required.** The docs site does not connect to Postgres, Clerk, or OpenAI.
+
+## Ignored build step
+
+`apps/docs/vercel.json` runs `scripts/vercel-ignore-build-docs.sh`:
+
+- Skips build when only unrelated apps change (e.g. iOS-only commits)
+- Builds when `apps/docs/`, shared packages, or workspace config change
+
+## Local verification before deploy
+
+```bash
+pnpm build:docs
+pnpm lint:docs
+```
+
+Build runs Pagefind search indexing after `next build`.
+
+## Custom domain
+
+Default: `*.vercel.app` project URL (e.g. `flashycardy-docs.vercel.app`). Attach `docs.yourdomain.com` in Vercel **Domains** when ready.
+
+Update the Help menu base URL in `apps/web/src/components/app-user-button.tsx` if the docs URL changes.
+
+## Related
+
+- [Deployment overview](/developers/deployment)
+- [Deploy web app (Vercel)](/developers/deployment/web-vercel)

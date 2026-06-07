@@ -13,7 +13,7 @@ todos:
     status: completed
   - id: pr-4-developer-depth
     content: "PR 4 — docs/developer-guide: architecture, monorepo, env vars, testing, CI/CD, deployment, coding-standards, contributing, platform guides"
-    status: pending
+    status: completed
   - id: pr-5-pro-platforms
     content: "PR 5 — docs/pro-and-platforms: Pro user docs, extension/iOS user guides, MCP tools reference, Swift example, release-notes"
     status: pending

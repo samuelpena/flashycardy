@@ -1,0 +1,76 @@
+---
+title: Coding standards
+---
+
+# Coding standards
+
+Conventions enforced in this repository. Full rules live in `.cursor/rules/` — this page summarizes what contributors must follow.
+
+## Data access
+
+- **All Drizzle queries** in `apps/web/src/db/queries/` — never inline in components or actions
+- **Server Components** fetch via query helpers only
+- **Mutations** via Server Actions → query helpers (web UI)
+- **REST/MCP** handlers delegate to the same query helpers
+
+## Auth & authorization
+
+- Call `auth()` at the top of every server action, route handler, and data fetch
+- Scope queries with `clerkUserId` — never trust client-supplied user IDs
+- Protected pages: `redirect("/")` when unauthenticated (not throw)
+- Server actions: return `{ error: "Unauthorized" }` when unauthenticated
+
+## Validation
+
+- **Zod** on every Server Action input (`safeParse` before DB)
+- Never use `FormData` as the Server Action parameter type
+
+## UI
+
+- **shadcn/ui only** via `@flashycardy/ui` — no hand-rolled primitives
+- Clerk sign-in/up: shadcn `<Button>` + modal mode
+- Dark mode: ensure readable contrast
+
+## API & MCP
+
+- Public REST under `apps/web/src/app/api/` — uniform `{ data }` / `{ error }` envelope
+- Every REST route has a matching **MCP tool** (`src/lib/mcp/tools/`, `register-tools.ts`)
+- Update `apps/docs/content/api/endpoints/*` when changing routes
+
+## AI
+
+- **Vercel AI SDK** + `gpt-4.1-nano` — never call OpenAI REST directly
+- `generateText` with `Output.object` and Zod schema
+- Gate Pro AI features with `has({ feature: "..." })`
+
+## i18n
+
+- UI strings via **next-intl** and `packages/i18n/messages/`
+- Signed-in locale from Clerk metadata; guest locale from cookie only
+
+## Billing
+
+- **Clerk Billing** only — no direct Stripe integration
+- Feature slugs: `unlimited_decks`, `ai_flashcard_generation`, `document_deck_generation`
+
+## Documentation
+
+- User-facing changes → `apps/docs/content/users/`
+- API changes → `apps/docs/content/api/endpoints/`
+- Architecture/env/CI → `apps/docs/content/developers/`
+- Keep [Product Guide](/users/introduction) and [Developer Guide](/developers/introduction) separate
+
+## TypeScript
+
+- TSDoc on exported functions, actions, components, and types
+- Run `pnpm --filter @flashycardy/web typecheck` after substantive edits
+
+## Extension & iOS
+
+- Extension: `@flashycardy/api-client` only — no Server Actions, no inline undocumented fetch
+- iOS: `APIClient` + services — mirrors API client patterns
+
+## Related
+
+- [Contributing](/developers/contributing)
+- [Testing](/developers/testing)
