@@ -1,0 +1,44 @@
+---
+title: Sync across devices
+---
+
+# Sync across devices
+
+Flashycardy stores your decks in the cloud. The same account on **web**, **Chrome extension**, and **iOS** should show the same library after sign-in.
+
+## How sync works
+
+- All clients talk to the same Flashycardy account backend
+- Changes (new decks, cards, study sessions) save to the server immediately after each action
+- There is no separate "Sync" button — refresh or reopen the app to see latest data
+
+## Steps if data looks out of date
+
+1. **Confirm the same account** — same email on every platform ([Sign-in issues](/users/troubleshooting/sign-in-issues)).
+2. **Web** — reload the Dashboard or deck page.
+3. **Extension** — close and reopen the side panel; sign in again if needed.
+4. **iOS** — pull to refresh on Dashboard or force-quit and reopen the app.
+5. **Wait a few seconds** after creating content on one device before checking another.
+
+## Expected outcome
+
+Decks, cards, and analytics match across devices within seconds under normal network conditions.
+
+## What does not sync automatically
+
+| Item | Behavior |
+|------|----------|
+| **Language preference** | Stored on your account — should match after sign-in everywhere |
+| **Onboarding tour dismissed** | Per browser (`localStorage` on web only) |
+| **Extension prefill draft** | Temporary until you save the card |
+
+## Still mismatched?
+
+- Create a test deck on web — does it appear on mobile within a minute?
+- If not, sign out on all devices and sign back in on web first, then extension/iOS.
+
+## Related
+
+- [Web app](/users/platforms/web)
+- [Chrome extension](/users/platforms/chrome-extension)
+- [iOS app](/users/platforms/ios)

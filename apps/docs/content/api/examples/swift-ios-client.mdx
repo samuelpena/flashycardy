@@ -1,0 +1,124 @@
+---
+title: Swift (iOS client)
+---
+
+# Swift (iOS client)
+
+The iOS app uses a typed **`APIClient`** actor that mirrors the [`@flashycardy/api-client`](/api/examples/typescript-api-client) patterns — same REST paths, envelopes, and bearer auth.
+
+**Location:** `apps/ios/Flashycardy/Flashycardy/Services/APIClient.swift`
+
+Higher-level services (`DecksService`, `CardsService`, `StudySessionsService`) wrap the client; views access them through **`FlashycardyAPI`** injected by **`APIProvider`**.
+
+## Setup
+
+`APIProvider` builds a `FlashycardyAPI` when a Clerk session is available:
+
+```swift
+FlashycardyAPI(
+    configuration: APIClientConfiguration(
+        baseURL: AppConfig.apiBaseURL,
+        getToken: {
+            try await ClerkSessionToken.bearerToken(clerk: clerk)
+        }
+    )
+)
+```
+
+Wrap authenticated content in `APIProvider` and read the API from the environment:
+
+```swift
+struct MainShellView: View {
+    @InjectAPI private var api
+
+    var body: some View {
+        DashboardView()
+    }
+}
+```
+
+## Usage
+
+### List decks
+
+```swift
+let page = try await api.decks.list(pagination: PaginationParams(page: 1, pageSize: 20))
+for deck in page.data {
+    print(deck.name)
+}
+```
+
+Maps to `GET /api/decks` — see [List decks](/api/endpoints/decks/list-decks).
+
+### Get deck with cards
+
+```swift
+let result = try await api.decks.get(
+    deckUuid: uuid,
+    pagination: PaginationParams(page: 1, pageSize: 50)
+)
+let deck = result.data
+let cards = result.data.cards
+```
+
+Uses `requestDataWithPagination` for `{ data, meta, links }` where `data` includes nested cards — same shape as the TypeScript client's `requestDataWithPagination`.
+
+### Create deck
+
+```swift
+let deck = try await api.decks.create(
+    CreateDeckInput(name: "Spanish verbs", description: "Common conjugations")
+)
+```
+
+### Generate cards (Pro)
+
+```swift
+let result = try await api.decks.generateCards(deckUuid: deck.uuid)
+print("Generated \(result.cardsCreated) cards")
+```
+
+Requires Pro (`ai_flashcard_generation`). See [Generate cards](/api/endpoints/decks/generate-cards).
+
+### Study sessions
+
+```swift
+let sessions = try await api.studySessions.list()
+try await api.studySessions.create(
+    CreateStudySessionInput(
+        deckUuid: deckUuid,
+        cardResults: [
+            CardResultInput(cardUuid: cardUuid, isCorrect: true)
+        ]
+    )
+)
+```
+
+## Error handling
+
+The client throws **`ApiError`** with `statusCode` and `message` parsed from the API error envelope:
+
+```swift
+do {
+    try await api.decks.create(CreateDeckInput(name: ""))
+} catch let error as ApiError {
+    print(error.statusCode, error.message)
+}
+```
+
+See [Errors](/api/errors).
+
+## Pagination
+
+Pass optional `PaginationParams(page:pageSize:)` to list and get methods. Query string format matches REST: `?page=1&pageSize=20`.
+
+## MainActor decoding
+
+`APIClient` decodes and encodes JSON on the **`MainActor`** to satisfy Swift concurrency rules for `Decodable`/`Encodable` in SwiftUI targets.
+
+## Related
+
+- [TypeScript client](/api/examples/typescript-api-client)
+- [Authentication](/api/authentication)
+- [iOS development](/developers/platforms/ios)
+- [iOS app (user guide)](/users/platforms/ios)

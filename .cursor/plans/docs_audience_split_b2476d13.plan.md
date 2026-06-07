@@ -16,7 +16,7 @@ todos:
     status: completed
   - id: pr-5-pro-platforms
     content: "PR 5 — docs/pro-and-platforms: Pro user docs, extension/iOS user guides, MCP tools reference, Swift example, release-notes"
-    status: pending
+    status: completed
 isProject: false
 ---
 

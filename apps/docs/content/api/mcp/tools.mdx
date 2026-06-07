@@ -1,0 +1,251 @@
+---
+title: Tools reference
+---
+
+# MCP tools reference
+
+Flashycardy registers **20 tools** on the MCP server. Each tool maps 1:1 to a [REST endpoint](/api/overview) and returns JSON text in MCP `content[0].text` using the same response envelopes as HTTP.
+
+For authentication, endpoint URL, and client setup, see [MCP overview](/api/mcp/overview).
+
+## Pagination
+
+List-style tools accept optional arguments:
+
+| Argument | Type | Default | Range |
+|----------|------|---------|-------|
+| `page` | integer | `1` | ≥ 1 |
+| `pageSize` | integer | `20` | 1–100 |
+
+## Deck tools
+
+### `list_decks`
+
+Lists the authenticated user's decks.
+
+| REST | `GET /api/decks` |
+|------|------------------|
+| **Arguments** | `page?`, `pageSize?` |
+
+### `get_deck_count`
+
+Returns how many decks the user owns.
+
+| REST | `GET /api/decks/count` |
+|------|------------------------|
+| **Arguments** | _(none)_ |
+
+### `create_deck`
+
+Creates a deck, optionally with initial cards. Free plan limited to **3 decks**.
+
+| REST | `POST /api/decks` |
+|------|-------------------|
+| **Arguments** | |
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `name` | string | Yes | 1–255 characters |
+| `description` | string | No | Max 1000 characters |
+| `cards` | array | No | `{ front, back }` pairs |
+
+### `create_deck_from_document`
+
+Creates a deck with **20 AI-generated cards** from a base64-encoded document. **Pro** — requires `document_deck_generation`.
+
+| REST | `POST /api/decks/from-document` |
+|------|----------------------------------|
+| **Arguments** | |
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `filename` | string | Yes | Original filename (`.pdf`, `.docx`, `.pptx`) |
+| `contentBase64` | string | Yes | Base64-encoded file bytes |
+
+### `generate_cards`
+
+AI-generates **20 cards** for an existing deck from its description. **Pro** — requires `ai_flashcard_generation`.
+
+| REST | `POST /api/decks/[deckUuid]/generate-cards` |
+|------|---------------------------------------------|
+| **Arguments** | |
+
+| Field | Type | Required |
+|-------|------|----------|
+| `deckUuid` | UUID string | Yes |
+
+### `generate_deck_from_page_content`
+
+Creates a deck with **20 AI-generated cards** from web page text. **Pro** — requires `document_deck_generation`.
+
+| REST | `POST /api/decks/from-page` |
+|------|----------------------------|
+| **Arguments** | |
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `pageText` | string | Yes | Extracted page content |
+| `pageTitle` | string | No | Used for deck title |
+
+### `get_deck`
+
+Returns deck metadata and a paginated card list.
+
+| REST | `GET /api/decks/[deckUuid]` |
+|------|-----------------------------|
+| **Arguments** | |
+
+| Field | Type | Required |
+|-------|------|----------|
+| `deckUuid` | UUID string | Yes |
+| `page` | integer | No |
+| `pageSize` | integer | No |
+
+### `replace_deck`
+
+Full update of deck name and description.
+
+| REST | `PUT /api/decks/[deckUuid]` |
+|------|-----------------------------|
+| **Arguments** | |
+
+| Field | Type | Required |
+|-------|------|----------|
+| `deckUuid` | UUID string | Yes |
+| `name` | string | Yes |
+| `description` | string | No |
+
+### `patch_deck`
+
+Partial update of deck fields.
+
+| REST | `PATCH /api/decks/[deckUuid]` |
+|------|-------------------------------|
+| **Arguments** | At least one of `name` or `description` |
+
+| Field | Type | Required |
+|-------|------|----------|
+| `deckUuid` | UUID string | Yes |
+| `name` | string | No |
+| `description` | string | No |
+
+### `delete_deck`
+
+Deletes a deck owned by the user (cascades cards).
+
+| REST | `DELETE /api/decks/[deckUuid]` |
+|------|--------------------------------|
+| **Arguments** | |
+
+| Field | Type | Required |
+|-------|------|----------|
+| `deckUuid` | UUID string | Yes |
+
+## Card tools
+
+### `list_cards`
+
+Lists cards in a deck with pagination.
+
+| REST | `GET /api/decks/[deckUuid]/cards` |
+|------|-----------------------------------|
+| **Arguments** | `deckUuid`, `page?`, `pageSize?` |
+
+### `create_card`
+
+Creates a single card in a deck.
+
+| REST | `POST /api/decks/[deckUuid]/cards` |
+|------|------------------------------------|
+| **Arguments** | |
+
+| Field | Type | Required |
+|-------|------|----------|
+| `deckUuid` | UUID string | Yes |
+| `front` | string | Yes |
+| `back` | string | Yes |
+
+### `get_card`
+
+Returns one card.
+
+| REST | `GET /api/decks/[deckUuid]/cards/[cardUuid]` |
+|------|-----------------------------------------------|
+| **Arguments** | `deckUuid`, `cardUuid` |
+
+### `replace_card`
+
+Replaces card front and back.
+
+| REST | `PUT /api/decks/[deckUuid]/cards/[cardUuid]` |
+|------|-----------------------------------------------|
+| **Arguments** | `deckUuid`, `cardUuid`, `front`, `back` |
+
+### `patch_card`
+
+Partially updates a card.
+
+| REST | `PATCH /api/decks/[deckUuid]/cards/[cardUuid]` |
+|------|------------------------------------------------|
+| **Arguments** | `deckUuid`, `cardUuid`, at least one of `front` or `back` |
+
+### `delete_card`
+
+Deletes a card from a deck.
+
+| REST | `DELETE /api/decks/[deckUuid]/cards/[cardUuid]` |
+|------|-------------------------------------------------|
+| **Arguments** | `deckUuid`, `cardUuid` |
+
+## Ratings
+
+### `list_ratings`
+
+Aggregated correct/incorrect counts per card in a deck.
+
+| REST | `GET /api/decks/[deckUuid]/ratings` |
+|------|-------------------------------------|
+| **Arguments** | `deckUuid`, `page?`, `pageSize?` |
+
+## Study session tools
+
+### `list_study_sessions`
+
+Lists completed study sessions for the user.
+
+| REST | `GET /api/study-sessions` |
+|------|---------------------------|
+| **Arguments** | `page?`, `pageSize?` |
+
+### `create_study_session`
+
+Saves a completed study session.
+
+| REST | `POST /api/study-sessions` |
+|------|----------------------------|
+| **Arguments** | |
+
+| Field | Type | Required |
+|-------|------|----------|
+| `deckUuid` | UUID string | Yes |
+| `cardResults` | array | Yes — min 1 item |
+| `cardResults[].cardUuid` | UUID string | Yes |
+| `cardResults[].isCorrect` | boolean | Yes |
+
+### `list_study_session_counts`
+
+Session counts grouped by deck.
+
+| REST | `GET /api/study-sessions/counts` |
+|------|----------------------------------|
+| **Arguments** | `page?`, `pageSize?` |
+
+## Errors
+
+Failed tool calls return MCP **`isError: true`** with a plain-text message (e.g. `"Unauthorized"`, `"Deck not found"`, `"Deck limit reached for the free plan"`). See [Errors](/api/errors) for REST status code meanings.
+
+## Related
+
+- [MCP overview](/api/mcp/overview)
+- [REST endpoints](/api/overview)
+- [MCP architecture](/developers/mcp-architecture)
