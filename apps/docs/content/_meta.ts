@@ -1,9 +1,8 @@
 const meta = {
-  index: "Introduction",
-  "getting-started": "Getting Started",
-  architecture: "Architecture",
-  reference: "Reference",
-  "how-to": "How-to guides",
+  index: "Home",
+  users: { title: "Product Guide", type: "page" },
+  developers: { title: "Developer Guide", type: "page" },
+  api: { title: "API Reference", type: "page" },
 };
 
 export default meta;

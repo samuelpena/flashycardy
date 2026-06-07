@@ -6,9 +6,9 @@ title: HTTP API (REST)
 
 Public JSON API served by `apps/web` under the `/api` path. All routes require an authenticated Clerk session (Bearer token or session cookie, depending on client). Unauthenticated requests receive **`401`** with body `{ "error": "Unauthorized" }`.
 
-**REST clients in this monorepo:** the [Chrome extension](./extension-development) and [iOS app](../../how-to/ios-development) call these routes with an **`Authorization: Bearer`** header carrying the Clerk session JWT. The web app uses session cookies via Next.js; mobile and extension clients never use Server Actions for data access.
+**REST clients in this monorepo:** the [Chrome extension](/developers/platforms/chrome-extension) and [iOS app](/developers/platforms/ios) call these routes with an **`Authorization: Bearer`** header carrying the Clerk session JWT. The web app uses session cookies via Next.js; mobile and extension clients never use Server Actions for data access.
 
-For **AI / MCP clients**, see also [Model Context Protocol (MCP)](./mcp) (`/api/mcp`, Streamable HTTP). REST handlers here expect a **Clerk session** (cookie or **`session_token`** bearer). The MCP server **prefers Clerk OAuth access tokens** per Clerk’s MCP guide and **falls back** to the same session JWT style for compatibility — see the MCP doc for metadata URLs and token types.
+For **AI / MCP clients**, see also [Model Context Protocol (MCP)](/api/mcp/overview) (`/api/mcp`, Streamable HTTP). REST handlers here expect a **Clerk session** (cookie or **`session_token`** bearer). The MCP server **prefers Clerk OAuth access tokens** per Clerk’s MCP guide and **falls back** to the same session JWT style for compatibility — see the MCP doc for metadata URLs and token types.
 
 ## Conventions
 

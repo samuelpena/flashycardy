@@ -48,7 +48,7 @@ pnpm test:extension:unit   # Vitest
 pnpm test:extension:e2e    # Playwright (--load-extension); requires Chrome
 ```
 
-See [extension development docs](../../apps/docs/content/how-to/extension-development.mdx) for E2E env vars.
+See [Chrome extension development docs](../../apps/docs/content/developers/platforms/chrome-extension.mdx) for E2E env vars.
 
 ## Routes (HashRouter)
 

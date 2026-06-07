@@ -1,36 +1,32 @@
 ---
-description: Ship Diátaxis docs in apps/docs for every apps/web feature or public API change
+description: Ship docs in apps/docs for every apps/web feature or public API change
 globs: apps/web/**/*.ts,apps/web/**/*.tsx,apps/docs/content/**/*.mdx,apps/docs/content/_meta.ts
 alwaysApply: false
 ---
 
-# Apps Web → Apps Docs (Diátaxis)
+# Apps Web → Apps Docs
 
 Any **new or materially changed** user-facing behavior in `apps/web` (routes, flows, config, **public HTTP API** under `apps/web/src/app/api/`, billing gates, AI features, auth) needs **matching updates** in `apps/docs` in the same change set. Do not merge web-only surface area without documentation.
 
-## Diátaxis — use the right doc type
+## Audience separation — never mix
 
-| Quadrant | Purpose | When to add or extend |
-|----------|---------|------------------------|
-| **Tutorials** | Learning-oriented, step-by-step; first success path | New developer or user onboarding, end-to-end “do this once” lessons |
-| **How-to guides** | Task-oriented recipes; assumes basics | “How to …” for a concrete goal (auth pattern, import, deploy checklist) |
-| **Reference** | Information-oriented technical map | **API**: methods/paths, parameters, bodies, response envelope, status codes, error shapes; also stable factual lists (CLI flags, env vars) |
-| **Explanation** | Understanding-oriented context and “why” | Architecture, trade-offs, data model concepts, security or billing model (not step lists) |
+| Section | Path | Audience | Content |
+|---------|------|----------|---------|
+| **Product Guide** | `apps/docs/content/users/` | End users, customers, admins | Features, workflows, billing, troubleshooting, FAQ |
+| **Developer Guide** | `apps/docs/content/developers/` | Contributors, integrators | Architecture, monorepo, local dev, testing, deployment, platforms |
+| **API Reference** | `apps/docs/content/api/` | API consumers, MCP clients | REST endpoints, auth, errors, MCP tools, examples |
 
-**Do not** put tutorial steps inside reference pages, or tables of endpoints inside explanation-only essays. Cross-link between quadrants instead.
+**Do not** put source code, repo paths, or deployment instructions in `users/`. **Do not** put end-user tutorials or marketing copy in `developers/` or `api/`. Cross-link between sections only when necessary (e.g. user billing page must not link to API auth docs).
 
 ## Layout (`apps/docs`)
 
-- MDX lives under `apps/docs/content/`. Register pages in `apps/docs/content/_meta.ts` so the sidebar stays accurate.
-- Prefer clear **separation by quadrant** in paths or titles, for example:
-  - `content/tutorials/…` — tutorials
-  - `content/how-to/…` — how-to guides
-  - `content/reference/…` — reference (e.g. REST API under `apps/web/src/app/api/`)
-  - `content/explanation/…` or existing top-level conceptual pages (e.g. `architecture.mdx`) — explanation
-- **Reference** for HTTP APIs must document: route, method(s), auth, query/body fields, success `{ data }` / error `{ error }` envelope, relevant status codes, and pagination/CORS behavior where applicable (align with `.cursor/rules/public-api.mdc`).
+- MDX lives under `apps/docs/content/`. Register pages in the nearest `_meta.ts` so the sidebar stays accurate.
+- Top-level nav: `users/` (Product Guide), `developers/` (Developer Guide), `api/` (API Reference).
+- **API** docs must document: route, method(s), auth, query/body fields, success `{ data }` / error `{ error }` envelope, relevant status codes, and pagination/CORS behavior where applicable (align with `.cursor/rules/public-api.mdc`).
 
 ## Rules
 
-- If you touch `apps/web/src/app/api/**`, add or update **Reference** in `apps/docs` for every affected route.
-- If you add a user-visible feature or change behavior, add or update the smallest set of **Tutorial / How-to / Explanation** pages that keep Diátaxis boundaries honest.
-- Keep intro/overview copy honest about what is shipped; avoid “placeholder” language once the feature exists.
+- If you touch `apps/web/src/app/api/**`, add or update docs under `apps/docs/content/api/` for every affected route.
+- If you add a user-visible feature or change behavior, add or update pages under `apps/docs/content/users/`.
+- If you change architecture, env vars, CI, or platform setup, update `apps/docs/content/developers/`.
+- Keep copy honest about what is shipped; avoid "placeholder" language once the feature exists.

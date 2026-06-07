@@ -1,0 +1,37 @@
+---
+title: Local development
+---
+
+# Local development
+
+This page is a stub. Full setup instructions will be expanded in a follow-up release.
+
+## Quick start
+
+From the monorepo root:
+
+```bash
+pnpm install
+pnpm dev
+```
+
+The web app boots on `http://localhost:3000`. To run the docs site instead:
+
+```bash
+pnpm dev:docs
+```
+
+The docs site boots on `http://localhost:3001`.
+
+Other apps:
+
+```bash
+pnpm dev:extension   # Chrome extension (WXT)
+pnpm dev:ios         # Opens Xcode project
+```
+
+## Environment variables
+
+Environment files live at the repo root (`.env`, `.env.development`, `.env.production`). The docs site does not need any of them.
+
+See the [Developer Guide introduction](/developers/introduction) for platform-specific setup (extension, iOS) and the [HTTP API (REST)](/api/rest-api) for integration details.
